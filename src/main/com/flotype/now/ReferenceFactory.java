@@ -1,4 +1,6 @@
 package com.flotype.now;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.rabbitmq.client.Channel;
@@ -29,6 +31,10 @@ public class ReferenceFactory {
 	}
 	
 	protected Reference generateReference(String value){
+		return new Reference(value, channel, id);
+	}
+
+	public Reference generateReference(List<String> value) {
 		return new Reference(value, channel, id);
 	}
 

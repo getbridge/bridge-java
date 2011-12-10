@@ -81,7 +81,9 @@ public class Utils {
 			
 			newValue = theMap;
 		} else if (type.equals("now")) {
-			Reference theReference = ReferenceFactory.getFactory().generateReference((String) value);
+			Map<String, List<String>> refMap = (Map<String, List<String>>) value;
+			List<String> path = refMap.get("ref");
+			Reference theReference = ReferenceFactory.getFactory().generateReference(path);
 			newValue = theReference;
 			refList.add(theReference);
 		}

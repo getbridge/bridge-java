@@ -18,6 +18,7 @@ public class Consumer extends DefaultConsumer {
 	
 	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body){
 		try {
+			// TODO run this in a seperate thread
 			Request req = Utils.deserialize(new String(body));
 			dispatcher.dispatch(req);
 		} catch (JsonParseException e) {

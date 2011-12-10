@@ -1,5 +1,7 @@
 package com.flotype.now;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,12 +12,22 @@ import com.rabbitmq.client.AMQP.BasicProperties;
 
 
 public class Reference {
-	private String address;
+	private String networkAddress;
+	List<String> pathchain;
 	Channel channel;
 	UUID id;
 	
-	protected Reference(String value, Channel channel, UUID id){
-		setAddress(value);
+	protected Reference(String address, Channel channel, UUID id){
+		this(address, Arrays.asList(new String[]{address}), channel, id);
+	}
+	
+	protected Reference(List<String> pathchain, Channel channel, UUID id){
+		this(pathchain.get(0), pathchain, channel, id);
+	}
+	
+	protected Reference(String address, List<String> pathchain, Channel channel, UUID id){
+		setAddress(address);
+		this.pathchain = pathchain;
 		this.channel = channel;
 		this.id = id;
 	}
@@ -31,30 +43,29 @@ public class Reference {
 	}
 
 	protected void setAddress(String address) {
-		this.address = address;
+		this.networkAddress = address;
 	}
 
 	public String getAddress() {
-		return address;
+		return networkAddress;
 	}
 
-	public void invokeRPC(String methodName, String argsString,
-			List<Reference> refList) throws IOException {
+	public void invokeRPC(String bodyString, List<Reference> refList) throws IOException {
 		
 		Map<String, Object> linkMap = new HashMap<String, Object>();
 		for(int i = 0; i < refList.size(); i++){
 			Reference ref = refList.get(i);
 			String headerKey = "link_"+i;
-			linkMap.put(headerKey, ref.address);
+			linkMap.put(headerKey, ref.networkAddress);
 		}
 		
 		BasicProperties properties = new BasicProperties();
 		
-		// Deprecated method but the alternative is to fill out a gigantic constructor with 10 parameters. Fuck that.
+		// TODO Use the AMQP BasicProperties builder
 		properties.setHeaders(linkMap);
 		
 		// basicPublish(java.lang.String exchange, java.lang.String routingKey, AMQP.BasicProperties props, byte[] body)
-		this.channel.basicPublish(Utils.Prefix.TOPIC+id.toString(), this.address, properties, argsString.getBytes());
+		this.channel.basicPublish(Utils.Prefix.TOPIC+id.toString(), Utils.Prefix.NAMESPACED_ROUTING + this.networkAddress, properties, bodyString.getBytes());
 	}
 	
 	

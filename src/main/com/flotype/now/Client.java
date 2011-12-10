@@ -25,10 +25,14 @@ public class Client {
 		this(null, null);
 	}
 	
+	public Client(String host) throws IOException{
+		this(host, null);
+	}
+	
 	public Client(String host, Integer port) throws IOException{
 		ConnectionFactory factory = new ConnectionFactory();
 		
-		if(host != null) {factory.setHost(host);}
+		if(host != null) { factory.setHost(host);}
 		if(port != null) { factory.setPort(port); }
 		
 		connection = factory.newConnection();
@@ -47,8 +51,8 @@ public class Client {
 		return true;
 	}
 	
-	public Reference getDummyReference(){
-		return new Reference("adasd", channel, id);
+	public Reference getDummyReference(String actorId){
+		return new Reference(actorId, channel, id);
 	}
 	
 	public void addToPool(Reference user, Reference pool){
@@ -70,7 +74,6 @@ public class Client {
 		queuesToTags.put(queueName, consumerTag);
 		
 		channel.queueBind(queueName, namespace, Utils.Prefix.NAMESPACED_ROUTING+workerPoolName);
-		
 	}
 	
 	public void leaveWorkerPool(String workerPoolName) throws IOException{
@@ -89,7 +92,7 @@ public class Client {
 		channel.exchangeDeclare(Utils.DEFAULT_EXCHANGE_NAME, "direct");
 		
 		// Exchange T_UUID
-		channel.exchangeDeclare(exchangeName, "direct");
+		channel.exchangeDeclare(exchangeName, "topic");
 		
 		// Queue C_UUID
 		channel.queueDeclare(queueName, /*durable=*/ false, /*exclusive=*/ true, true, null);

@@ -4,6 +4,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 class Dispatcher {
@@ -14,14 +16,19 @@ class Dispatcher {
 	private UUID id;
 	private Map<Service, Class<?>> serviceToClass;
 	private Map<String, Service> services;
+	
+	private ExecutorService tp;
 
 	protected Dispatcher(UUID id){
 		this.id = id;
-		
 		serviceToClass = new HashMap<Service, Class<?>>();
 		services = new HashMap<String, Service>();
+		
+		// TODO UH OH: magic numbers!
+		tp = Executors.newFixedThreadPool(4);
 	}
 	
+	// TODO syncronize this. Being invoked from different consumer threads
 	protected void dispatch(final Request req){
 		req.normalize(id);
 		
@@ -32,7 +39,7 @@ class Dispatcher {
 		
 		try {
 			final Method m = serviceToClass.get(service).getMethod(methodName, req.getParameterList());
-			Thread t = new Thread(new Runnable(){
+			tp.execute(new Runnable(){
 				public void run() {
 					try {
 						m.invoke(service, req.getArguments());
@@ -45,7 +52,6 @@ class Dispatcher {
 					}
 				}
 			});
-			t.run();
 		} catch(NoSuchMethodException e){
 			e.printStackTrace();
 		}

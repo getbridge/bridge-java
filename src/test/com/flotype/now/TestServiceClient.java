@@ -26,8 +26,8 @@ public class TestServiceClient extends ServiceClient {
 		super(reference);
 	}
 	
-	public void foo(String s){
-		this.invokeRPC("foo", s);
+	public void fetchUrl(String s){
+		this.invokeRPC("fetch_url", s);
 	}
 
 }

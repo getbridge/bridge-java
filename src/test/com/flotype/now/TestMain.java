@@ -14,19 +14,16 @@ public class TestMain {
 			Client client = new Client();
 			client.connect();
 			client.joinWorkerPool("foo");
+
 			client.registerService("foo", new TestService());
 			
-			TestServiceClient s = new TestServiceClient(client.getDummyReference());
-			Map<String, Object> m = new HashMap<String, Object>();
-			m.put("foo", "bar");
-			m.put("qux", Arrays.asList(new String[]{"I", "am", "crazy"}));
-			m.put("baz", client.getDummyReference());
-			
-			s.foo("s");
+			TestServiceClient s = new TestServiceClient(client.getDummyReference("webpull"));
+			s.fetchUrl("s");
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
 
+	}
+	
 }
