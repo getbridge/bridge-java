@@ -13,24 +13,13 @@ import java.util.Map;
 
 public class Utils {
 	
-	 static enum Prefix{
-		DIRECT("D_"), TOPIC("T_"), FANOUT("F_"),
-		WORKER("W_"), CLIENT("C_"),
-		NAMESPACED_ROUTING("N.");
-		
-		private String value;
-		private Prefix(String value){
-			this.value = value;
-		}
-		
-		public String toString(){
-			return this.value;
-		}
-	};
-	static String DEFAULT_EXCHANGE_NAME = Prefix.DIRECT + "DEFAULT";
 	
 	protected static Request deserialize(String jsonString) throws JsonParseException, JsonMappingException, IOException{
+		
+		// Create object mapper
 		ObjectMapper mapper = new ObjectMapper();
+		
+		// Return a request object parsed by mapper
 		Request jsonObj = mapper.readValue(jsonString, Request.class);
 		return jsonObj;
 	}
@@ -88,6 +77,14 @@ public class Utils {
 			refList.add(theReference);
 		}
 		return newValue;
+	}
+	
+	protected static byte[] intToByteArray(int value) {
+        return new byte[] {
+                (byte)(value >>> 24),
+                (byte)(value >>> 16),
+                (byte)(value >>> 8),
+                (byte)value};
 	}
 
 }

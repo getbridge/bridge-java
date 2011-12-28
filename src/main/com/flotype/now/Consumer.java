@@ -2,13 +2,10 @@ package com.flotype.now;
 import java.io.IOException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
 
-public class Consumer extends DefaultConsumer {
-	
+
+public class Consumer  {
+	/*
 	Dispatcher dispatcher;
 
 	protected Consumer(Channel channel, Dispatcher dispatcher) {
@@ -29,6 +26,6 @@ public class Consumer extends DefaultConsumer {
 			e.printStackTrace();
 		}
 	}
-	
+	*/
 
 }

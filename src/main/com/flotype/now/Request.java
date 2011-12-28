@@ -12,23 +12,19 @@ public class Request {
 	private Class<?>[] parameterList;
 	private Object[] argumentsList;
 	
-	public Request(@JsonProperty("pathchain") List<String> pathchain, @JsonProperty("serargskwargs") List<Object> signature){
+	public Request(@JsonProperty("pathchain") List<String> pathchain, @JsonProperty("args") List<ArrayList<Object>> regularArguments){
 		this.pathchain = pathchain;
 		
 		// null check
-		if(null == signature || signature.size() < 1){
+		if(null == regularArguments || regularArguments.size() < 1){
 			parameterList = null;
 			argumentsList = null;
 		}
 		
 		// Get element 0: regular arguments. Ignore element 1 (keyword arguments)
-		List<ArrayList<Object>> regularArguments = (ArrayList<ArrayList<Object>>) signature.get(0);
+		//List<ArrayList<Object>> regularArguments = (ArrayList<ArrayList<Object>>) signature.get(0);
 		
-		// null check
-		if(null == regularArguments){
-			parameterList = null;
-			argumentsList = null;
-		}
+
 		int len = regularArguments.size();
 		parameterList = new Class<?>[len];
 		argumentsList = new Object[len];
@@ -51,13 +47,13 @@ public class Request {
 		}
 		
 		for(Reference ref: refList){
-			ref.establishLink();
+			//ref.establishLink();
 		}
 		
 	}
 	
 	public void normalize(UUID id){
-		if(pathchain.get(0) == id.toString()){
+		if(pathchain.get(0).equals(id.toString())){
 			pathchain.remove(0);
 		}
 	}

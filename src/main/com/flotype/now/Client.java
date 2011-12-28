@@ -4,15 +4,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.ConnectionFactory;
+import java.lang.*;
+import java.io.*;
+import java.net.*;
+import java.nio.ByteBuffer;
+
+import net.bobah.nio.TcpClient;
 
 public class Client {
 	
 	
-	private Connection connection;
-	private Channel channel;
+	private TcpClient connection;
 	
 	private UUID id;
 	
@@ -30,29 +32,75 @@ public class Client {
 	}
 	
 	public Client(String host, Integer port) throws IOException{
-		ConnectionFactory factory = new ConnectionFactory();
 		
-		if(host != null) { factory.setHost(host);}
-		if(port != null) { factory.setPort(port); }
+		// Setup TCP
 		
-		connection = factory.newConnection();
-		
-		id = UUID.randomUUID();
-		queuesToTags = new HashMap<String, String>();
-		
-		dispatcher = new Dispatcher(id);
-		consumer = new Consumer(channel, dispatcher);
 	}
 	
+	int i = 0;
+	
 	public boolean connect() throws IOException{
-		channel = connection.createChannel();
-		ReferenceFactory.createFactory(channel, id);
-		this.AMQPSetup();
+		
+	    	
+		connection = new TcpClient() {
+	      @Override protected void onRead(ByteBuffer buf) throws Exception {
+	    	  byte[] bytearr = new byte[buf.remaining()];
+	    	  buf.get(bytearr);
+	    	  String s = new String(bytearr);
+	    	  System.out.println(s);
+	    	  //write("asdf");
+    	  	buf.position(buf.limit()); 
+	  	  }
+	      @Override protected void onDisconnected() { 
+	    	  
+
+	    	  System.out.println("disconnected to tcp server");
+	    	  
+	      }
+	      @Override protected void onConnected() throws Exception { 
+	    	  
+	    	  System.out.println("connected to tcp server");
+	    	  
+	      }
+	    };
+
+	    connection.setAddress(new InetSocketAddress("127.0.0.1", 8082));
+	    try {
+	      connection.start();
+	    } catch (IOException e) {
+	      e.printStackTrace();
+	    }
+		
+		
+		ReferenceFactory.createFactory(id);
+		
+		
+		
 		return true;
 	}
 	
 	public Reference getDummyReference(String actorId){
-		return new Reference(actorId, channel, id);
+		return new Reference(actorId, id);
+	}
+	
+	public void write(String jsonStr) {
+		try {
+			
+			byte[] jsonBytes = jsonStr.getBytes();
+			
+			ByteBuffer data = ByteBuffer.allocate(jsonBytes.length + 4);
+			
+			data.put(Utils.intToByteArray(jsonBytes.length));
+			data.put(jsonBytes);
+			
+			connection.send(data);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void addToPool(Reference user, Reference pool){
@@ -63,46 +111,25 @@ public class Client {
 	}
 	
 	public void joinWorkerPool(String workerPoolName) throws IOException{
-		joinWorkerPool(workerPoolName, Utils.DEFAULT_EXCHANGE_NAME);
+		//joinWorkerPool(workerPoolName, Utils.DEFAULT_EXCHANGE_NAME);
 	}
 	
 	public void joinWorkerPool(String workerPoolName, String namespace) throws IOException{
-		String queueName = Utils.Prefix.WORKER+workerPoolName;
+		//String queueName = Utils.Prefix.WORKER+workerPoolName;
 		
-		channel.queueDeclare(queueName, /*durable=*/ false, /*exclusive=*/ false, true, null);
-		String consumerTag = channel.basicConsume(queueName, true, consumer);
-		queuesToTags.put(queueName, consumerTag);
+		//channel.queueDeclare(queueName, /*durable=*/ false, /*exclusive=*/ false, true, null);
+	//	String consumerTag = channel.basicConsume(queueName, true, consumer);
+	//	queuesToTags.put(queueName, consumerTag);
 		
-		channel.queueBind(queueName, namespace, Utils.Prefix.NAMESPACED_ROUTING+workerPoolName);
+		//channel.queueBind(queueName, namespace, Utils.Prefix.NAMESPACED_ROUTING+workerPoolName);
 	}
 	
 	public void leaveWorkerPool(String workerPoolName) throws IOException{
-		String queueName = Utils.Prefix.WORKER+workerPoolName;
+		//String queueName = Utils.Prefix.WORKER+workerPoolName;
 		
-		String consumerTag = queuesToTags.get(queueName);
-		channel.basicCancel(consumerTag);
+		//String consumerTag = queuesToTags.get(queueName);
+		//channel.basicCancel(consumerTag);
 	}
 	
-	
-	private void AMQPSetup() throws IOException{
-		String queueName = Utils.Prefix.CLIENT +id.toString();
-		String exchangeName = Utils.Prefix.TOPIC+id.toString();
-		
-		// Ensure default exchange exists
-		channel.exchangeDeclare(Utils.DEFAULT_EXCHANGE_NAME, "direct");
-		
-		// Exchange T_UUID
-		channel.exchangeDeclare(exchangeName, "topic");
-		
-		// Queue C_UUID
-		channel.queueDeclare(queueName, /*durable=*/ false, /*exclusive=*/ true, true, null);
-		
-		//Consume C_UUID
-		String consumerTag = channel.basicConsume(queueName, /*autoAck=*/ true, consumer);
-		queuesToTags.put(queueName, consumerTag);
-		
-		//Binding T_UUID -> routing_key: N.* -> D_DEFAULT
-		channel.exchangeBind(Utils.DEFAULT_EXCHANGE_NAME, exchangeName, Utils.Prefix.NAMESPACED_ROUTING+"*");
-	}
-	
+
 }

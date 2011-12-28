@@ -10,7 +10,7 @@ import com.flotype.now.Client;
 public class TestMain {
 	
 	public static void main(String[] args){
-		try {
+		/*try {
 			Client client = new Client();
 			client.connect();
 			client.joinWorkerPool("foo");
@@ -21,6 +21,20 @@ public class TestMain {
 			s.fetchUrl("s");
 			
 		} catch (IOException e) {
+			e.printStackTrace();
+		}*/
+		
+		Client client = null;
+		try {
+			client = new Client();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			client.connect();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

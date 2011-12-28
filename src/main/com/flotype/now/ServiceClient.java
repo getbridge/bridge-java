@@ -16,7 +16,7 @@ import com.flotype.now.serializers.MapSerializer;
 import com.flotype.now.serializers.OuterSerializer;
 import com.flotype.now.serializers.ReferenceSerializer;
 import com.flotype.now.serializers.StringSerializer;
-import com.rabbitmq.client.Channel;
+
 
 
 public class ServiceClient {
@@ -54,7 +54,7 @@ public class ServiceClient {
 			pathchainWithMethod.add(methodName);
 			
 			requestBody.put("pathchain", pathchainWithMethod);
-			requestBody.put("serargskwargs", argsString);
+			requestBody.put("args", argsString);
 	
 			ObjectMapper outerMapper = new ObjectMapper();
 			SimpleModule outerModule = new SimpleModule("Outer", new Version(0, 1, 0, "alpha"));
