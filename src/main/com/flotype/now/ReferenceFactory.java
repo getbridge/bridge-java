@@ -1,20 +1,19 @@
 package com.flotype.now;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 
 public class ReferenceFactory {
 	
 	static ReferenceFactory theFactory;
-	static UUID id;
+	static Client client;
 	
-	protected ReferenceFactory(UUID id) {
-		this.id = id;
+	protected ReferenceFactory(Client client) {
+		this.client = client;
 	}
 
-	protected static void createFactory(UUID id){
-		theFactory = new ReferenceFactory(id);
+	protected static void createFactory(Client client){
+		theFactory = new ReferenceFactory(client);
 	}
 	
 	protected static ReferenceFactory getFactory(){
@@ -26,11 +25,11 @@ public class ReferenceFactory {
 	}
 	
 	protected Reference generateReference(String value){
-		return new Reference(value, id);
+		return new Reference(value, client);
 	}
 
 	public Reference generateReference(List<String> value) {
-		return new Reference(value, id);
+		return new Reference(value, client);
 	}
 
 }

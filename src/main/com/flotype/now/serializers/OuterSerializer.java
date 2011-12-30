@@ -22,10 +22,8 @@ public class OuterSerializer extends SerializerBase<Map> {
 		jsonGen.writeStartObject();
 		jsonGen.writeFieldName("pathchain");
 		serializerProvider.defaultSerializeValue(value.get("pathchain"), jsonGen);
-		jsonGen.writeFieldName("serargskwargs");
-		jsonGen.writeStartArray();
-		jsonGen.writeRawValue((String) value.get("serargskwargs"));
-		jsonGen.writeEndArray();
+		jsonGen.writeFieldName("args");
+		jsonGen.writeRawValue((String) value.get("args"));
 		jsonGen.writeEndObject();
 	}
 

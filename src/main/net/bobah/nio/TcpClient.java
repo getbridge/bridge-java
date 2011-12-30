@@ -92,7 +92,7 @@ public abstract class TcpClient implements Runnable {
   public void send(ByteBuffer buffer) throws InterruptedException, IOException {
     if (!connected.get()) throw new IOException("not connected");
     synchronized (writeBuf) {
-      
+    	
       // try direct write of what's in the buffer to free up space
       if (writeBuf.remaining() < buffer.remaining()) {
         writeBuf.flip();
@@ -170,6 +170,7 @@ public abstract class TcpClient implements Runnable {
             if (selector.select() > 0) processSelectedKeys(selector.selectedKeys());
           }
         } catch (Exception e) {
+          System.out.println(e);
           System.out.println("exception");
         } finally {
           connected.set(false);

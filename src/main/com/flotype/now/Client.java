@@ -16,71 +16,89 @@ public class Client {
 	
 	private TcpClient connection;
 	
-	private UUID id;
+	// The connectionId
+	private String id;
 	
 	private Dispatcher dispatcher;
-	private Consumer consumer;
+	
 	
 	private Map<String, String> queuesToTags;
 	
 	public Client() throws IOException{
-		this(null, null);
+		this(Utils.DEFAULT_HOST, Utils.DEFAULT_PORT);
 	}
 	
 	public Client(String host) throws IOException{
-		this(host, null);
+		this(host, Utils.DEFAULT_PORT);
 	}
 	
 	public Client(String host, Integer port) throws IOException{
-		
+	    
+			
 		// Setup TCP
+		connection = new TcpClient() {
+		  @Override protected void onRead(ByteBuffer buf) throws Exception {
+			  
+			  // Assuming 4 byte little endian ints
+			  int length = buf.getInt();
+			 
+			  byte[] body = new byte[buf.remaining()];
+			  buf.get(body);
+			  
+			  if (length != body.length) {
+				  throw new Exception("Expected message length not equal to buffer size");
+			  }
+			  
+			  
+			  if(id == null) {
+				  // Client not handshaken
+				  id = new String(body);
+				  // Create dispatcher
+				  dispatcher = new Dispatcher(id);
+				  System.out.println("Client handshaked with ID = " + id);
+			  } else {
+				  // Parse as normal
+				  Request req = Utils.deserialize(body);
+				  //dispatcher.dispatch(req);
+			  }
+			 
+			  System.out.println("Message = " + new String(body));
+			 
+		  }
+		  @Override protected void onDisconnected() { 
+			  
+			  // No reconnect system yet so new connectionId every connection
+			  id = null;
+		
+			  System.out.println("disconnected to tcp server");
+			  
+		  }
+		  @Override protected void onConnected() throws Exception { 
+			  
+			  System.out.println("connected to tcp server");
+			  
+		  }
+	    };
+	    connection.setAddress(new InetSocketAddress(host, port));
 		
 	}
 	
-	int i = 0;
-	
 	public boolean connect() throws IOException{
-		
-	    	
-		connection = new TcpClient() {
-	      @Override protected void onRead(ByteBuffer buf) throws Exception {
-	    	  byte[] bytearr = new byte[buf.remaining()];
-	    	  buf.get(bytearr);
-	    	  String s = new String(bytearr);
-	    	  System.out.println(s);
-	    	  //write("asdf");
-    	  	buf.position(buf.limit()); 
-	  	  }
-	      @Override protected void onDisconnected() { 
-	    	  
 
-	    	  System.out.println("disconnected to tcp server");
-	    	  
-	      }
-	      @Override protected void onConnected() throws Exception { 
-	    	  
-	    	  System.out.println("connected to tcp server");
-	    	  
-	      }
-	    };
-
-	    connection.setAddress(new InetSocketAddress("127.0.0.1", 8082));
 	    try {
 	      connection.start();
 	    } catch (IOException e) {
 	      e.printStackTrace();
+          return false;
 	    }
-		
-		
-		ReferenceFactory.createFactory(id);
-		
-		
-		
+
+		ReferenceFactory.createFactory(this);
+				
 		return true;
 	}
 	
 	public Reference getDummyReference(String actorId){
-		return new Reference(actorId, id);
+		return new Reference(actorId, this);
 	}
 	
 	public void write(String jsonStr) {
@@ -106,30 +124,18 @@ public class Client {
 	public void addToPool(Reference user, Reference pool){
 		
 	}
-	public void registerService(String name, Service service){
+	public void joinService(String name, Service service){
 		dispatcher.registerService(name, service);
+		joinWorkerPool(name);
 	}
 	
-	public void joinWorkerPool(String workerPoolName) throws IOException{
-		//joinWorkerPool(workerPoolName, Utils.DEFAULT_EXCHANGE_NAME);
+	
+	
+	public void joinWorkerPool(String workerPoolName) {
+		// It's faster this way
+		write("{\"type\": \"joinWorkerPool\", \"name\": \""+workerPoolName+"\"}");
 	}
 	
-	public void joinWorkerPool(String workerPoolName, String namespace) throws IOException{
-		//String queueName = Utils.Prefix.WORKER+workerPoolName;
-		
-		//channel.queueDeclare(queueName, /*durable=*/ false, /*exclusive=*/ false, true, null);
-	//	String consumerTag = channel.basicConsume(queueName, true, consumer);
-	//	queuesToTags.put(queueName, consumerTag);
-		
-		//channel.queueBind(queueName, namespace, Utils.Prefix.NAMESPACED_ROUTING+workerPoolName);
-	}
-	
-	public void leaveWorkerPool(String workerPoolName) throws IOException{
-		//String queueName = Utils.Prefix.WORKER+workerPoolName;
-		
-		//String consumerTag = queuesToTags.get(queueName);
-		//channel.basicCancel(consumerTag);
-	}
 	
 
 }

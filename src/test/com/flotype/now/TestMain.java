@@ -9,7 +9,7 @@ import com.flotype.now.Client;
 
 public class TestMain {
 	
-	public static void main(String[] args){
+	public static void main(String[] args) throws Exception{
 		/*try {
 			Client client = new Client();
 			client.connect();
@@ -25,19 +25,23 @@ public class TestMain {
 		}*/
 		
 		Client client = null;
-		try {
-			client = new Client();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			client.connect();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	
+		client = new Client("localhost", 8090);
+		
+		client.connect();
+		
 
+		
+		Thread.sleep(1000);
+		
+		client.joinWorkerPool("foo");
+		
+
+		client.joinService("foo", new TestService());
+		
+		TestServiceClient s = new TestServiceClient(client.getDummyReference("webpull"));
+		s.fetchUrl("s");
+		
 	}
 	
 }

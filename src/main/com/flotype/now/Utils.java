@@ -13,14 +13,17 @@ import java.util.Map;
 
 public class Utils {
 	
+	public static final int DEFAULT_PORT = 8082;
+	public static final String DEFAULT_HOST = "127.0.0.1";
 	
-	protected static Request deserialize(String jsonString) throws JsonParseException, JsonMappingException, IOException{
+	
+	protected static Request deserialize(byte[] json) throws JsonParseException, JsonMappingException, IOException{
 		
 		// Create object mapper
 		ObjectMapper mapper = new ObjectMapper();
 		
 		// Return a request object parsed by mapper
-		Request jsonObj = mapper.readValue(jsonString, Request.class);
+		Request jsonObj = mapper.readValue(json, Request.class);
 		return jsonObj;
 	}
 	

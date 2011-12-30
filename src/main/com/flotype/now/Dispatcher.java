@@ -13,13 +13,13 @@ class Dispatcher {
 	// In the future this will be auto generated
 	
 	
-	private UUID id;
+	private String id;
 	private Map<Service, Class<?>> serviceToClass;
 	private Map<String, Service> services;
 	
 	private ExecutorService tp;
 
-	protected Dispatcher(UUID id){
+	protected Dispatcher(String id){
 		this.id = id;
 		serviceToClass = new HashMap<Service, Class<?>>();
 		services = new HashMap<String, Service>();
@@ -28,7 +28,7 @@ class Dispatcher {
 		tp = Executors.newFixedThreadPool(4);
 	}
 	
-	// TODO syncronize this. Being invoked from different consumer threads
+	// TODO synchronize this. Being invoked from different consumer threads
 	protected void dispatch(final Request req){
 		req.normalize(id);
 		

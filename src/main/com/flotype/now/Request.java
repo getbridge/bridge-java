@@ -52,8 +52,8 @@ public class Request {
 		
 	}
 	
-	public void normalize(UUID id){
-		if(pathchain.get(0).equals(id.toString())){
+	public void normalize(String id){
+		if(pathchain.get(0).equals(id)){
 			pathchain.remove(0);
 		}
 	}

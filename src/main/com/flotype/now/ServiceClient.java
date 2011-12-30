@@ -63,7 +63,7 @@ public class ServiceClient {
 			
 			String bodyString = outerMapper.writeValueAsString(requestBody);
 			
-			System.out.println(bodyString);
+			System.out.println("Sending JSON = " +  bodyString);
 			
 			this.reference.invokeRPC(bodyString, refList);
 			

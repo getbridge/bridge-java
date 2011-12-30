@@ -10,20 +10,20 @@ import java.util.UUID;
 public class Reference {
 	private String networkAddress;
 	List<String> pathchain;
-	UUID id;
+	Client client;
 	
-	protected Reference(String address, UUID id){
-		this(address, Arrays.asList(new String[]{address}), id);
+	protected Reference(String address, Client client){
+		this(address, Arrays.asList(new String[]{address}), client);
 	}
 	
-	protected Reference(List<String> pathchain, UUID id){
-		this(pathchain.get(0), pathchain, id);
+	protected Reference(List<String> pathchain, Client client){
+		this(pathchain.get(0), pathchain, client);
 	}
 	
-	protected Reference(String address, List<String> pathchain, UUID id){
+	protected Reference(String address, List<String> pathchain, Client client){
 		setAddress(address);
 		this.pathchain = pathchain;
-		this.id = id;
+		this.client = client;
 	}
 
 	protected void setAddress(String address) {
@@ -50,6 +50,5 @@ public class Reference {
 		// basicPublish(java.lang.String exchange, java.lang.String routingKey, AMQP.BasicProperties props, byte[] body)
 		//this.channel.basicPublish(Utils.Prefix.TOPIC+id.toString(), Utils.Prefix.NAMESPACED_ROUTING + this.networkAddress, properties, bodyString.getBytes());
 	}
-	
 	
 }
