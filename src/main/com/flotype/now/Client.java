@@ -103,15 +103,18 @@ public class Client {
 	
 	public void write(String jsonStr) {
 		try {
-			
+			System.out.println("Sending JSON = " +  jsonStr);
 			byte[] jsonBytes = jsonStr.getBytes();
 			
 			ByteBuffer data = ByteBuffer.allocate(jsonBytes.length + 4);
 			
 			data.put(Utils.intToByteArray(jsonBytes.length));
 			data.put(jsonBytes);
+			data.flip();
 			
 			connection.send(data);
+			
+			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -126,16 +129,24 @@ public class Client {
 	}
 	public void joinService(String name, Service service){
 		dispatcher.registerService(name, service);
+		service.createReference(id, name);
 		joinWorkerPool(name);
 	}
 	
-	
+	public void joinService(Service service){
+		String name = Utils.generateId();
+		service.createReference(id, name);
+		dispatcher.registerService(name, service);
+	}
 	
 	public void joinWorkerPool(String workerPoolName) {
 		// It's faster this way
-		write("{\"type\": \"joinWorkerPool\", \"name\": \""+workerPoolName+"\"}");
+		write("{\"type\":\"joinWorkerPool\",\"name\":\""+workerPoolName+"\",\"callback\":[\"none\",null]}");
 	}
 	
-	
-
+	public class Callback extends Service{
+		Callback() {
+			joinService(this);
+		}
+	}
 }

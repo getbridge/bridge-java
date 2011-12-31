@@ -7,17 +7,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.codehaus.jackson.Version;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.module.SimpleModule;
+
+import com.flotype.now.serializers.MessageSerializer;
+import com.flotype.now.serializers.OuterSerializer;
+
 public class Reference {
 	private String networkAddress;
 	List<String> pathchain;
 	Client client;
 	
 	protected Reference(String address, Client client){
-		this(address, Arrays.asList(new String[]{address}), client);
+		this(address, Arrays.asList(address.split("\\.")), client);
 	}
 	
 	protected Reference(List<String> pathchain, Client client){
-		this(pathchain.get(0), pathchain, client);
+		this(Utils.join(pathchain, "."), pathchain, client);
 	}
 	
 	protected Reference(String address, List<String> pathchain, Client client){
@@ -29,12 +36,16 @@ public class Reference {
 	protected void setAddress(String address) {
 		this.networkAddress = address;
 	}
+	
+	public List<String> getPathchain () {
+		return pathchain;
+	}
 
 	public String getAddress() {
 		return networkAddress;
 	}
 
-	public void invokeRPC(String bodyString, List<Reference> refList) throws IOException {
+	public void invokeRPC(String methodName, String bodyString, List<Reference> refList) throws IOException {
 		
 		Map<String, Object> linkMap = new HashMap<String, Object>();
 		for(int i = 0; i < refList.size(); i++){
@@ -42,6 +53,28 @@ public class Reference {
 			String headerKey = "link_"+i;
 			linkMap.put(headerKey, ref.networkAddress);
 		}
+		String routingKey = "N." + this.networkAddress + "." + methodName ;
+		
+		
+		// Add message wrapper
+		
+		// Construct the request body here
+		Map<String, Object> messageBody = new HashMap<String, Object>();
+		
+
+		messageBody.put("message", bodyString);
+		messageBody.put("routingKey", routingKey);
+		messageBody.put("headers", linkMap);
+		
+
+		ObjectMapper messageMapper = new ObjectMapper();
+		SimpleModule messageModule = new SimpleModule("Outer", new Version(0, 1, 0, "alpha"));
+		messageModule.addSerializer(new MessageSerializer(Map.class));
+		messageMapper.registerModule(messageModule);
+		
+		String messageString = messageMapper.writeValueAsString(messageBody);
+	
+		System.out.println("JSON MESSAGE = " + messageString);
 		
 		
 		// TODO Use the AMQP BasicProperties builder

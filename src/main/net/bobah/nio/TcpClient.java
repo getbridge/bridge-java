@@ -170,7 +170,7 @@ public abstract class TcpClient implements Runnable {
             if (selector.select() > 0) processSelectedKeys(selector.selectedKeys());
           }
         } catch (Exception e) {
-          System.out.println(e);
+          e.printStackTrace();
           System.out.println("exception");
         } finally {
           connected.set(false);

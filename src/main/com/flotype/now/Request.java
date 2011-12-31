@@ -63,7 +63,11 @@ public class Request {
 	}
 	
 	public String getMethodName(){
-		return pathchain.get(1);
+		if(pathchain.size() == 1) {
+			return "callback";
+		} else {
+			return pathchain.get(1);
+		}
 	}
 	
 	public Class<?>[] getParameterList(){

@@ -26,7 +26,14 @@ public class ReferenceSerializer extends SerializerBase<Reference> {
 
 		jsonGen.writeStartArray();
 		jsonGen.writeString("now");
-		jsonGen.writeString(value.getAddress());
+		jsonGen.writeStartObject();
+		jsonGen.writeFieldName("ref");
+		jsonGen.writeStartArray();
+		for(String path : value.getPathchain()) {
+			jsonGen.writeString(path);
+		}
+		jsonGen.writeEndArray();
+		jsonGen.writeEndObject();
 		jsonGen.writeEndArray();
 		
 		refList.add(value);

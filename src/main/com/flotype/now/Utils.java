@@ -1,7 +1,9 @@
 package com.flotype.now;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.codehaus.jackson.JsonParseException;
@@ -27,10 +29,8 @@ public class Utils {
 		return jsonObj;
 	}
 	
-	//This is complete bullshit. But it will work for now
-	protected static boolean isUUID(String name){
-		 String[] components = name.split("-");
-         return components.length == 5;
+	protected static String generateId() {
+		return Long.toHexString(Double.doubleToLongBits(Math.random()));
 	}
 
 	protected static Class<?> classFromString(String type) {
@@ -88,6 +88,18 @@ public class Utils {
                 (byte)(value >>> 16),
                 (byte)(value >>> 8),
                 (byte)value};
+	}
+	
+	protected static String join(Collection<String> s, String delimiter) {
+		StringBuffer buffer = new StringBuffer();
+        Iterator iter = s.iterator();
+        while (iter.hasNext()) {
+            buffer.append(iter.next());
+            if (iter.hasNext()) {
+                buffer.append(delimiter);
+            }
+        }
+        return buffer.toString();
 	}
 
 }

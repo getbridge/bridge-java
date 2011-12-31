@@ -15,6 +15,7 @@ import com.flotype.now.serializers.ListSerializer;
 import com.flotype.now.serializers.MapSerializer;
 import com.flotype.now.serializers.OuterSerializer;
 import com.flotype.now.serializers.ReferenceSerializer;
+import com.flotype.now.serializers.ServiceSerializer;
 import com.flotype.now.serializers.StringSerializer;
 
 
@@ -39,6 +40,7 @@ public class ServiceClient {
 		ObjectMapper argsMapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule("NowSerializers", new Version(0, 1, 0, "alpha"));
 		module.addSerializer(new ReferenceSerializer(Reference.class, refList))
+			.addSerializer(new ServiceSerializer(Service.class, refList))
 			.addSerializer(new MapSerializer(Map.class))
 			.addSerializer(new ListSerializer(List.class))
 			.addSerializer(new StringSerializer(String.class));
@@ -62,10 +64,9 @@ public class ServiceClient {
 			outerMapper.registerModule(outerModule);
 			
 			String bodyString = outerMapper.writeValueAsString(requestBody);
+		
 			
-			System.out.println("Sending JSON = " +  bodyString);
-			
-			this.reference.invokeRPC(bodyString, refList);
+			this.reference.invokeRPC(methodName, bodyString, refList);
 			
 		} catch (JsonGenerationException e) {
 			// TODO Auto-generated catch block

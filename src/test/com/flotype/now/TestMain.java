@@ -34,13 +34,17 @@ public class TestMain {
 		
 		Thread.sleep(1000);
 		
-		client.joinWorkerPool("foo");
 		
-
 		client.joinService("foo", new TestService());
 		
-		TestServiceClient s = new TestServiceClient(client.getDummyReference("webpull"));
-		s.fetchUrl("s");
+		TestServiceClient x = new TestServiceClient(client.getDummyReference("webpull"));
+		
+		Client.Callback s = client.new Callback(){
+			void callback(String data) {
+				System.out.println(data);
+			}
+		};
+		x.fetchUrl("s", s);
 		
 	}
 	
