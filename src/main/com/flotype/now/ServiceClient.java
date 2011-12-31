@@ -40,7 +40,7 @@ public class ServiceClient {
 		ObjectMapper argsMapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule("NowSerializers", new Version(0, 1, 0, "alpha"));
 		module.addSerializer(new ReferenceSerializer(Reference.class, refList))
-			.addSerializer(new ServiceSerializer(Service.class, refList))
+			.addSerializer(new ServiceSerializer(Service.class))
 			.addSerializer(new MapSerializer(Map.class))
 			.addSerializer(new ListSerializer(List.class))
 			.addSerializer(new StringSerializer(String.class));
@@ -52,7 +52,7 @@ public class ServiceClient {
 			// Construct the request body here
 			Map<String, Object> requestBody = new HashMap<String, Object>();
 			
-			List<String> pathchainWithMethod = new ArrayList<String>(this.reference.pathchain);
+			List<String> pathchainWithMethod = new ArrayList<String>(this.reference.getPathchain());
 			pathchainWithMethod.add(methodName);
 			
 			requestBody.put("pathchain", pathchainWithMethod);

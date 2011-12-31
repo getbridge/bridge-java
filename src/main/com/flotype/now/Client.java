@@ -16,13 +16,10 @@ public class Client {
 	
 	private TcpClient connection;
 	
-	// The connectionId
-	private String id;
+	private String connectionId;
 	
-	private Dispatcher dispatcher;
+	private Executor executor = new Executor();
 	
-	
-	private Map<String, String> queuesToTags;
 	
 	public Client() throws IOException{
 		this(Utils.DEFAULT_HOST, Utils.DEFAULT_PORT);
@@ -50,16 +47,14 @@ public class Client {
 			  }
 			  
 			  
-			  if(id == null) {
+			  if(connectionId == null) {
 				  // Client not handshaken
-				  id = new String(body);
-				  // Create dispatcher
-				  dispatcher = new Dispatcher(id);
-				  System.out.println("Client handshaked with ID = " + id);
+				  connectionId = new String(body);
+				  System.out.println("Client handshaked with ID = " + connectionId);
 			  } else {
 				  // Parse as normal
 				  Request req = Utils.deserialize(body);
-				  //dispatcher.dispatch(req);
+				  executor.execute(req);
 			  }
 			 
 			  System.out.println("Message = " + new String(body));
@@ -68,7 +63,7 @@ public class Client {
 		  @Override protected void onDisconnected() { 
 			  
 			  // No reconnect system yet so new connectionId every connection
-			  id = null;
+			  connectionId = null;
 		
 			  System.out.println("disconnected to tcp server");
 			  
@@ -97,8 +92,10 @@ public class Client {
 		return true;
 	}
 	
-	public Reference getDummyReference(String actorId){
-		return new Reference(actorId, this);
+	public Reference getService(String actorId){
+		Reference result = new Reference(actorId, this);
+		result.setRoutingPrefix("N.");
+		return result;
 	}
 	
 	public void write(String jsonStr) {
@@ -124,19 +121,26 @@ public class Client {
 		}
 	}
 	
-	public void addToPool(Reference user, Reference pool){
-		
+	public String getConnectionId () {
+		return connectionId;
 	}
-	public void joinService(String name, Service service){
-		dispatcher.registerService(name, service);
-		service.createReference(id, name);
+	
+	public void joinChannel(String name, Service handler) {
+	
+	}
+	
+	public void joinService(String name, Service service) {
+		executor.addService(name, service);
+		service.createReference(name);
+		service.getReference().setRoutingPrefix("N.");
 		joinWorkerPool(name);
 	}
 	
+	
 	public void joinService(Service service){
 		String name = Utils.generateId();
-		service.createReference(id, name);
-		dispatcher.registerService(name, service);
+		service.createReference(name);
+		executor.addService(name, service);
 	}
 	
 	public void joinWorkerPool(String workerPoolName) {
@@ -144,9 +148,4 @@ public class Client {
 		write("{\"type\":\"joinWorkerPool\",\"name\":\""+workerPoolName+"\",\"callback\":[\"none\",null]}");
 	}
 	
-	public class Callback extends Service{
-		Callback() {
-			joinService(this);
-		}
-	}
 }

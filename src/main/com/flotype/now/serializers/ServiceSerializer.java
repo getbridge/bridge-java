@@ -9,23 +9,20 @@ import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.ser.std.SerializerBase;
 
 import com.flotype.now.Reference;
+import com.flotype.now.ReferenceFactory;
 import com.flotype.now.Service;
 
 
 
 public class ServiceSerializer extends SerializerBase<Service> {
 	
-	private List<Reference> refList;
-	
-	public ServiceSerializer(Class<Service> t, List<Reference> refList) {
+	public ServiceSerializer(Class<Service> t) {
 		super(t);
-		this.refList = refList;
 	}
 
 	public void serialize(Service value, JsonGenerator jsonGen, SerializerProvider serializerProvider) 
 	throws IOException, JsonProcessingException {
-
+		value.ensureReference();
 		serializerProvider.defaultSerializeValue(value.getReference(), jsonGen);
-
 	}
 }

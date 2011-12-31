@@ -13,6 +13,7 @@ public class Request {
 	private Object[] argumentsList;
 	
 	public Request(@JsonProperty("pathchain") List<String> pathchain, @JsonProperty("args") List<ArrayList<Object>> regularArguments){
+		
 		this.pathchain = pathchain;
 		
 		// null check
@@ -30,7 +31,7 @@ public class Request {
 		argumentsList = new Object[len];
 		
 		int pos = 0;
-		List<Reference> refList = new ArrayList<Reference>();
+		
 		for(ArrayList<Object> param : regularArguments){
 			// First element of the list is type. Second element of the list is value. We want type.
 			String type = (String) param.get(0);
@@ -40,34 +41,17 @@ public class Request {
 			parameterList[pos] = theClass;
 			
 			// Ugly hack. Can only return one thing, so deserialize returns deserializedValue while also populating refList
-			Object deserializedValue = Utils.deserialize(type, value, refList);
+			Object deserializedValue = Utils.deserialize(type, value);
 			argumentsList[pos] = deserializedValue;
 			
 			pos++;
 		}
 		
-		for(Reference ref: refList){
-			//ref.establishLink();
-		}
 		
 	}
 	
-	public void normalize(String id){
-		if(pathchain.get(0).equals(id)){
-			pathchain.remove(0);
-		}
-	}
-	
-	public String getServiceName(){
-		return pathchain.get(0);
-	}
-	
-	public String getMethodName(){
-		if(pathchain.size() == 1) {
-			return "callback";
-		} else {
-			return pathchain.get(1);
-		}
+	public List<String> getPathchain () {
+		return pathchain;
 	}
 	
 	public Class<?>[] getParameterList(){

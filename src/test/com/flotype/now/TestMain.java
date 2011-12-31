@@ -37,14 +37,24 @@ public class TestMain {
 		
 		client.joinService("foo", new TestService());
 		
-		TestServiceClient x = new TestServiceClient(client.getDummyReference("webpull"));
+		TestServiceClient x = new TestServiceClient(client.getService("webpull"));
+		final ResizeServiceClient y = new ResizeServiceClient(client.getService("resize"));
 		
-		Client.Callback s = client.new Callback(){
-			void callback(String data) {
-				System.out.println(data);
+		Callback s = new Callback(){
+			public void callback(Reference x) {
+				y.resize(x, 2000, 2300, new Callback(){
+					public void callback(Reference file) {
+						FileServiceClient z = new FileServiceClient(file);
+						z.get_localpath(new Callback(){
+							public void callback(String result) {
+								System.out.println("RESULT::: " + result);
+							}
+						});
+					}
+				});
 			}
 		};
-		x.fetchUrl("s", s);
+		x.fetchUrl("http://ericzhang.com/images/kb.jpg", s);
 		
 	}
 	

@@ -2,38 +2,66 @@ package com.flotype.now;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-class Dispatcher {
+class Executor {
 	
 	// In the future this will be auto generated
 	
 	
-	private String id;
+	
 	private Map<Service, Class<?>> serviceToClass;
 	private Map<String, Service> services;
 	
 	private ExecutorService tp;
 
-	protected Dispatcher(String id){
-		this.id = id;
+	protected Executor(){
 		serviceToClass = new HashMap<Service, Class<?>>();
 		services = new HashMap<String, Service>();
 		
-		// TODO UH OH: magic numbers!
 		tp = Executors.newFixedThreadPool(4);
 	}
 	
 	// TODO synchronize this. Being invoked from different consumer threads
-	protected void dispatch(final Request req){
-		req.normalize(id);
+	protected void execute(final Request req){
+
+		String serviceName;
+		String methodName;
 		
-		String serviceName = req.getServiceName();
-		String methodName = req.getMethodName();
+		List<String> pathchain = req.getPathchain();
+
+		if (pathchain.get(0).equals("system")) {
+			// Reserved for future
+		}
+		
+		if (pathchain.get(1).equals("channel")) {
+			serviceName = "channel:" + pathchain.get(2);
+			if(pathchain.size() == 4) {
+				// connectionId.channel.channelname.method
+				methodName = pathchain.get(3);
+			} else {
+				// connectionId.channel.channelname
+				methodName = "callback";
+			}
+
+		} else {
+			serviceName = pathchain.get(1);
+			if(pathchain.size() == 3) {
+				// connectionId.service.method
+				methodName = pathchain.get(2);
+			} else {
+				// connectionId.channel.channelname
+				methodName = "callback";
+			}
+		}
+		
+		System.out.println(serviceName + ":" + methodName + " called");
+		
 		
 		final Service service = services.get(serviceName);
 		
@@ -55,12 +83,10 @@ class Dispatcher {
 		} catch(NoSuchMethodException e){
 			e.printStackTrace();
 		}
-
-			
 		
 	}
 	
-	protected void registerService(String serviceName, Service service){
+	protected void addService(String serviceName, Service service){
 		serviceToClass.put(service, service.getClass());
 		services.put(serviceName, service);
 	}

@@ -52,14 +52,14 @@ public class Utils {
 	}
 	
 	// TODO: unit test
-	protected static Object deserialize(String type, Object value, List<Reference> refList) {
+	protected static Object deserialize(String type, Object value) {
 		Object newValue = value;
 		if(type.equals("list")){
 			List<Object> theList = new ArrayList<Object>();
 			for(List<Object> item : (List<List>) value){
 				String type1 = (String) item.get(0);
 				Object value1 = item.get(1);
-				theList.add(Utils.deserialize(type1 , value1, refList));
+				theList.add(Utils.deserialize(type1 , value1));
 			}
 			
 			newValue = theList;
@@ -68,7 +68,7 @@ public class Utils {
 			for(Map.Entry<String, List<?>> entry: ((Map<String, List<?>>) value).entrySet()){
 				String type1 = (String) entry.getValue().get(0);
 				Object value1 = entry.getValue().get(1);
-				theMap.put(entry.getKey(), Utils.deserialize(type1 , value1, refList));
+				theMap.put(entry.getKey(), Utils.deserialize(type1 , value1));
 			}
 			
 			newValue = theMap;
@@ -77,7 +77,6 @@ public class Utils {
 			List<String> path = refMap.get("ref");
 			Reference theReference = ReferenceFactory.getFactory().generateReference(path);
 			newValue = theReference;
-			refList.add(theReference);
 		}
 		return newValue;
 	}

@@ -16,8 +16,9 @@ import com.flotype.now.serializers.OuterSerializer;
 
 public class Reference {
 	private String networkAddress;
-	List<String> pathchain;
-	Client client;
+	private List<String> pathchain;
+	private Client client;
+	private String routingPrefix = "";
 	
 	protected Reference(String address, Client client){
 		this(address, Arrays.asList(address.split("\\.")), client);
@@ -44,6 +45,10 @@ public class Reference {
 	public String getAddress() {
 		return networkAddress;
 	}
+	
+	protected void setRoutingPrefix (String prefix) {
+		routingPrefix = prefix;
+	}
 
 	public void invokeRPC(String methodName, String bodyString, List<Reference> refList) throws IOException {
 		
@@ -53,7 +58,7 @@ public class Reference {
 			String headerKey = "link_"+i;
 			linkMap.put(headerKey, ref.networkAddress);
 		}
-		String routingKey = "N." + this.networkAddress + "." + methodName ;
+		String routingKey = this.routingPrefix + this.networkAddress + "." + methodName ;
 		
 		
 		// Add message wrapper
@@ -74,8 +79,7 @@ public class Reference {
 		
 		String messageString = messageMapper.writeValueAsString(messageBody);
 	
-		System.out.println("JSON MESSAGE = " + messageString);
-		
+		client.write(messageString);
 		
 		// TODO Use the AMQP BasicProperties builder
 		//properties.setHeaders(linkMap);

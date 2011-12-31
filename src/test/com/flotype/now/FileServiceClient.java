@@ -20,14 +20,14 @@ import com.flotype.now.serializers.ReferenceSerializer;
 import com.flotype.now.serializers.StringSerializer;
 
 
-public class TestServiceClient extends ServiceClient {
+public class FileServiceClient extends ServiceClient {
 
-	public TestServiceClient(Reference reference) {
+	public FileServiceClient(Reference reference) {
 		super(reference);
 	}
 	
-	public void fetchUrl(String s, Callback x){
-		this.invokeRPC("fetch_url", s, x);
+	public void get_localpath(Callback z){
+		this.invokeRPC("get_localpath", z);
 	}
 
 }
