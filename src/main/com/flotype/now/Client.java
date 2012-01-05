@@ -16,8 +16,8 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 
-import com.flotype.now.serializers.JoinChannelSerializer;
-import com.flotype.now.serializers.MessageSerializer;
+import com.flotype.now.serializers.HandlerSerializer;
+import com.flotype.now.serializers.CommandSerializer;
 import com.flotype.now.serializers.ReferenceSerializer;
 
 import net.bobah.nio.TcpClient;
@@ -109,7 +109,7 @@ public class Client {
 		return result;
 	}
 	
-	public void write(String jsonStr) {
+	protected void write(String jsonStr) {
 		try {
 			System.out.println("Sending JSON = " +  jsonStr);
 			byte[] jsonBytes = jsonStr.getBytes();
@@ -145,18 +145,23 @@ public class Client {
 		
 		joinChannelBody.put("name", name);
 		joinChannelBody.put("handler", handler.getReference());
-		joinChannelBody.put("callback", callback);
 		
-		ObjectMapper joinChannelMapper = new ObjectMapper();
-		SimpleModule joinChannelModule = new SimpleModule("Outer", new Version(0, 1, 0, "alpha"));
-		joinChannelModule.addSerializer(new ReferenceSerializer(Reference.class, /* Terrible due to reference serializer also populating refList */ new ArrayList()));
-		joinChannelModule.addSerializer(new JoinChannelSerializer(Map.class));
-		joinChannelMapper.registerModule(joinChannelModule);
+		if(callback == null) {
+			joinChannelBody.put("callback", null);
+		} else {
+			joinChannelBody.put("callback", callback.getReference());
+		}
+		
+		ObjectMapper handlerMapper = new ObjectMapper();
+		SimpleModule handlerModule = new SimpleModule("Handler", new Version(0, 1, 0, "alpha"));
+		handlerModule.addSerializer(new ReferenceSerializer(Reference.class));
+		handlerModule.addSerializer(new HandlerSerializer(Map.class));
+		handlerMapper.registerModule(handlerModule);
+		
 		
 		try {
-			String joinChannelString = joinChannelMapper.writeValueAsString(joinChannelBody);
+			String joinChannelString = handlerMapper.writeValueAsString(joinChannelBody);
 			write(joinChannelString);
-		
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -164,10 +169,14 @@ public class Client {
 	}
 	
 	public void joinService(String name, Service service) {
+		joinService(name, service, null);
+	}
+	
+	public void joinService(String name, Service service, Service callback) {
 		executor.addService(name, service);
 		service.createReference(name);
 		service.getReference().setRoutingPrefix("N.");
-		joinWorkerPool(name);
+		joinWorkerPool(name, service, callback);
 	}
 	
 	public void joinService(Service service){
@@ -176,9 +185,30 @@ public class Client {
 		executor.addService(name, service);
 	}
 	
-	public void joinWorkerPool(String workerPoolName) {
-		// It's faster this way
-		write("{\"type\":\"joinWorkerPool\",\"name\":\""+workerPoolName+"\",\"callback\":[\"none\",null]}");
+	public void joinWorkerPool(String name, Service handler, Service callback) {
+		Map<String, Object> joinWorkerPoolBody = new HashMap<String, Object>();
+		
+		joinWorkerPoolBody.put("name", name);
+		joinWorkerPoolBody.put("handler", handler.getReference());
+		
+		if(callback == null) {
+			joinWorkerPoolBody.put("callback", null);
+		} else {
+			joinWorkerPoolBody.put("callback", callback.getReference());
+		}
+		
+		ObjectMapper handlerMapper = new ObjectMapper();
+		SimpleModule handlerModule = new SimpleModule("Handler", new Version(0, 1, 0, "alpha"));
+		handlerModule.addSerializer(new ReferenceSerializer(Reference.class));
+		handlerModule.addSerializer(new HandlerSerializer(Map.class));
+		handlerMapper.registerModule(handlerModule);
+		
+		try {
+			String joinWorkerPoolString = handlerMapper.writeValueAsString(joinWorkerPoolBody);
+			write(joinWorkerPoolString);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 }

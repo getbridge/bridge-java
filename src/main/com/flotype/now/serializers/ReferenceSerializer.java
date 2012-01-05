@@ -16,7 +16,7 @@ public class ReferenceSerializer extends SerializerBase<Reference> {
 	
 	private List<Reference> refList;
 	
-	public ReferenceSerializer(Class<Reference> t, List<Reference> refList) {
+	public ReferenceSerializer(Class<Reference> t) {
 		super(t);
 		this.refList = refList;
 	}
@@ -24,18 +24,24 @@ public class ReferenceSerializer extends SerializerBase<Reference> {
 	public void serialize(Reference value, JsonGenerator jsonGen, SerializerProvider serializerProvider) 
 	throws IOException, JsonProcessingException {
 
-		jsonGen.writeStartArray();
-		jsonGen.writeString("now");
-		jsonGen.writeStartObject();
-		jsonGen.writeFieldName("ref");
-		jsonGen.writeStartArray();
-		for(String path : value.getPathchain()) {
-			jsonGen.writeString(path);
+		if(value == null) {
+			jsonGen.writeStartArray();
+			jsonGen.writeString("none");
+			jsonGen.writeNull();
+			jsonGen.writeEndArray();
+		} else {
+			jsonGen.writeStartArray();
+			jsonGen.writeString("now");
+			jsonGen.writeStartObject();
+			jsonGen.writeFieldName("ref");
+			jsonGen.writeStartArray();
+			for(String path : value.getPathchain()) {
+				jsonGen.writeString(path);
+			}
+			jsonGen.writeEndArray();
+			jsonGen.writeEndObject();
+			jsonGen.writeEndArray();
 		}
-		jsonGen.writeEndArray();
-		jsonGen.writeEndObject();
-		jsonGen.writeEndArray();
-		
-		refList.add(value);
+	
 	}
 }
