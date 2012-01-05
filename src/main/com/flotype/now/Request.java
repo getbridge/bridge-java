@@ -12,7 +12,7 @@ public class Request {
 	private Class<?>[] parameterList;
 	private Object[] argumentsList;
 	
-	public Request(@JsonProperty("pathchain") List<String> pathchain, @JsonProperty("args") List<ArrayList<Object>> regularArguments){
+	public Request(@JsonProperty("pathchain") List<String> pathchain, @JsonProperty("args") List<ArrayList<Object>> regularArguments, @JsonProperty("reference") List<Object> reference) {
 		
 		this.pathchain = pathchain;
 		

@@ -1,40 +1,52 @@
 package com.flotype.now;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.flotype.now.Callback;
 import com.flotype.now.Client;
+import com.flotype.now.Reference;
 
 
 public class TestMain {
+ 
 	
-	public static void main(String[] args) throws Exception{
-		/*try {
-			Client client = new Client();
-			client.connect();
-			client.joinWorkerPool("foo");
-
-			client.registerService("foo", new TestService());
-			
-			TestServiceClient s = new TestServiceClient(client.getDummyReference("webpull"));
-			s.fetchUrl("s");
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
-		
+	public static void main (String[] args) {
+	
 		Client client = null;
+		
+		try {
+			client = new Client("192.168.1.105", 8090);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		try {
+			client.connect();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	
-		client = new Client("localhost", 8090);
 		
-		client.connect();
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-
+		client.joinChannel("chat", new Callback(){
+			
+			
+			
+		});
 		
-		Thread.sleep(1000);
-		
-		
+		/*
 		client.joinService("foo", new TestService());
 		
 		TestServiceClient x = new TestServiceClient(client.getService("webpull"));
@@ -55,7 +67,6 @@ public class TestMain {
 			}
 		};
 		x.fetchUrl("http://ericzhang.com/images/kb.jpg", s);
-		
-	}
-	
+		*/
+	}	   
 }

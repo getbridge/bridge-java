@@ -1,5 +1,6 @@
 package com.flotype.now;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -8,6 +9,16 @@ import java.lang.*;
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.Version;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.module.SimpleModule;
+
+import com.flotype.now.serializers.JoinChannelSerializer;
+import com.flotype.now.serializers.MessageSerializer;
+import com.flotype.now.serializers.ReferenceSerializer;
 
 import net.bobah.nio.TcpClient;
 
@@ -45,6 +56,8 @@ public class Client {
 			  if (length != body.length) {
 				  throw new Exception("Expected message length not equal to buffer size");
 			  }
+
+			  System.out.println("Message = " + new String(body));
 			  
 			  
 			  if(connectionId == null) {
@@ -56,8 +69,6 @@ public class Client {
 				  Request req = Utils.deserialize(body);
 				  executor.execute(req);
 			  }
-			 
-			  System.out.println("Message = " + new String(body));
 			 
 		  }
 		  @Override protected void onDisconnected() { 
@@ -126,7 +137,30 @@ public class Client {
 	}
 	
 	public void joinChannel(String name, Service handler) {
+		joinChannel(name, handler, null);
+	}
 	
+	public void joinChannel(String name, Service handler, Service callback) {
+		Map<String, Object> joinChannelBody = new HashMap<String, Object>();
+		
+		joinChannelBody.put("name", name);
+		joinChannelBody.put("handler", handler.getReference());
+		joinChannelBody.put("callback", callback);
+		
+		ObjectMapper joinChannelMapper = new ObjectMapper();
+		SimpleModule joinChannelModule = new SimpleModule("Outer", new Version(0, 1, 0, "alpha"));
+		joinChannelModule.addSerializer(new ReferenceSerializer(Reference.class, /* Terrible due to reference serializer also populating refList */ new ArrayList()));
+		joinChannelModule.addSerializer(new JoinChannelSerializer(Map.class));
+		joinChannelMapper.registerModule(joinChannelModule);
+		
+		try {
+			String joinChannelString = joinChannelMapper.writeValueAsString(joinChannelBody);
+			write(joinChannelString);
+		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void joinService(String name, Service service) {
@@ -135,7 +169,6 @@ public class Client {
 		service.getReference().setRoutingPrefix("N.");
 		joinWorkerPool(name);
 	}
-	
 	
 	public void joinService(Service service){
 		String name = Utils.generateId();
