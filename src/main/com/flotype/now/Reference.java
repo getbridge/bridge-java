@@ -83,7 +83,6 @@ public class Reference {
 		SimpleModule sendModule = new SimpleModule("Send", new Version(0, 1, 0, "alpha"));
 		sendModule.addSerializer(new SendSerializer(Map.class));
 		sendMapper.registerModule(sendModule);
-		
 		String sendString = sendMapper.writeValueAsString(sendBody);
 		
 			
