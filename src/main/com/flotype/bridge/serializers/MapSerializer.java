@@ -1,4 +1,4 @@
-package com.flotype.now.serializers;
+package com.flotype.bridge.serializers;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.flotype.now.serializers;
+package com.flotype.bridge.serializers;
 import java.io.IOException;
 import java.util.List;
 
@@ -8,9 +8,9 @@ import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.ser.std.SerializerBase;
 
-import com.flotype.now.Reference;
-import com.flotype.now.ReferenceFactory;
-import com.flotype.now.Service;
+import com.flotype.bridge.Reference;
+import com.flotype.bridge.ReferenceFactory;
+import com.flotype.bridge.Service;
 
 
 

@@ -1,4 +1,4 @@
-package com.flotype.now;
+package com.flotype.bridge;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +20,7 @@ public class Utils {
 	
 	public static final int DEFAULT_PORT = 8082;
 	public static final String DEFAULT_HOST = "127.0.0.1";
-	
+	public static int logLevel = 0;
 	
 	protected static Request deserialize(byte[] json) throws JsonParseException, JsonMappingException, IOException{
 		
@@ -109,5 +109,23 @@ public class Utils {
         }
         return buffer.toString();
 	}
-
+	
+	public static void info(Object obj) {
+		if(Utils.logLevel > 2) {
+			System.out.println(obj);
+		}
+	}
+	
+	public static void warn(Object obj) {
+		if(Utils.logLevel > 1) {
+			System.out.println(obj);
+		}
+	}
+	
+	public static void error(Object obj) {
+		if(Utils.logLevel > 0) {
+			System.out.println(obj);
+		}
+	}
+	
 }

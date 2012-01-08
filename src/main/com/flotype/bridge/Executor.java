@@ -1,4 +1,4 @@
-package com.flotype.now;
+package com.flotype.bridge;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -60,7 +60,7 @@ class Executor {
 			}
 		}
 		
-		System.out.println(serviceName + ":" + methodName + " called");
+		Utils.info(serviceName + ":" + methodName + " called");
 		
 		
 		final Service service = services.get(serviceName);

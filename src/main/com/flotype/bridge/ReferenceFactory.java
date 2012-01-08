@@ -1,4 +1,4 @@
-package com.flotype.now;
+package com.flotype.bridge;
 import java.util.List;
 import java.util.Map;
 
@@ -6,13 +6,13 @@ import java.util.Map;
 public class ReferenceFactory {
 	
 	static ReferenceFactory theFactory;
-	static Client client;
+	static Bridge client;
 	
-	protected ReferenceFactory(Client client) {
+	protected ReferenceFactory(Bridge client) {
 		this.client = client;
 	}
 
-	protected static void createFactory(Client client){
+	protected static void createFactory(Bridge client){
 		theFactory = new ReferenceFactory(client);
 	}
 	

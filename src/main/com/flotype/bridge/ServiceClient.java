@@ -1,4 +1,4 @@
-package com.flotype.now;
+package com.flotype.bridge;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,12 +11,12 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 
-import com.flotype.now.serializers.ListSerializer;
-import com.flotype.now.serializers.MapSerializer;
-import com.flotype.now.serializers.SendSerializer;
-import com.flotype.now.serializers.ReferenceSerializer;
-import com.flotype.now.serializers.ServiceSerializer;
-import com.flotype.now.serializers.StringSerializer;
+import com.flotype.bridge.serializers.ListSerializer;
+import com.flotype.bridge.serializers.MapSerializer;
+import com.flotype.bridge.serializers.ReferenceSerializer;
+import com.flotype.bridge.serializers.SendSerializer;
+import com.flotype.bridge.serializers.ServiceSerializer;
+import com.flotype.bridge.serializers.StringSerializer;
 
 
 

@@ -20,6 +20,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 
+import com.flotype.bridge.Utils;
+
 
 /**
  * A simple NIO TCP client
@@ -66,7 +68,7 @@ public abstract class TcpClient implements Runnable {
   }
 
   public void start() throws IOException {
-    System.out.println("starting event loop");
+	  Utils.info("starting event loop");
     thread.start();
   }
 
@@ -75,7 +77,7 @@ public abstract class TcpClient implements Runnable {
   }
 
   public void stop() throws IOException, InterruptedException {
-    System.out.println("stopping event loop");
+	Utils.info("stopping event loop");
     thread.interrupt();
     selector.wakeup();
   }
@@ -155,7 +157,7 @@ public abstract class TcpClient implements Runnable {
 
   @Override
   public void run() {
-    System.out.println("event loop running");
+	Utils.info("event loop running");
     try {
       while(! Thread.interrupted()) { // reconnection loop
         try {
@@ -171,7 +173,7 @@ public abstract class TcpClient implements Runnable {
           }
         } catch (Exception e) {
           e.printStackTrace();
-          System.out.println("exception");
+          Utils.error("exception");
         } finally {
           connected.set(false);
           onDisconnected();
@@ -179,22 +181,22 @@ public abstract class TcpClient implements Runnable {
           readBuf.clear();
           if (channel != null) channel.close();
           if (selector != null) selector.close();
-          System.out.println("connection closed");
+          Utils.warn("connection closed");
         }
 
         try {
           Thread.sleep(reconnectInterval);
           if (reconnectInterval < MAXIMUM_RECONNECT_INTERVAL) reconnectInterval *= 2;
-          System.out.println("reconnecting to " + address);
+          Utils.warn("reconnecting to " + address);
         } catch (InterruptedException e) {
           break;
         }
       }
     } catch (Exception e) {
-      System.out.println("unrecoverable error");
+      Utils.error("unrecoverable error");
     }
    
-    System.out.println("event loop terminated");
+    Utils.warn("event loop terminated");
   }
 
   private void processSelectedKeys(Set<SelectionKey> keys) throws Exception {
@@ -212,7 +214,7 @@ public abstract class TcpClient implements Runnable {
   private void processConnect(SelectionKey key) throws Exception {
     SocketChannel ch = (SocketChannel) key.channel();
     if (ch.finishConnect()) {
-      System.out.println("connected to " + address);
+      Utils.info("connected to " + address);
       key.interestOps(key.interestOps() ^ SelectionKey.OP_CONNECT);
       key.interestOps(key.interestOps() | SelectionKey.OP_READ);
       reconnectInterval = INITIAL_RECONNECT_INTERVAL;
@@ -233,7 +235,7 @@ public abstract class TcpClient implements Runnable {
       readBuf.compact();
     }
     else if (bytesOp == -1) {
-      System.out.println("peer closed read channel");
+      Utils.info("peer closed read channel");
       ch.close();
     }
 
@@ -256,7 +258,7 @@ public abstract class TcpClient implements Runnable {
 
       if (bytesTotal > 0) writeBuf.notify();
       else if (bytesOp == -1) {
-        System.out.println("peer closed write channel");
+    	Utils.info("peer closed write channel");
         ch.close();
       }
 

@@ -1,4 +1,4 @@
-package com.flotype.now;
+package com.flotype.bridge;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,13 +16,13 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 
-import com.flotype.now.serializers.HandlerSerializer;
-import com.flotype.now.serializers.CommandSerializer;
-import com.flotype.now.serializers.ReferenceSerializer;
+import com.flotype.bridge.serializers.CommandSerializer;
+import com.flotype.bridge.serializers.HandlerSerializer;
+import com.flotype.bridge.serializers.ReferenceSerializer;
 
 import net.bobah.nio.TcpClient;
 
-public class Client {
+public class Bridge {
 	
 	
 	private TcpClient connection;
@@ -31,18 +31,21 @@ public class Client {
 	
 	private Executor executor = new Executor();
 	
+	private BridgeEventHandler eventHandler = null;
 	
-	public Client() throws IOException{
+	
+	public Bridge() throws IOException{
 		this(Utils.DEFAULT_HOST, Utils.DEFAULT_PORT);
 	}
 	
-	public Client(String host) throws IOException{
+	public Bridge(String host) throws IOException{
 		this(host, Utils.DEFAULT_PORT);
 	}
 	
-	public Client(String host, Integer port) throws IOException{
+	public Bridge(String host, Integer port) throws IOException{
 	    
-			
+		Bridge self = this;
+		
 		// Setup TCP
 		connection = new TcpClient() {
 		  @Override protected void onRead(ByteBuffer buf) throws Exception {
@@ -57,13 +60,18 @@ public class Client {
 				  throw new Exception("Expected message length not equal to buffer size");
 			  }
 
-			  System.out.println("Message = " + new String(body));
+			  Utils.info("Message = " + new String(body));
 			  
 			  
 			  if(connectionId == null) {
 				  // Client not handshaken
 				  connectionId = new String(body);
-				  System.out.println("Client handshaked with ID = " + connectionId);
+				  Utils.info("Client handshaked with ID = " + connectionId);
+				  
+				  if (Bridge.this.eventHandler != null) {
+					  Bridge.this.eventHandler.onReady();
+				  }
+				  
 			  } else {
 				  // Parse as normal
 				  Request req = Utils.deserialize(body);
@@ -76,20 +84,20 @@ public class Client {
 			  // No reconnect system yet so new connectionId every connection
 			  connectionId = null;
 		
-			  System.out.println("disconnected to tcp server");
+			  Utils.warn("disconnected to tcp server");
 			  
 		  }
 		  @Override protected void onConnected() throws Exception { 
-			  
-			  System.out.println("connected to tcp server");
+			 			  
+			  Utils.info("connected to tcp server");
 			  
 		  }
 	    };
 	    connection.setAddress(new InetSocketAddress(host, port));
-		
+		this.connect();
 	}
 	
-	public boolean connect() throws IOException{
+	private boolean connect() throws IOException{
 
 	    try {
 	      connection.start();
@@ -111,7 +119,7 @@ public class Client {
 	
 	protected void write(String jsonStr) {
 		try {
-			System.out.println("Sending JSON = " +  jsonStr);
+			Utils.info("Sending JSON = " +  jsonStr);
 			byte[] jsonBytes = jsonStr.getBytes();
 			
 			ByteBuffer data = ByteBuffer.allocate(jsonBytes.length + 4);
@@ -235,6 +243,13 @@ public class Client {
 			this.write(commandString);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void onReady(BridgeEventHandler eventHandler) {
+		this.eventHandler = eventHandler;
+		if(connection.isConnected()) {
+			eventHandler.onReady();
 		}
 	}
 	

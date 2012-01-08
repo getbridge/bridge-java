@@ -1,4 +1,4 @@
-package com.flotype.now;
+package com.flotype.bridge;
 
 import java.util.ArrayList;
 

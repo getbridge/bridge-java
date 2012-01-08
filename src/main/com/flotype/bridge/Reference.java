@@ -1,4 +1,4 @@
-package com.flotype.now;
+package com.flotype.bridge;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,16 +13,16 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 
-import com.flotype.now.serializers.CommandSerializer;
-import com.flotype.now.serializers.DoubleSerializer;
-import com.flotype.now.serializers.FloatSerializer;
-import com.flotype.now.serializers.IntegerSerializer;
-import com.flotype.now.serializers.ListSerializer;
-import com.flotype.now.serializers.MapSerializer;
-import com.flotype.now.serializers.ReferenceSerializer;
-import com.flotype.now.serializers.SendSerializer;
-import com.flotype.now.serializers.ServiceSerializer;
-import com.flotype.now.serializers.StringSerializer;
+import com.flotype.bridge.serializers.CommandSerializer;
+import com.flotype.bridge.serializers.DoubleSerializer;
+import com.flotype.bridge.serializers.FloatSerializer;
+import com.flotype.bridge.serializers.IntegerSerializer;
+import com.flotype.bridge.serializers.ListSerializer;
+import com.flotype.bridge.serializers.MapSerializer;
+import com.flotype.bridge.serializers.ReferenceSerializer;
+import com.flotype.bridge.serializers.SendSerializer;
+import com.flotype.bridge.serializers.ServiceSerializer;
+import com.flotype.bridge.serializers.StringSerializer;
 
 public class Reference {
 	
@@ -30,18 +30,18 @@ public class Reference {
 	
 	private String networkAddress;
 	private List<String> pathchain;
-	private Client client;
+	private Bridge client;
 	private String routingPrefix = "";
 	
-	protected Reference(String address, Client client){
+	protected Reference(String address, Bridge client){
 		this(address, Arrays.asList(address.split("\\.")), client);
 	}
 	
-	protected Reference(List<String> pathchain, Client client){
+	protected Reference(List<String> pathchain, Bridge client){
 		this(Utils.join(pathchain, "."), pathchain, client);
 	}
 	
-	protected Reference(String address, List<String> pathchain, Client client){
+	protected Reference(String address, List<String> pathchain, Bridge client){
 		setAddress(address);
 		this.pathchain = pathchain;
 		this.client = client;

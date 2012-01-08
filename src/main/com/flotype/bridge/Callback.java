@@ -1,4 +1,4 @@
-package com.flotype.now;
+package com.flotype.bridge;
 
 public class Callback extends Service{
 	public Callback() {

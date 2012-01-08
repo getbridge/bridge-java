@@ -1,7 +1,7 @@
-package com.flotype.now;
+package com.flotype.bridge;
 
-import com.flotype.now.Reference;
-import com.flotype.now.Service;
+import com.flotype.bridge.Reference;
+import com.flotype.bridge.Service;
 
 
 public class TestService extends Service {
