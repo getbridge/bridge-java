@@ -16,7 +16,7 @@ public class Service {
 	// Create anonymous reference if there isn't one
 	public void ensureReference() {
 		if(!hasReference()) {
-			ReferenceFactory.client.joinService(this);
+			ReferenceFactory.client.publishService(this);
 		}
 	}
 	
