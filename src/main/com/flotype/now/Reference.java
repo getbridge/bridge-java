@@ -14,6 +14,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 
 import com.flotype.now.serializers.CommandSerializer;
+import com.flotype.now.serializers.DoubleSerializer;
+import com.flotype.now.serializers.FloatSerializer;
+import com.flotype.now.serializers.IntegerSerializer;
 import com.flotype.now.serializers.ListSerializer;
 import com.flotype.now.serializers.MapSerializer;
 import com.flotype.now.serializers.ReferenceSerializer;
@@ -22,6 +25,9 @@ import com.flotype.now.serializers.ServiceSerializer;
 import com.flotype.now.serializers.StringSerializer;
 
 public class Reference {
+	
+	public static Reference Null = new Reference("null", null);
+	
 	private String networkAddress;
 	private List<String> pathchain;
 	private Client client;
@@ -56,6 +62,10 @@ public class Reference {
 	protected void setRoutingPrefix (String prefix) {
 		routingPrefix = prefix;
 	}
+	
+	public String getRoutingPrefix() {
+		return routingPrefix;
+	}
 
 	public void invokeRPC(String methodName, Object ... args) throws IOException {
 		
@@ -65,6 +75,9 @@ public class Reference {
 		module.addSerializer(new ReferenceSerializer(Reference.class))
 			.addSerializer(new ServiceSerializer(Service.class))
 			.addSerializer(new MapSerializer(Map.class))
+			.addSerializer(new IntegerSerializer(Integer.class))
+			.addSerializer(new FloatSerializer(Float.class))
+			.addSerializer(new DoubleSerializer(Double.class))
 			.addSerializer(new ListSerializer(List.class))
 			.addSerializer(new StringSerializer(String.class));
 		argsMapper.registerModule(module);
@@ -74,14 +87,21 @@ public class Reference {
 		// Construct the request body here
 		Map<String, Object> sendBody = new HashMap<String, Object>();
 		
-		sendBody.put("destination", this);
+		ArrayList<String> destinationPath = new ArrayList(this.getPathchain());
+		destinationPath.add(methodName);
+		Reference destination = ReferenceFactory.getFactory().generateReference(destinationPath);
+		destination.setRoutingPrefix(this.getRoutingPrefix());
+		
+		sendBody.put("destination", destination);
+		sendBody.put("method", methodName);
 		sendBody.put("args", argsString);
 		// TODO
-		sendBody.put("exceptions", null);
+		sendBody.put("exceptions", Reference.Null);
 		
 		ObjectMapper sendMapper = new ObjectMapper();
 		SimpleModule sendModule = new SimpleModule("Send", new Version(0, 1, 0, "alpha"));
-		sendModule.addSerializer(new SendSerializer(Map.class));
+		sendModule.addSerializer(new ReferenceSerializer(Reference.class))
+			.addSerializer(new SendSerializer(Map.class));
 		sendMapper.registerModule(sendModule);
 		String sendString = sendMapper.writeValueAsString(sendBody);
 		

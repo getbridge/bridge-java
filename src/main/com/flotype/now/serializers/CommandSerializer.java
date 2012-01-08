@@ -18,14 +18,22 @@ public class CommandSerializer extends SerializerBase<Map> {
 
 	public void serialize(Map value, JsonGenerator jsonGen, SerializerProvider serializerProvider) 
 	throws IOException, JsonProcessingException {
-
+		jsonGen.writeStartArray();
+		jsonGen.writeString("dict");
 		jsonGen.writeStartObject();
 		jsonGen.writeFieldName("command");
 		// Double serialize object because connection gateway simply forwards json to Rabbit
+		jsonGen.writeStartArray();
+		jsonGen.writeString("str");
 		jsonGen.writeString((String) value.get("command"));
+		jsonGen.writeEndArray();
 		jsonGen.writeFieldName("data");
-		jsonGen.writeRaw((String) value.get("data"));
+		jsonGen.writeStartArray();
+		jsonGen.writeString("dict");
+		jsonGen.writeRawValue((String) value.get("data"));
+		jsonGen.writeEndArray();
 		jsonGen.writeEndObject();
+		jsonGen.writeEndArray();
 	}
 
 }

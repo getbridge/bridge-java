@@ -105,7 +105,7 @@ public class Client {
 	
 	public Reference getService(String actorId){
 		Reference result = new Reference(actorId, this);
-		result.setRoutingPrefix("N.");
+		result.setRoutingPrefix("named");
 		return result;
 	}
 	
@@ -147,7 +147,7 @@ public class Client {
 		joinChannelBody.put("handler", handler.getReference());
 		
 		if(callback == null) {
-			joinChannelBody.put("callback", null);
+			joinChannelBody.put("callback", Reference.Null);
 		} else {
 			joinChannelBody.put("callback", callback.getReference());
 		}
@@ -158,28 +158,40 @@ public class Client {
 		handlerModule.addSerializer(new HandlerSerializer(Map.class));
 		handlerMapper.registerModule(handlerModule);
 		
-		
 		try {
 			String joinChannelString = handlerMapper.writeValueAsString(joinChannelBody);
-			write(joinChannelString);
+	
+			// Construct the request body here
+			Map<String, Object> commandBody = new HashMap<String, Object>();
+		
+			commandBody.put("command", "JOINCHANNEL");
+			commandBody.put("data", joinChannelString);
+			
+	
+			ObjectMapper commandMapper = new ObjectMapper();
+			SimpleModule commandModule = new SimpleModule("Command", new Version(0, 1, 0, "alpha"));
+			commandModule.addSerializer(new CommandSerializer(Map.class));
+			commandMapper.registerModule(commandModule);
+			
+			String commandString = commandMapper.writeValueAsString(commandBody);
+		
+			this.write(commandString);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	public void joinService(String name, Service service) {
-		joinService(name, service, null);
+	public void publishService(String name, Service service) {
+		publishService(name, service, null);
 	}
 	
-	public void joinService(String name, Service service, Service callback) {
+	public void publishService(String name, Service service, Service callback) {
 		executor.addService(name, service);
 		service.createReference(name);
-		service.getReference().setRoutingPrefix("N.");
 		joinWorkerPool(name, service, callback);
 	}
 	
-	public void joinService(Service service){
+	public void publishService(Service service){
 		String name = Utils.generateId();
 		service.createReference(name);
 		executor.addService(name, service);
@@ -192,7 +204,7 @@ public class Client {
 		joinWorkerPoolBody.put("handler", handler.getReference());
 		
 		if(callback == null) {
-			joinWorkerPoolBody.put("callback", null);
+			joinWorkerPoolBody.put("callback", Reference.Null);
 		} else {
 			joinWorkerPoolBody.put("callback", callback.getReference());
 		}
@@ -205,7 +217,22 @@ public class Client {
 		
 		try {
 			String joinWorkerPoolString = handlerMapper.writeValueAsString(joinWorkerPoolBody);
-			write(joinWorkerPoolString);
+	
+			// Construct the request body here
+			Map<String, Object> commandBody = new HashMap<String, Object>();
+		
+			commandBody.put("command", "JOINWORKERPOOL");
+			commandBody.put("data", joinWorkerPoolString);
+			
+	
+			ObjectMapper commandMapper = new ObjectMapper();
+			SimpleModule commandModule = new SimpleModule("Command", new Version(0, 1, 0, "alpha"));
+			commandModule.addSerializer(new CommandSerializer(Map.class));
+			commandMapper.registerModule(commandModule);
+			
+			String commandString = commandMapper.writeValueAsString(commandBody);
+		
+			this.write(commandString);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

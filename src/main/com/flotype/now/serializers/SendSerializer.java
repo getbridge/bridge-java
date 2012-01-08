@@ -10,6 +10,8 @@ import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.ser.std.SerializerBase;
 
+import com.flotype.now.Reference;
+
 public class SendSerializer extends SerializerBase<Map> {
 
 	public SendSerializer(Class<Map> class1) {
@@ -22,9 +24,12 @@ public class SendSerializer extends SerializerBase<Map> {
 		jsonGen.writeFieldName("destination");
 		serializerProvider.defaultSerializeValue(value.get("destination"), jsonGen);
 		jsonGen.writeFieldName("args");
+		jsonGen.writeStartArray();
+		jsonGen.writeString("list");
 		jsonGen.writeRawValue((String) value.get("args"));
+		jsonGen.writeEndArray();
 		jsonGen.writeFieldName("exceptions");
-		serializerProvider.defaultSerializeValue(value.get("exceptions"), jsonGen);
+		serializerProvider.defaultSerializeValue(value.get("exceptions") ,jsonGen);
 		jsonGen.writeEndObject();
 	}
 

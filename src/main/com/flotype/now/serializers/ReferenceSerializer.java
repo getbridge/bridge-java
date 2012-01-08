@@ -14,17 +14,14 @@ import com.flotype.now.Reference;
 
 public class ReferenceSerializer extends SerializerBase<Reference> {
 	
-	private List<Reference> refList;
-	
 	public ReferenceSerializer(Class<Reference> t) {
 		super(t);
-		this.refList = refList;
 	}
 
 	public void serialize(Reference value, JsonGenerator jsonGen, SerializerProvider serializerProvider) 
 	throws IOException, JsonProcessingException {
 
-		if(value == null) {
+		if(value == Reference.Null) {
 			jsonGen.writeStartArray();
 			jsonGen.writeString("none");
 			jsonGen.writeNull();
@@ -35,6 +32,10 @@ public class ReferenceSerializer extends SerializerBase<Reference> {
 			jsonGen.writeStartObject();
 			jsonGen.writeFieldName("ref");
 			jsonGen.writeStartArray();
+			String prefix = value.getRoutingPrefix();
+			if(prefix.length() > 0) {
+				jsonGen.writeString(prefix);
+			}
 			for(String path : value.getPathchain()) {
 				jsonGen.writeString(path);
 			}

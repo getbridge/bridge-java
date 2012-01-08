@@ -18,7 +18,7 @@ public class TestMain {
 		Client client = null;
 		
 		try {
-			client = new Client("192.168.1.105", 8090);
+			client = new Client("localhost", 8090);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -39,15 +39,15 @@ public class TestMain {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		/*
 		client.joinChannel("chat", new Callback(){
 			
 			
 			
 		});
+		*/
 		
-		/*
-		client.joinService("foo", new TestService());
+		client.publishService("foo", new TestService());
 		
 		TestServiceClient x = new TestServiceClient(client.getService("webpull"));
 		final ResizeServiceClient y = new ResizeServiceClient(client.getService("resize"));
@@ -67,6 +67,6 @@ public class TestMain {
 			}
 		};
 		x.fetchUrl("http://ericzhang.com/images/kb.jpg", s);
-		*/
+		
 	}	   
 }

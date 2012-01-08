@@ -12,7 +12,7 @@ public class Request {
 	private Class<?>[] parameterList;
 	private Object[] argumentsList;
 	
-	public Request(@JsonProperty("destination") List<String> pathchain, @JsonProperty("args") List<ArrayList<Object>> regularArguments, @JsonProperty("reference") List<Object> reference) {
+	public Request(@JsonProperty("pathchain") List<String> pathchain, @JsonProperty("args") List<ArrayList<Object>> regularArguments) {
 		
 		this.pathchain = pathchain;
 		
@@ -50,7 +50,7 @@ public class Request {
 		
 	}
 	
-	public List<String> getPathchain () {
+	public List<String> getPathchain() {
 		return pathchain;
 	}
 	
@@ -61,4 +61,5 @@ public class Request {
 	public Object[] getArguments(){
 		return argumentsList;
 	}
+
 }

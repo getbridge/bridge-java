@@ -19,7 +19,10 @@ public class HandlerSerializer extends SerializerBase<Map> {
 	throws IOException, JsonProcessingException {
 		jsonGen.writeStartObject();
 		jsonGen.writeFieldName("name");
+		jsonGen.writeStartArray();
+		jsonGen.writeString("str");
 		jsonGen.writeString((String)value.get("name"));
+		jsonGen.writeEndArray();
 		jsonGen.writeFieldName("handler");
 		serializerProvider.defaultSerializeValue(value.get("handler"), jsonGen);
 		jsonGen.writeFieldName("callback");

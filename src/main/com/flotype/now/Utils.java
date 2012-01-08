@@ -7,9 +7,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.module.SimpleModule;
 import org.codehaus.jackson.type.TypeReference;
+
 
 import java.util.Map;
 
@@ -25,8 +28,14 @@ public class Utils {
 		ObjectMapper mapper = new ObjectMapper();
 		
 		// Return a request object parsed by mapper
-		Request jsonObj = mapper.readValue(json, Request.class);
-		return jsonObj;
+		ArrayList<Object> jsonObj = mapper.readValue(json, new TypeReference<ArrayList<Object>>(){});
+		ArrayList<Object> deserArgs = new ArrayList<Object>();
+		
+		Map<String, Object> data = (Map<String, Object>) jsonObj.get(1);
+		ArrayList<ArrayList<Object>> args = ((ArrayList<ArrayList<ArrayList<Object>>>) data.get("args")).get(1);
+		
+		List<String> pathchain = (ArrayList<String>)((Map<String, Object>)((ArrayList<Object>) data.get("destination")).get(1)).get("ref");		
+		return new Request(pathchain, args);
 	}
 	
 	protected static String generateId() {
