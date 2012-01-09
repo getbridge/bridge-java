@@ -51,7 +51,8 @@ public class Utils {
 		} else if (type.equals("str")) {
 			theClass = java.lang.String.class;
 		} else if (type.equals("float")) {
-			theClass = java.lang.Double.class;
+			// All numbers are floats now
+			theClass = java.lang.Float.class;
 		} else if (type.equals("none")){
 			theClass = java.lang.Object.class;
 		} else if (type.equals("now")) {
@@ -86,6 +87,8 @@ public class Utils {
 			List<String> path = refMap.get("ref");
 			Reference theReference = ReferenceFactory.getFactory().generateReference(path);
 			newValue = theReference;
+		} else if (type.equals("float")){
+			newValue = ((Number) value).floatValue();
 		}
 		return newValue;
 	}
