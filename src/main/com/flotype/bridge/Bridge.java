@@ -53,7 +53,7 @@ public class Bridge {
 			  // Assuming 4 byte little endian ints
 			  int length = buf.getInt();
 			 
-			  byte[] body = new byte[buf.remaining()];
+			  byte[] body = new byte[length];
 			  buf.get(body);
 			  
 			  if (length != body.length) {
