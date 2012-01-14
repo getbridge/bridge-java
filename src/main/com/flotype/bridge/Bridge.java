@@ -49,35 +49,35 @@ public class Bridge {
 		// Setup TCP
 		connection = new TcpClient() {
 		  @Override protected void onRead(ByteBuffer buf) throws Exception {
-			  
-			  // Assuming 4 byte little endian ints
-			  int length = buf.getInt();
-			 
-			  byte[] body = new byte[length];
-			  buf.get(body);
-			  
-			  if (length != body.length) {
-				  throw new Exception("Expected message length not equal to buffer size");
-			  }
+			  while(buf.hasRemaining()){
+				  // Assuming 4 byte little endian ints
+				  int length = buf.getInt();
 
-			  Utils.info("Message = " + new String(body));
-			  
-			  
-			  if(connectionId == null) {
-				  // Client not handshaken
-				  connectionId = new String(body);
-				  Utils.info("Client handshaked with ID = " + connectionId);
-				  
-				  if (Bridge.this.eventHandler != null) {
-					  Bridge.this.eventHandler.onReady();
+				  byte[] body = new byte[length];
+				  buf.get(body);
+
+				  if (length != body.length) {
+					  throw new Exception("Expected message length not equal to buffer size");
 				  }
-				  
-			  } else {
-				  // Parse as normal
-				  Request req = Utils.deserialize(body);
-				  executor.execute(req);
+
+				  Utils.info("Message = " + new String(body));
+
+
+				  if(connectionId == null) {
+					  // Client not handshaken
+					  connectionId = new String(body);
+					  Utils.info("Client handshaked with ID = " + connectionId);
+
+					  if (Bridge.this.eventHandler != null) {
+						  Bridge.this.eventHandler.onReady();
+					  }
+
+				  } else {
+					  // Parse as normal
+					  Request req = Utils.deserialize(body);
+					  executor.execute(req);
+				  }
 			  }
-			 
 		  }
 		  @Override protected void onDisconnected() { 
 			  
