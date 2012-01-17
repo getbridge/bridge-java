@@ -39,21 +39,21 @@ class Executor {
 			// Reserved for future
 		}
 		
-		if (pathchain.get(1).equals("channel")) {
-			serviceName = "channel:" + pathchain.get(2);
-			if(pathchain.size() == 4) {
+		if (pathchain.get(0).equals("channel")) {
+			serviceName = "channel:" + pathchain.get(1);
+			if(pathchain.size() == 3) {
 				// connectionId.channel.channelname.method
-				methodName = pathchain.get(3);
+				methodName = pathchain.get(2);
 			} else {
 				// connectionId.channel.channelname
 				methodName = "callback";
 			}
 
 		} else {
-			serviceName = pathchain.get(1);
+			serviceName = pathchain.get(0);
 			if(pathchain.size() == 3) {
 				// connectionId.service.method
-				methodName = pathchain.get(2);
+				methodName = pathchain.get(1);
 			} else {
 				// connectionId.channel.channelname
 				methodName = "callback";
@@ -89,6 +89,12 @@ class Executor {
 	protected void addService(String serviceName, Service service){
 		serviceToClass.put(service, service.getClass());
 		services.put(serviceName, service);
+	}
+
+	public void addExistingServiceByKey(String channelName, String key) {
+		// TODO Auto-generated method stub
+		Service s = services.get(key);
+		addService(channelName, s);
 	}
 
 }

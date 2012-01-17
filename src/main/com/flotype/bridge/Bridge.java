@@ -107,6 +107,7 @@ public class Bridge {
 	    }
 
 		ReferenceFactory.createFactory(this);
+		executor.addService("system", new SystemService(this, executor));
 				
 		return true;
 	}
@@ -114,6 +115,12 @@ public class Bridge {
 	public Reference getService(String actorId){
 		Reference result = new Reference(actorId, this);
 		result.setRoutingPrefix("named");
+		return result;
+	}
+	
+	protected Reference getChannel(String channelId){
+		Reference result = new Reference(channelId, this);
+		result.setRoutingPrefix("channel");
 		return result;
 	}
 	
