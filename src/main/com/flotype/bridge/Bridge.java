@@ -29,6 +29,9 @@ public class Bridge {
 	
 	private String connectionId;
 	
+	// Secret used for reconnects
+	private String secret;
+	
 	private Executor executor = new Executor();
 	
 	private BridgeEventHandler eventHandler = null;
@@ -65,8 +68,11 @@ public class Bridge {
 
 				  if(connectionId == null) {
 					  // Client not handshaken
-					  connectionId = new String(body);
-					  Utils.info("Client handshaked with ID = " + connectionId);
+					  String[] ids = (new String(body)).split("\\|");
+					  connectionId = ids[0];
+					  secret = ids[1];
+					  
+					  Utils.info("Client handshaked with ID = " + connectionId + ", secret = " + secret);
 
 					  if (Bridge.this.eventHandler != null) {
 						  Bridge.this.eventHandler.onReady();

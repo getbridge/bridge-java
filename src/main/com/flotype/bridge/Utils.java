@@ -20,7 +20,7 @@ public class Utils {
 	
 	public static final int DEFAULT_PORT = 8082;
 	public static final String DEFAULT_HOST = "127.0.0.1";
-	public static int logLevel = 0;
+	public static int logLevel = 5;
 	
 	protected static Request deserialize(byte[] json) throws JsonParseException, JsonMappingException, IOException{
 		
