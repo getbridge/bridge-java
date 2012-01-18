@@ -79,6 +79,7 @@ public class Reference {
 			.addSerializer(new FloatSerializer(Float.class))
 			.addSerializer(new DoubleSerializer(Double.class))
 			.addSerializer(new ListSerializer(List.class))
+			.addSerializer(new BooleanSerializer(Boolean.class))
 			.addSerializer(new StringSerializer(String.class));
 		argsMapper.registerModule(module);
 		
