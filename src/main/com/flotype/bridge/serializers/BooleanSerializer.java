@@ -1,4 +1,4 @@
-package com.flotype.bridge;
+package com.flotype.bridge.serializers;
 
 import java.io.IOException;
 

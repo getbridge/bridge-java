@@ -13,6 +13,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 
+import com.flotype.bridge.serializers.BooleanSerializer;
 import com.flotype.bridge.serializers.CommandSerializer;
 import com.flotype.bridge.serializers.DoubleSerializer;
 import com.flotype.bridge.serializers.FloatSerializer;
