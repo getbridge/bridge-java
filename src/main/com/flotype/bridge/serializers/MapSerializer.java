@@ -12,13 +12,13 @@ import org.codehaus.jackson.map.ser.std.SerializerBase;
 
 
 public class MapSerializer extends SerializerBase<Map> {
-	
+
 	public MapSerializer(Class<Map> class1) {
 		super(class1);
 		// TODO Auto-generated constructor stub
 	}
 
-	public void serialize(Map value, JsonGenerator jsonGen, SerializerProvider serializerProvider) 
+	public void serialize(Map value, JsonGenerator jsonGen, SerializerProvider serializerProvider)
 	throws IOException, JsonProcessingException {
 
 		jsonGen.writeStartArray();

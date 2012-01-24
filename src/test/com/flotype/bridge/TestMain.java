@@ -11,12 +11,12 @@ import com.flotype.bridge.Reference;
 
 
 public class TestMain {
- 
-	
+
+
 	public static void main (String[] args) throws Exception {
-	
+
 		final Bridge bridge = new Bridge("localhost", 8090);
-		
+
 		bridge.onReady(new BridgeEventHandler() {
 			public void onReady() {
 				bridge.publishService("foo", new TestService());
@@ -40,7 +40,7 @@ public class TestMain {
 				};
 				x.fetchUrl("http://ericzhang.com/images/kb.jpg", s);
 
-			}	
+			}
 		});
-	}	   
+	}
 }

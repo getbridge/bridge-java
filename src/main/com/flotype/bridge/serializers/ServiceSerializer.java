@@ -15,12 +15,12 @@ import com.flotype.bridge.Service;
 
 
 public class ServiceSerializer extends SerializerBase<Service> {
-	
+
 	public ServiceSerializer(Class<Service> t) {
 		super(t);
 	}
 
-	public void serialize(Service value, JsonGenerator jsonGen, SerializerProvider serializerProvider) 
+	public void serialize(Service value, JsonGenerator jsonGen, SerializerProvider serializerProvider)
 	throws IOException, JsonProcessingException {
 		value.ensureReference();
 		serializerProvider.defaultSerializeValue(value.getReference(), jsonGen);

@@ -22,11 +22,11 @@ import com.flotype.bridge.serializers.StringSerializer;
 
 public class ServiceClient {
 	Reference reference;
-	
+
 	public ServiceClient(Reference reference){
 		this.reference = reference;
 	}
-	
+
 	protected void invokeRPC(String methodName, Object... args){
 		try {
 			this.reference.invokeRPC(methodName, args);
@@ -35,5 +35,5 @@ public class ServiceClient {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

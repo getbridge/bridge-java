@@ -13,12 +13,12 @@ import org.codehaus.jackson.map.ser.std.SerializerBase;
 
 
 public class ListSerializer extends SerializerBase<List> {
-	
+
 	public ListSerializer(Class<List> class1) {
-		super(class1);	
+		super(class1);
 	}
 
-	public void serialize(List value, JsonGenerator jsonGen, SerializerProvider serializerProvider) 
+	public void serialize(List value, JsonGenerator jsonGen, SerializerProvider serializerProvider)
 	throws IOException, JsonProcessingException {
 
 		jsonGen.writeStartArray();

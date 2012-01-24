@@ -4,10 +4,10 @@ import java.util.Map;
 
 
 public class ReferenceFactory {
-	
+
 	static ReferenceFactory theFactory;
 	static Bridge client;
-	
+
 	protected ReferenceFactory(Bridge client) {
 		this.client = client;
 	}
@@ -15,7 +15,7 @@ public class ReferenceFactory {
 	protected static void createFactory(Bridge client){
 		theFactory = new ReferenceFactory(client);
 	}
-	
+
 	protected static ReferenceFactory getFactory(){
 		if(theFactory == null){
 			throw new Error("ReferenceFactory uninitialized");
@@ -23,7 +23,7 @@ public class ReferenceFactory {
 			return theFactory;
 		}
 	}
-	
+
 	protected Reference generateReference(String value){
 		return new Reference(value, client);
 	}

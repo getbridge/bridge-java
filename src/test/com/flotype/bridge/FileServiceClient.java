@@ -19,7 +19,7 @@ public class FileServiceClient extends ServiceClient {
 	public FileServiceClient(Reference reference) {
 		super(reference);
 	}
-	
+
 	public void get_localpath(Callback z){
 		this.invokeRPC("get_localpath", z);
 	}

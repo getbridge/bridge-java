@@ -20,7 +20,7 @@ public class TestServiceClient extends ServiceClient {
 	public TestServiceClient(Reference reference) {
 		super(reference);
 	}
-	
+
 	public void fetchUrl(String s, Callback x){
 		this.invokeRPC("fetch_url", s, x);
 	}
