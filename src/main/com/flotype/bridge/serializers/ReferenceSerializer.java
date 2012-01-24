@@ -13,12 +13,12 @@ import com.flotype.bridge.Reference;
 
 
 public class ReferenceSerializer extends SerializerBase<Reference> {
-	
+
 	public ReferenceSerializer(Class<Reference> t) {
 		super(t);
 	}
 
-	public void serialize(Reference value, JsonGenerator jsonGen, SerializerProvider serializerProvider) 
+	public void serialize(Reference value, JsonGenerator jsonGen, SerializerProvider serializerProvider)
 	throws IOException, JsonProcessingException {
 
 		if(value == Reference.Null) {
@@ -43,6 +43,6 @@ public class ReferenceSerializer extends SerializerBase<Reference> {
 			jsonGen.writeEndObject();
 			jsonGen.writeEndArray();
 		}
-	
+
 	}
 }

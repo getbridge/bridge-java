@@ -10,12 +10,12 @@ import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.ser.std.SerializerBase;
 
 public class HandlerSerializer extends SerializerBase<Map> {
-	
+
 	public HandlerSerializer(Class<Map> t) {
 		super(t);
 	}
 
-	public void serialize(Map value, JsonGenerator jsonGen, SerializerProvider serializerProvider) 
+	public void serialize(Map value, JsonGenerator jsonGen, SerializerProvider serializerProvider)
 	throws IOException, JsonProcessingException {
 		jsonGen.writeStartObject();
 		jsonGen.writeFieldName("name");

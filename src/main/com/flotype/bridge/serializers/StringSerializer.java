@@ -9,13 +9,13 @@ import org.codehaus.jackson.map.ser.std.SerializerBase;
 
 
 public class StringSerializer extends SerializerBase<String> {
-	
+
 	public StringSerializer(Class<String> t) {
 		super(t);
 		// TODO Auto-generated constructor stub
 	}
 
-	public void serialize(String value, JsonGenerator jsonGen, SerializerProvider serializerProvider) 
+	public void serialize(String value, JsonGenerator jsonGen, SerializerProvider serializerProvider)
 	throws IOException, JsonProcessingException {
 
 		jsonGen.writeStartArray();

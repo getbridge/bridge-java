@@ -17,27 +17,27 @@ import org.codehaus.jackson.type.TypeReference;
 import java.util.Map;
 
 public class Utils {
-	
+
 	public static final int DEFAULT_PORT = 8082;
 	public static final String DEFAULT_HOST = "127.0.0.1";
-	public static int logLevel = 0;
-	
+	public static int logLevel = 5;
+
 	protected static Request deserialize(byte[] json) throws JsonParseException, JsonMappingException, IOException{
-		
+
 		// Create object mapper
 		ObjectMapper mapper = new ObjectMapper();
-		
+
 		// Return a request object parsed by mapper
 		ArrayList<Object> jsonObj = mapper.readValue(json, new TypeReference<ArrayList<Object>>(){});
 		ArrayList<Object> deserArgs = new ArrayList<Object>();
-		
+
 		Map<String, Object> data = (Map<String, Object>) jsonObj.get(1);
 		ArrayList<ArrayList<Object>> args = ((ArrayList<ArrayList<ArrayList<Object>>>) data.get("args")).get(1);
-		
-		List<String> pathchain = (ArrayList<String>)((Map<String, Object>)((ArrayList<Object>) data.get("destination")).get(1)).get("ref");		
+
+		List<String> pathchain = (ArrayList<String>)((Map<String, Object>)((ArrayList<Object>) data.get("destination")).get(1)).get("ref");
 		return new Request(pathchain, args);
 	}
-	
+
 	protected static String generateId() {
 		return Long.toHexString(Double.doubleToLongBits(Math.random()));
 	}
@@ -60,7 +60,7 @@ public class Utils {
 		}
 		return theClass;
 	}
-	
+
 	// TODO: unit test
 	protected static Object deserialize(String type, Object value) {
 		Object newValue = value;
@@ -71,7 +71,7 @@ public class Utils {
 				Object value1 = item.get(1);
 				theList.add(Utils.deserialize(type1 , value1));
 			}
-			
+
 			newValue = theList;
 		} else if (type.equals("dict")) {
 			Map<String, Object> theMap = new HashMap<String, Object>();
@@ -80,7 +80,7 @@ public class Utils {
 				Object value1 = entry.getValue().get(1);
 				theMap.put(entry.getKey(), Utils.deserialize(type1 , value1));
 			}
-			
+
 			newValue = theMap;
 		} else if (type.equals("now")) {
 			Map<String, List<String>> refMap = (Map<String, List<String>>) value;
@@ -92,7 +92,7 @@ public class Utils {
 		}
 		return newValue;
 	}
-	
+
 	protected static byte[] intToByteArray(int value) {
         return new byte[] {
                 (byte)(value >>> 24),
@@ -100,7 +100,7 @@ public class Utils {
                 (byte)(value >>> 8),
                 (byte)value};
 	}
-	
+
 	protected static String join(Collection<String> s, String delimiter) {
 		StringBuffer buffer = new StringBuffer();
         Iterator iter = s.iterator();
@@ -112,23 +112,23 @@ public class Utils {
         }
         return buffer.toString();
 	}
-	
+
 	public static void info(Object obj) {
 		if(Utils.logLevel > 2) {
 			System.out.println(obj);
 		}
 	}
-	
+
 	public static void warn(Object obj) {
 		if(Utils.logLevel > 1) {
 			System.out.println(obj);
 		}
 	}
-	
+
 	public static void error(Object obj) {
 		if(Utils.logLevel > 0) {
 			System.out.println(obj);
 		}
 	}
-	
+
 }

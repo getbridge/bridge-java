@@ -16,7 +16,7 @@ public class CommandSerializer extends SerializerBase<Map> {
 		super(class1);
 	}
 
-	public void serialize(Map value, JsonGenerator jsonGen, SerializerProvider serializerProvider) 
+	public void serialize(Map value, JsonGenerator jsonGen, SerializerProvider serializerProvider)
 	throws IOException, JsonProcessingException {
 		jsonGen.writeStartArray();
 		jsonGen.writeString("dict");

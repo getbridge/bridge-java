@@ -32,7 +32,7 @@ import com.flotype.bridge.Utils;
  *   so client disconnects and reconnects
  * - the incoming flow is higher than outgoing, so
  *   direct channel write method is not implemented
- * 
+ *
  * @author Vladimir Lysyy (mail@bobah.net)
  *
  */
@@ -59,7 +59,7 @@ public abstract class TcpClient implements Runnable {
   private AtomicLong bytesIn = new AtomicLong(0L);
 
   public TcpClient() {
-    
+
   }
 
   @PostConstruct
@@ -94,7 +94,7 @@ public abstract class TcpClient implements Runnable {
   public void send(ByteBuffer buffer) throws InterruptedException, IOException {
     if (!connected.get()) throw new IOException("not connected");
     synchronized (writeBuf) {
-    	
+
       // try direct write of what's in the buffer to free up space
       if (writeBuf.remaining() < buffer.remaining()) {
         writeBuf.flip();
@@ -131,7 +131,7 @@ public abstract class TcpClient implements Runnable {
    * @param buf
    */
   protected abstract void onRead(ByteBuffer buf) throws Exception;
-  
+
   /**
    * Override with something meaningful
    * @param buf
@@ -195,7 +195,7 @@ public abstract class TcpClient implements Runnable {
     } catch (Exception e) {
       Utils.error("unrecoverable error");
     }
-   
+
     Utils.warn("event loop terminated");
   }
 

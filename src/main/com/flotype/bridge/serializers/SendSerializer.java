@@ -18,7 +18,7 @@ public class SendSerializer extends SerializerBase<Map> {
 		super(class1);
 	}
 
-	public void serialize(Map value, JsonGenerator jsonGen, SerializerProvider serializerProvider) 
+	public void serialize(Map value, JsonGenerator jsonGen, SerializerProvider serializerProvider)
 	throws IOException, JsonProcessingException {
 		jsonGen.writeStartObject();
 		jsonGen.writeFieldName("destination");

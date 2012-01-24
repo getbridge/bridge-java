@@ -10,35 +10,35 @@ import java.util.concurrent.Executors;
 
 
 class Executor {
-	
+
 	// In the future this will be auto generated
-	
-	
-	
+
+
+
 	private Map<Service, Class<?>> serviceToClass;
 	private Map<String, Service> services;
-	
+
 	private ExecutorService tp;
 
 	protected Executor(){
 		serviceToClass = new HashMap<Service, Class<?>>();
 		services = new HashMap<String, Service>();
-		
+
 		tp = Executors.newFixedThreadPool(4);
 	}
-	
+
 	// TODO synchronize this. Being invoked from different consumer threads
 	protected void execute(final Request req){
 
 		String serviceName;
 		String methodName;
-		
+
 		List<String> pathchain = req.getPathchain();
 
 		if (pathchain.get(0).equals("system")) {
 			// Reserved for future
 		}
-		
+
 		if (pathchain.get(0).equals("channel")) {
 			serviceName = "channel:" + pathchain.get(1);
 			if(pathchain.size() == 3) {
@@ -59,12 +59,12 @@ class Executor {
 				methodName = "callback";
 			}
 		}
-		
+
 		Utils.info(serviceName + ":" + methodName + " called");
-		
-		
+
+
 		final Service service = services.get(serviceName);
-		
+
 		try {
 			final Method m = serviceToClass.get(service).getMethod(methodName, req.getParameterList());
 			tp.execute(new Runnable(){
@@ -83,9 +83,9 @@ class Executor {
 		} catch(NoSuchMethodException e){
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	protected void addService(String serviceName, Service service){
 		serviceToClass.put(service, service.getClass());
 		services.put(serviceName, service);
