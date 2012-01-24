@@ -11,34 +11,29 @@ import com.flotype.bridge.Reference;
 
 
 public class TestMain {
- 
-	
+
+
 	public static void main (String[] args) throws Exception {
-	
+
 		final Bridge bridge = new Bridge("localhost", 8090);
-		
+
 		bridge.onReady(new BridgeEventHandler() {
 			public void onReady() {
-				bridge.publishService("foo", new TestService());
-
-				TestServiceClient x = new TestServiceClient(bridge.getService("webpull"));
-				final ResizeServiceClient y = new ResizeServiceClient(bridge.getService("resize"));
-
-				Callback s = new Callback(){
-					public void callback(Reference x) {
-						y.resize(x, 2000, 2300, new Callback(){
-							public void callback(Reference file) {
-								FileServiceClient z = new FileServiceClient(file);
-								z.get_localpath(new Callback(){
-									public void callback(String result) {
-										System.out.println("RESULT::: " + result);
-									}
-								});
+				Reference chat = bridge.getService("chat");
+				(new ChatServiceClient(chat)).join(
+						"lobby", 
+						new Service(){
+							public void msg(String s, String t){
+								System.out.println(s + ":" + t);
 							}
-						});
-					}
-				};
-				x.fetchUrl("http://ericzhang.com/images/kb.jpg", s);
+						},
+						new Service(){
+							public void callback(Reference l, String name){
+								System.out.println("JOINED " + name);
+								(new ChatChannelClient(l)).msg("peter piper", "picked a peck of pickled peppers");
+							}
+						}
+				);
 
 			}	
 		});
