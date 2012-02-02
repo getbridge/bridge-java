@@ -89,9 +89,7 @@ public class Reference {
 		destination.setMethodName(methodName);
 		
 		sendBody.put("destination", destination);
-		sendBody.put("method", methodName);
 		sendBody.put("args", args);
-		// TODO
 		sendBody.put("exceptions", null);
 
 	
