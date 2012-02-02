@@ -10,7 +10,7 @@ public class SystemService extends Service {
 	}
 	public void hook_channel_handler(String channel, Reference handler, Reference callback){
 		String channelName = "channel:"+channel;
-		String key = handler.getPathchain().get(1);
+		String key = handler.getServiceName();
 		executor.addExistingServiceByKey(channelName, key);
 		(new ServiceClient(callback)).invokeRPC("callback", bridge.getChannel(channel), channel);
 	}
