@@ -11,12 +11,6 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 
-import com.flotype.bridge.serializers.ListSerializer;
-import com.flotype.bridge.serializers.MapSerializer;
-import com.flotype.bridge.serializers.ReferenceSerializer;
-import com.flotype.bridge.serializers.SendSerializer;
-import com.flotype.bridge.serializers.ServiceSerializer;
-import com.flotype.bridge.serializers.StringSerializer;
 
 
 
