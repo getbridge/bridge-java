@@ -13,6 +13,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 import org.codehaus.jackson.type.TypeReference;
 
+import com.flotype.bridge.serializers.ReferenceDeserializer;
+
 
 import java.util.Map;
 
@@ -29,11 +31,52 @@ public class Utils {
 
 		// Return a request object parsed by mapper
 		Map<String, Object> jsonObj = mapper.readValue(json, new TypeReference<Map<String, Object>>(){});
+		jsonObj = (Map<String, Object>) constructRefs(jsonObj);
+
 		List<Object> args = (List<Object>) jsonObj.get("args");
 
-		List<String> pathchain = (List<String>) ((Map<String, Object>) jsonObj.get("destination")).get("ref");
-		return new Request(pathchain, args);
+		return new Request(((Reference) jsonObj.get("destination")), args);
 	}
+	
+	
+	public static Object constructRefs(Map<String, Object> theMap){
+		Object pathchain;
+		if((pathchain = theMap.get("ref")) != null){
+			return ReferenceFactory.getFactory().generateReference((List<String>) pathchain);
+		}
+		
+		for(Map.Entry<String,Object> entry: (theMap).entrySet()){
+			
+			Object value = entry.getValue();
+			
+			if(value != null && value.getClass() == java.util.LinkedHashMap.class){
+				value = constructRefs((Map<String, Object>) value);
+			} else if (value != null && value.getClass() == ArrayList.class) {
+				value = constructRefs((List<Object>) value);
+			}
+			
+			theMap.put(entry.getKey(), value);
+		}
+		
+		return theMap;
+	}
+	
+	private static Object constructRefs(List<Object> list) {
+		
+		int idx = 0;
+		for(Object value : (List<Object>) list){
+			if(value != null && value.getClass() == java.util.LinkedHashMap.class){
+				value = constructRefs((Map<String, Object>) value);
+			} else if (value != null && value.getClass() == ArrayList.class) {
+				value = constructRefs((List<Object>) value);
+			}
+			list.set(idx, value);
+			idx++;
+		}
+
+		return list;
+	}
+
 
 	protected static String generateId() {
 		return Long.toHexString(Double.doubleToLongBits(Math.random()));
