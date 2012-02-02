@@ -15,6 +15,6 @@ public class TestService extends Service {
 	}
 
 	public void foo(Reference r){
-		System.out.println("Dat reference: " + r.getAddress());
+		System.out.println("Dat reference: ");
 	}
 }
