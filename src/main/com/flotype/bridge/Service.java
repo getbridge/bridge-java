@@ -7,10 +7,8 @@ public class Service {
 
 	// Create named reference
 	protected void createReference(String name) {
-		ArrayList<String> path = new ArrayList<String>();
-		path.add(ReferenceFactory.client.getConnectionId());
-		path.add(name);
-		reference = ReferenceFactory.getFactory().generateReference(path);
+		reference = ReferenceFactory.getFactory().generateReference();
+		reference.setServiceName(name);
 	}
 
 	// Create anonymous reference if there isn't one

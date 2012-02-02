@@ -18,47 +18,61 @@ import com.flotype.bridge.serializers.ServiceSerializer;
 
 public class Reference {
 
-	public static Reference Null = new Reference("null", null);
-
-	private String networkAddress;
-	private List<String> pathchain;
+	private List<String> pathchain ;
 	private Bridge client;
-	private String routingPrefix = "";
-
-	protected Reference(String address, Bridge client){
-		this(address, Arrays.asList(address.split("\\.")), client);
-	}
 
 	protected Reference(List<String> pathchain, Bridge client){
-		this(Utils.join(pathchain, "."), pathchain, client);
-	}
-
-	protected Reference(String address, List<String> pathchain, Bridge client){
-		setAddress(address);
-		this.pathchain = pathchain;
 		this.client = client;
-	}
 
-	protected void setAddress(String address) {
-		this.networkAddress = address;
+		if(pathchain != null){
+			this.pathchain = pathchain;
+		} else {
+			this.pathchain = Arrays.asList(new String[]{"", "", "", ""});
+			
+			this.setRoutingPrefix("client");
+			this.setRoutingId(client.getConnectionId());
+		}
+	}
+	
+	protected Reference(Reference other){
+		this(other.getPathchain(), other.client);
 	}
 
 	public List<String> getPathchain () {
 		return pathchain;
 	}
 
-	public String getAddress() {
-		return networkAddress;
-	}
-
 	protected void setRoutingPrefix (String prefix) {
-		routingPrefix = prefix;
+		pathchain.set(0, prefix);
+	}
+	
+	protected void setRoutingId (String id) {
+		pathchain.set(1, id);
+	}
+	
+	protected void setServiceName (String serviceName) {
+		pathchain.set(2, serviceName);
+	}
+	
+	protected void setMethodName (String methodName) {
+		pathchain.set(3, methodName);
 	}
 
-	public String getRoutingPrefix() {
-		return routingPrefix;
+	protected void getRoutingPrefix() {
+		pathchain.get(0);
 	}
-
+	
+	protected void getRoutingId() {
+		pathchain.get(1);
+	}
+	
+	protected void getServiceName() {
+		pathchain.get(2);
+	}
+	
+	protected void getMethodName() {
+		pathchain.get(3);
+	}
 	public void invokeRPC(String methodName, Object ... args) throws IOException {
 
 		ObjectMapper mapper = new ObjectMapper();

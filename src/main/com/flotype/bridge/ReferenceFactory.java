@@ -24,12 +24,16 @@ public class ReferenceFactory {
 		}
 	}
 
-	protected Reference generateReference(String value){
+	public Reference generateReference(List<String> value) {
 		return new Reference(value, client);
 	}
 
-	public Reference generateReference(List<String> value) {
-		return new Reference(value, client);
+	public Reference generateReference(Reference reference) {
+		return new Reference(reference);
+	}
+	
+	public Reference generateReference(){
+		return new Reference(null, client);
 	}
 
 }

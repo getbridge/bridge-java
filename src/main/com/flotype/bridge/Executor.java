@@ -4,16 +4,11 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
 class Executor {
-
-	// In the future this will be auto generated
-
-
 
 	private Map<Service, Class<?>> serviceToClass;
 	private Map<String, Service> services;
@@ -29,37 +24,11 @@ class Executor {
 
 	// TODO synchronize this. Being invoked from different consumer threads
 	protected void execute(final Request req){
-
-		String serviceName;
-		String methodName;
-
 		List<String> pathchain = req.getPathchain();
 
-		if (pathchain.get(0).equals("system")) {
-			// Reserved for future
-		}
-
-		if (pathchain.get(0).equals("channel")) {
-			serviceName = "channel:" + pathchain.get(1);
-			if(pathchain.size() == 3) {
-				// connectionId.channel.channelname.method
-				methodName = pathchain.get(2);
-			} else {
-				// connectionId.channel.channelname
-				methodName = "callback";
-			}
-
-		} else {
-			serviceName = pathchain.get(0);
-			if(pathchain.size() == 3) {
-				// connectionId.service.method
-				methodName = pathchain.get(1);
-			} else {
-				// connectionId.channel.channelname
-				methodName = "callback";
-			}
-		}
-
+		String serviceName = pathchain.get(2);
+		String methodName = pathchain.get(3);
+		
 		Utils.info(serviceName + ":" + methodName + " called");
 
 
