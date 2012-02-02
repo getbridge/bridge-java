@@ -67,6 +67,7 @@ public class Bridge {
 		Reference result = new Reference(null, this);
 		result.setRoutingPrefix("channel");
 		result.setRoutingId(channelName);
+		result.setServiceName("channel:" + channelName);
 		return result;
 	}
 
