@@ -14,7 +14,7 @@ public class TestMain {
 
 		bridge.onReady(new BridgeEventHandler() {
 			public void onReady() {
-				Reference chat = bridge.getService("chat");
+				Reference chat = bridge.getService("chatserver");
 				(new ChatServiceClient(chat)).join(
 						"lobby", 
 						new Service(){
