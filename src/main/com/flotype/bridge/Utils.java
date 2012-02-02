@@ -28,13 +28,10 @@ public class Utils {
 		ObjectMapper mapper = new ObjectMapper();
 
 		// Return a request object parsed by mapper
-		ArrayList<Object> jsonObj = mapper.readValue(json, new TypeReference<ArrayList<Object>>(){});
-		ArrayList<Object> deserArgs = new ArrayList<Object>();
+		Map<String, Object> jsonObj = mapper.readValue(json, new TypeReference<Map<String, Object>>(){});
+		List<Object> args = (List<Object>) jsonObj.get("args");
 
-		Map<String, Object> data = (Map<String, Object>) jsonObj.get(1);
-		ArrayList<ArrayList<Object>> args = ((ArrayList<ArrayList<ArrayList<Object>>>) data.get("args")).get(1);
-
-		List<String> pathchain = (ArrayList<String>)((Map<String, Object>)((ArrayList<Object>) data.get("destination")).get(1)).get("ref");
+		List<String> pathchain = (List<String>) ((Map<String, Object>) jsonObj.get("destination")).get("ref");
 		return new Request(pathchain, args);
 	}
 
@@ -42,55 +39,14 @@ public class Utils {
 		return Long.toHexString(Double.doubleToLongBits(Math.random()));
 	}
 
-	protected static Class<?> classFromString(String type) {
-		Class<?> theClass = java.lang.Object.class;
-		if(type.equals("list")){
-			theClass = java.util.ArrayList.class;
-		} else if (type.equals("dict")) {
-			theClass = java.util.HashMap.class;
-		} else if (type.equals("str")) {
-			theClass = java.lang.String.class;
-		} else if (type.equals("float")) {
-			// All numbers are floats now
-			theClass = java.lang.Float.class;
-		} else if (type.equals("none")){
-			theClass = java.lang.Object.class;
-		} else if (type.equals("now")) {
-			theClass = Reference.class;
+	protected static Object deserialize(Object value) {
+		Class<?> klass = value.getClass();
+		if (klass == Double.class || klass == Integer.class){
+			// All numbers are floats
+			return ((Number) value).floatValue();
+		} else {
+			return value;
 		}
-		return theClass;
-	}
-
-	// TODO: unit test
-	protected static Object deserialize(String type, Object value) {
-		Object newValue = value;
-		if(type.equals("list")){
-			List<Object> theList = new ArrayList<Object>();
-			for(List<Object> item : (List<List>) value){
-				String type1 = (String) item.get(0);
-				Object value1 = item.get(1);
-				theList.add(Utils.deserialize(type1 , value1));
-			}
-
-			newValue = theList;
-		} else if (type.equals("dict")) {
-			Map<String, Object> theMap = new HashMap<String, Object>();
-			for(Map.Entry<String, List<?>> entry: ((Map<String, List<?>>) value).entrySet()){
-				String type1 = (String) entry.getValue().get(0);
-				Object value1 = entry.getValue().get(1);
-				theMap.put(entry.getKey(), Utils.deserialize(type1 , value1));
-			}
-
-			newValue = theMap;
-		} else if (type.equals("now")) {
-			Map<String, List<String>> refMap = (Map<String, List<String>>) value;
-			List<String> path = refMap.get("ref");
-			Reference theReference = ReferenceFactory.getFactory().generateReference(path);
-			newValue = theReference;
-		} else if (type.equals("float")){
-			newValue = ((Number) value).floatValue();
-		}
-		return newValue;
 	}
 
 	protected static byte[] intToByteArray(int value) {
