@@ -13,8 +13,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 import org.codehaus.jackson.type.TypeReference;
 
-import com.flotype.bridge.serializers.ReferenceDeserializer;
-
 
 import java.util.Map;
 
