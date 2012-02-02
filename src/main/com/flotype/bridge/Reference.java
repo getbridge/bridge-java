@@ -58,20 +58,20 @@ public class Reference {
 		pathchain.set(3, methodName);
 	}
 
-	protected void getRoutingPrefix() {
-		pathchain.get(0);
+	protected String getRoutingPrefix() {
+		return pathchain.get(0);
 	}
 	
-	protected void getRoutingId() {
-		pathchain.get(1);
+	protected String getRoutingId() {
+		return pathchain.get(1);
 	}
 	
-	protected void getServiceName() {
-		pathchain.get(2);
+	protected String getServiceName() {
+		return pathchain.get(2);
 	}
 	
-	protected void getMethodName() {
-		pathchain.get(3);
+	protected String getMethodName() {
+		return pathchain.get(3);
 	}
 	public void invokeRPC(String methodName, Object ... args) throws IOException {
 
