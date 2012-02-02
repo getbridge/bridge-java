@@ -14,19 +14,22 @@ public class TestMain {
 
 		bridge.onReady(new BridgeEventHandler() {
 			public void onReady() {
-				Reference chatServiceRef = bridge.getService("chatserver");
-				
-				(new ChatServiceClient(chatServiceRef)).join("lobby", new Callback() {
-					public void msg(String message, String person){
-						System.out.println(message);
-					}
-				}, new Callback(){
-					public void callback(Reference roomRef, String roomName){
-						System.out.println("Joined " + roomName);
-					}
-				});
-				
-				
+				Reference chat = bridge.getService("chat");
+				(new ChatServiceClient(chat)).join(
+						"lobby", 
+						new Service(){
+							public void msg(String s, String t){
+								System.out.println(s + ":" + t);
+							}
+						},
+						new Service(){
+							public void callback(Reference l, String name){
+								System.out.println("JOINED " + name);
+								(new ChatChannelClient(l)).msg("peter piper", "picked a peck of pickled peppers");
+							}
+						}
+				);
+
 			}
 		});
 	}
