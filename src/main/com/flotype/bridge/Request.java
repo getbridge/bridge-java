@@ -7,14 +7,14 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 public class Request {
 
-	private List<String> pathchain;
+	private Reference reference;
 
 	private Class<?>[] parameterList;
 	private Object[] argumentsList;
 
-	public Request(@JsonProperty("pathchain") List<String> pathchain, @JsonProperty("args") List<Object> args) {
+	public Request(@JsonProperty("destination") Reference reference, @JsonProperty("args") List<Object> args) {
 
-		this.pathchain = pathchain;
+		this.reference = reference;
 
 		// null check
 		if(null == args || args.size() < 1){
@@ -45,8 +45,8 @@ public class Request {
 
 	}
 
-	public List<String> getPathchain() {
-		return pathchain;
+	public Reference getReference() {
+		return reference;
 	}
 
 	public Class<?>[] getParameterList(){
