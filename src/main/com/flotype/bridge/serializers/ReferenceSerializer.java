@@ -1,6 +1,8 @@
 package com.flotype.bridge.serializers;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonProcessingException;
@@ -20,29 +22,15 @@ public class ReferenceSerializer extends SerializerBase<Reference> {
 
 	public void serialize(Reference value, JsonGenerator jsonGen, SerializerProvider serializerProvider)
 	throws IOException, JsonProcessingException {
+		
+		Map<String, Object> obj = null;
 
-		if(value == Reference.Null) {
-			jsonGen.writeStartArray();
-			jsonGen.writeString("none");
-			jsonGen.writeNull();
-			jsonGen.writeEndArray();
-		} else {
-			jsonGen.writeStartArray();
-			jsonGen.writeString("now");
-			jsonGen.writeStartObject();
-			jsonGen.writeFieldName("ref");
-			jsonGen.writeStartArray();
-			String prefix = value.getRoutingPrefix();
-			if(prefix.length() > 0) {
-				jsonGen.writeString(prefix);
-			}
-			for(String path : value.getPathchain()) {
-				jsonGen.writeString(path);
-			}
-			jsonGen.writeEndArray();
-			jsonGen.writeEndObject();
-			jsonGen.writeEndArray();
+		if(value != null) {
+			obj = new HashMap<String, Object>();
+			obj.put("ref", value.getPathchain());
 		}
+		
+		serializerProvider.defaultSerializeValue(obj, jsonGen);
 
 	}
 }
