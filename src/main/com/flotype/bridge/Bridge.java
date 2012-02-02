@@ -1,5 +1,6 @@
 package com.flotype.bridge;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -222,8 +223,7 @@ public class Bridge {
 		@Override protected void onConnected() throws Exception {
 			Utils.info("connected to tcp server");
 			Map<String, Object> connectBody = new HashMap<String, Object>();
-			connectBody.put("sessionid", null);
-			connectBody.put("secret", null);
+			connectBody.put("session", Arrays.asList(new String[]{"0","0"}));
 			
 			Bridge.this.sendCommand("CONNECT", connectBody);
 		}
