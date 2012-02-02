@@ -12,12 +12,12 @@ public class Request {
 	private Class<?>[] parameterList;
 	private Object[] argumentsList;
 
-	public Request(@JsonProperty("pathchain") List<String> pathchain, @JsonProperty("args") List<ArrayList<Object>> regularArguments) {
+	public Request(@JsonProperty("pathchain") List<String> pathchain, @JsonProperty("args") List<Object> args) {
 
 		this.pathchain = pathchain;
 
 		// null check
-		if(null == regularArguments || regularArguments.size() < 1){
+		if(null == args || args.size() < 1){
 			parameterList = null;
 			argumentsList = null;
 		}
@@ -26,22 +26,17 @@ public class Request {
 		//List<ArrayList<Object>> regularArguments = (ArrayList<ArrayList<Object>>) signature.get(0);
 
 
-		int len = regularArguments.size();
+		int len = args.size();
 		parameterList = new Class<?>[len];
 		argumentsList = new Object[len];
 
 		int pos = 0;
 
-		for(ArrayList<Object> param : regularArguments){
-			// First element of the list is type. Second element of the list is value. We want type.
-			String type = (String) param.get(0);
-			Object value = param.get(1);
-
-			Class<?> theClass = Utils.classFromString(type);
+		for(Object arg : args){
+			Class<?> theClass = arg.getClass();
 			parameterList[pos] = theClass;
 
-			// Ugly hack. Can only return one thing, so deserialize returns deserializedValue while also populating refList
-			Object deserializedValue = Utils.deserialize(type, value);
+			Object deserializedValue = Utils.deserialize(arg);
 			argumentsList[pos] = deserializedValue;
 
 			pos++;
