@@ -79,7 +79,7 @@ public class Bridge {
 	public void publishService(String name, Service service, Service callback) {
 		executor.addService(name, service);
 		service.createReference(name);
-		joinWorkerPool(name, service, callback);
+		joinWorkerPool(name, callback);
 	}
 
 	protected void publishService(Service service){
@@ -88,16 +88,13 @@ public class Bridge {
 		executor.addService(name, service);
 	}
 
-	public void joinWorkerPool(String name, Service handler, Service callback) {
+	public void joinWorkerPool(String name, Service callback) {
 
 		Map<String, Object> joinWorkerPoolBody = new HashMap<String, Object>();
 
 		joinWorkerPoolBody.put("name", name);
-		joinWorkerPoolBody.put("handler", handler.getReference());
 
-		if(callback == null) {
-			joinWorkerPoolBody.put("callback", null);
-		} else {
+		if(callback != null) {
 			joinWorkerPoolBody.put("callback", callback.getReference());
 		}
 
@@ -114,9 +111,7 @@ public class Bridge {
 		joinChannelBody.put("name", name);
 		joinChannelBody.put("handler", handler.getReference());
 
-		if(callback == null) {
-			joinChannelBody.put("callback", null);
-		} else {
+		if(callback != null) {
 			joinChannelBody.put("callback", callback.getReference());
 		}
 

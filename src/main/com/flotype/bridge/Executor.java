@@ -1,6 +1,7 @@
 package com.flotype.bridge;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,10 @@ class Executor {
 	protected void addService(String serviceName, Service service){
 		serviceToClass.put(service, service.getClass());
 		services.put(serviceName, service);
+	}
+	
+	protected Service getService(String serviceName) {
+		return services.get(serviceName);
 	}
 
 	public void addExistingServiceByKey(String channelName, String key) {

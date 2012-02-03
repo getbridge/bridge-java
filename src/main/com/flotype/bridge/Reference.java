@@ -27,7 +27,7 @@ public class Reference {
 		if(pathchain != null){
 			this.pathchain = pathchain;
 		} else {
-			this.pathchain = Arrays.asList(new String[]{"", "", "", ""});
+			this.pathchain = Arrays.asList(new String[]{"", "", ""});
 			
 			this.setRoutingPrefix("client");
 			this.setRoutingId(client.getConnectionId());
@@ -55,7 +55,11 @@ public class Reference {
 	}
 	
 	protected void setMethodName (String methodName) {
-		pathchain.set(3, methodName);
+		if(pathchain.size() == 4) {
+			pathchain.set(3, methodName);
+		} else {
+			pathchain.add(3, methodName);
+		}
 	}
 
 	protected String getRoutingPrefix() {
@@ -71,7 +75,11 @@ public class Reference {
 	}
 	
 	protected String getMethodName() {
-		return pathchain.get(3);
+		if(pathchain.size() == 4) {
+			return pathchain.get(3);	
+		} else {
+			return null;
+		}
 	}
 	public void invokeRPC(String methodName, Object ... args) throws IOException {
 

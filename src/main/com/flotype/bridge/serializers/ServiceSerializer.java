@@ -1,6 +1,8 @@
 package com.flotype.bridge.serializers;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonProcessingException;
@@ -23,6 +25,18 @@ public class ServiceSerializer extends SerializerBase<Service> {
 	public void serialize(Service value, JsonGenerator jsonGen, SerializerProvider serializerProvider)
 	throws IOException, JsonProcessingException {
 		value.ensureReference();
-		serializerProvider.defaultSerializeValue(value.getReference(), jsonGen);
+		
+		Reference ref = value.getReference();
+		
+		Map<String, Object> obj = null;
+
+		if(value != null) {
+			obj = new HashMap<String, Object>();
+			obj.put("ref", ref.getPathchain());
+			obj.put("operations", value.getMethodNames());
+		}
+		
+		serializerProvider.defaultSerializeValue(obj, jsonGen);
+		
 	}
 }

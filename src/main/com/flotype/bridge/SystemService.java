@@ -1,5 +1,7 @@
 package com.flotype.bridge;
 
+import java.io.IOException;
+
 public class SystemService extends Service {
 	Executor executor;
 	private Bridge bridge;
@@ -13,6 +15,10 @@ public class SystemService extends Service {
 		String key = handler.getServiceName();
 		executor.addExistingServiceByKey(channelName, key);
 		(new ServiceClient(callback)).invokeRPC("callback", bridge.getChannel(channel), channel);
+	}
+	
+	public void getservice(String name, Reference callback) throws IOException {
+		callback.invokeRPC("callback", executor.getService(name));
 	}
 
 }
