@@ -98,7 +98,6 @@ public class Reference {
 		
 		sendBody.put("destination", destination);
 		sendBody.put("args", args);
-		sendBody.put("exceptions", null);
 
 	
 
