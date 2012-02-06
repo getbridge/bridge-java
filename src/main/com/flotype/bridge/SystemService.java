@@ -20,5 +20,10 @@ public class SystemService extends Service {
 	public void getservice(String name, Reference callback) throws IOException {
 		callback.invokeRPC("callback", executor.getService(name));
 	}
+	
+	public void remoteError(String error) {
+		System.err.println(error);
+		bridge.eventHandler.onRemoteError(error);
+	}
 
 }
