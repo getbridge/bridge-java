@@ -1,7 +1,8 @@
 package com.flotype.bridge;
 
-public abstract class BridgeEventHandler {
+public class BridgeEventHandler {
 
-	public abstract void onReady();
-
+	public void onReady() {}
+	public void onRemoteError(String msg) {}
+	
 }
