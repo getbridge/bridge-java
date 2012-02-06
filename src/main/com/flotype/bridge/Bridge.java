@@ -29,19 +29,34 @@ public class Bridge {
 
 
 	public Bridge() throws IOException{
-		this(Utils.DEFAULT_HOST, Utils.DEFAULT_PORT);
+		this(Utils.DEFAULT_HOST, Utils.DEFAULT_PORT, Utils.DEFAULT_EVENT_HANDLER);
 	}
 
 	public Bridge(String host) throws IOException{
-		this(host, Utils.DEFAULT_PORT);
+		this(host, Utils.DEFAULT_PORT, Utils.DEFAULT_EVENT_HANDLER);
 	}
 
 	public Bridge(String host, Integer port) throws IOException{
+		this(host, port, Utils.DEFAULT_EVENT_HANDLER);
+	}
+	
+	public Bridge(BridgeEventHandler eventHandler) throws IOException{
+		this(Utils.DEFAULT_HOST, Utils.DEFAULT_PORT, eventHandler);
+	}
+
+	public Bridge(String host, BridgeEventHandler eventHandler) throws IOException{
+		this(host, Utils.DEFAULT_PORT, eventHandler);
+	}
+
+	public Bridge(String host, Integer port, BridgeEventHandler eventHandler) throws IOException{
+		this.eventHandler = eventHandler;
+		
 		// Setup TCP
 		connection = new Bridge.TCPConnection();
 		connection.setAddress(new InetSocketAddress(host, port));
 		this.connect();
 	}
+
 
 	private boolean connect() throws IOException{
 		try {
@@ -161,7 +176,7 @@ public class Bridge {
 		}
 	}
 
-	public void onReady(BridgeEventHandler eventHandler) {
+	public void setEventHandler(BridgeEventHandler eventHandler) {
 		this.eventHandler = eventHandler;
 		if(connection.isConnected()) {
 			eventHandler.onReady();
@@ -197,10 +212,7 @@ public class Bridge {
 					// Client not handshaken
 					String[] ids = (new String(body)).split("\\|");
 					Bridge.this.setConnectionId(ids[0]);
-
-					if (Bridge.this.eventHandler != null) {
-						Bridge.this.eventHandler.onReady();
-					}
+					Bridge.this.eventHandler.onReady();	
 
 				} else {
 					// Parse as normal
