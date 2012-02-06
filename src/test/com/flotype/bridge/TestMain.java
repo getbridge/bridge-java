@@ -12,7 +12,7 @@ public class TestMain {
 
 		final Bridge bridge = new Bridge("localhost", 8090);
 
-		bridge.onReady(new BridgeEventHandler() {
+		bridge.setEventHandler(new BridgeEventHandler() {
 			public void onReady() {
 				Reference chat = bridge.getService("chatserver");
 				(new ChatServiceClient(chat)).join(
