@@ -19,7 +19,8 @@ public class Bridge {
 
 
 	private TcpClient connection;
-	private String connectionId;
+	
+	private String clientId;
 
 	// Secret used for reconnects
 	private String secret;
@@ -183,12 +184,12 @@ public class Bridge {
 		}
 	}
 
-	public void setConnectionId(String connectionId) {
-		this.connectionId = connectionId;
+	protected void setClientId(String clientId) {
+		this.clientId = clientId;
 	}
 
-	public String getConnectionId () {
-		return connectionId;
+	public String getClientId () {
+		return this.clientId;
 	}
 
 	class TCPConnection extends TcpClient {
@@ -208,10 +209,11 @@ public class Bridge {
 				Utils.info("Message = " + new String(body));
 
 
-				if(Bridge.this.getConnectionId() == null) {
+				if(Bridge.this.getClientId() == null) {
 					// Client not handshaken
 					String[] ids = (new String(body)).split("\\|");
-					Bridge.this.setConnectionId(ids[0]);
+					Bridge.this.setClientId(ids[0]);
+					Bridge.this.setSecret(ids[1]);
 					Bridge.this.eventHandler.onReady();	
 
 				} else {
@@ -223,7 +225,7 @@ public class Bridge {
 		}
 		@Override protected void onDisconnected() {
 			// No reconnect system yet so new connectionId every connection
-			Bridge.this.setConnectionId(null);
+			Bridge.this.setClientId(null);
 			Utils.warn("disconnected to tcp server");
 
 		}
@@ -235,5 +237,13 @@ public class Bridge {
 			Bridge.this.sendCommand("CONNECT", connectBody);
 		}
 
+	}
+
+	private void setSecret(String secret) {
+		this.secret = secret;
+	}
+	
+	private String getSecret() {
+		return this.secret;
 	}
 }

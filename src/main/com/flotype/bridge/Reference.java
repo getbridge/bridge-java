@@ -30,7 +30,7 @@ public class Reference {
             this.pathchain.add("");
 
             this.setRoutingPrefix("client");
-            this.setRoutingId(client.getConnectionId());
+            this.setRoutingId(client.getClientId());
         }
     }
 

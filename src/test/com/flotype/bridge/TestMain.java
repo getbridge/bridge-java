@@ -1,6 +1,5 @@
 package com.flotype.bridge;
 
-import com.flotype.bridge.Callback;
 import com.flotype.bridge.Bridge;
 import com.flotype.bridge.Reference;
 

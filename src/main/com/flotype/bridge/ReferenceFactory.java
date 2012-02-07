@@ -1,6 +1,5 @@
 package com.flotype.bridge;
 import java.util.List;
-import java.util.Map;
 
 
 public class ReferenceFactory {
@@ -9,7 +8,7 @@ public class ReferenceFactory {
 	static Bridge client;
 
 	protected ReferenceFactory(Bridge client) {
-		this.client = client;
+		ReferenceFactory.client = client;
 	}
 
 	protected static void createFactory(Bridge client){
