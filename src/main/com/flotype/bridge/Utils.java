@@ -19,7 +19,8 @@ public class Utils {
     public static final BridgeEventHandler DEFAULT_EVENT_HANDLER = new BridgeEventHandler();
     public static int logLevel = 5;
 
-    protected static Request deserialize(byte[] json)
+    @SuppressWarnings("unchecked")
+	protected static Request deserialize(byte[] json)
         throws JsonParseException, JsonMappingException, IOException {
 
         // Create object mapper
@@ -35,7 +36,8 @@ public class Utils {
         return new Request(((Reference) jsonObj.get("destination")), args);
     }
 
-    public static Object constructRefs(Map<String, Object> theMap) {
+    @SuppressWarnings("unchecked")
+	public static Object constructRefs(Map<String, Object> theMap) {
         Object pathchain;
         if ((pathchain = theMap.get("ref")) != null) {
             return ReferenceFactory.getFactory().generateReference(
@@ -59,7 +61,8 @@ public class Utils {
         return theMap;
     }
 
-    private static Object constructRefs(List<Object> list) {
+    @SuppressWarnings("unchecked")
+	private static Object constructRefs(List<Object> list) {
 
         int idx = 0;
         for (Object value : list) {
@@ -97,7 +100,7 @@ public class Utils {
 
     protected static String join(Collection<String> s, String delimiter) {
         StringBuffer buffer = new StringBuffer();
-        Iterator iter = s.iterator();
+        Iterator<String> iter = s.iterator();
         while (iter.hasNext()) {
             buffer.append(iter.next());
             if (iter.hasNext()) {

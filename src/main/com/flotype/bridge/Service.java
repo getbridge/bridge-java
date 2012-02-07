@@ -1,7 +1,6 @@
 package com.flotype.bridge;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 
 public class Service {
 	private Reference reference = null;

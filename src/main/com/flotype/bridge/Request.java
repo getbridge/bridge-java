@@ -1,8 +1,5 @@
 package com.flotype.bridge;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
 import org.codehaus.jackson.annotate.JsonProperty;
 
 public class Request {
