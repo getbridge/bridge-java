@@ -30,15 +30,17 @@ public class Bridge {
 	// Options
 	String host;
 	Integer port;
+	String apiKey;
 	BridgeEventHandler eventHandler = null;
 
 	public Bridge() {
 		
 	}
 	
-	public Bridge(String host, Integer port, BridgeEventHandler eventHandler) {	
+	public Bridge(String host, Integer port, String apiKey, BridgeEventHandler eventHandler) {	
 		this.host = host;
 		this.port = port;
+		this.apiKey = apiKey;
 		this.eventHandler = eventHandler;
 	}
 
@@ -175,6 +177,11 @@ public class Bridge {
 		return this;
 	}
 	
+	public Bridge setApiKey(String apiKey) {
+		this.apiKey = apiKey;
+		return this;
+	}
+	
 	public Bridge setEventHandler(BridgeEventHandler eventHandler) {
 		this.eventHandler = eventHandler;
 		return this;
@@ -229,6 +236,7 @@ public class Bridge {
 			Utils.info("connected to tcp server");
 			Map<String, Object> connectBody = new HashMap<String, Object>();
 			connectBody.put("session", Arrays.asList(new String[]{"0","0"}));
+			connectBody.put("api_key", Bridge.this.apiKey);
 			
 			Bridge.this.sendCommand("CONNECT", connectBody);
 		}
