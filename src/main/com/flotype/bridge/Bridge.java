@@ -26,40 +26,28 @@ public class Bridge {
 	private String secret;
 
 	Executor executor = new Executor();
+	
+	// Options
+	String host;
+	Integer port;
 	BridgeEventHandler eventHandler = null;
 
-
-	public Bridge() throws IOException{
-		this(Utils.DEFAULT_HOST, Utils.DEFAULT_PORT, Utils.DEFAULT_EVENT_HANDLER);
-	}
-
-	public Bridge(String host) throws IOException{
-		this(host, Utils.DEFAULT_PORT, Utils.DEFAULT_EVENT_HANDLER);
-	}
-
-	public Bridge(String host, Integer port) throws IOException{
-		this(host, port, Utils.DEFAULT_EVENT_HANDLER);
+	public Bridge() {
+		
 	}
 	
-	public Bridge(BridgeEventHandler eventHandler) throws IOException{
-		this(Utils.DEFAULT_HOST, Utils.DEFAULT_PORT, eventHandler);
-	}
-
-	public Bridge(String host, BridgeEventHandler eventHandler) throws IOException{
-		this(host, Utils.DEFAULT_PORT, eventHandler);
-	}
-
-	public Bridge(String host, Integer port, BridgeEventHandler eventHandler) throws IOException{
+	public Bridge(String host, Integer port, BridgeEventHandler eventHandler) {	
+		this.host = host;
+		this.port = port;
 		this.eventHandler = eventHandler;
+	}
+
+	public boolean connect() {
 		
 		// Setup TCP
 		connection = new Bridge.TCPConnection();
 		connection.setAddress(new InetSocketAddress(host, port));
-		this.connect();
-	}
-
-
-	private boolean connect() throws IOException{
+		
 		try {
 			connection.start();
 		} catch (IOException e) {
@@ -177,11 +165,19 @@ public class Bridge {
 		}
 	}
 
-	public void setEventHandler(BridgeEventHandler eventHandler) {
+	public Bridge setHost(String host) {
+		this.host = host;
+		return this;
+	}
+	
+	public Bridge setPort(Integer port) {
+		this.port = port;
+		return this;
+	}
+	
+	public Bridge setEventHandler(BridgeEventHandler eventHandler) {
 		this.eventHandler = eventHandler;
-		if(connection.isConnected()) {
-			eventHandler.onReady();
-		}
+		return this;
 	}
 
 	protected void setClientId(String clientId) {
