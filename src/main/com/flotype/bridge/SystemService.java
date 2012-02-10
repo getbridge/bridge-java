@@ -18,7 +18,13 @@ public class SystemService extends Service {
 	}
 	
 	public void getservice(String name, Reference callback) throws IOException {
-		callback.invokeRPC("callback", executor.getService(name));
+		Service service = executor.getService(name);
+		if(service != null) {
+			callback.invokeRPC("callback", service);
+		} else {
+			callback.invokeRPC("callback", null, "Cannot find service " + name);
+		}
+		
 	}
 	
 	public void remoteError(String error) {
