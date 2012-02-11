@@ -6,8 +6,13 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 class Executor {
+	
+	private static Log log = LogFactory.getLog(Executor.class);
 
 	private Map<Service, Class<?>> serviceToClass;
 	private Map<String, Service> services;
@@ -28,7 +33,7 @@ class Executor {
 		String serviceName = reference.getServiceName();
 		String methodName = reference.getMethodName();
 
-		Utils.info(serviceName + ":" + methodName + " called");
+		log.info(serviceName + ":" + methodName + " called");
 
 
 		final Service service = services.get(serviceName);
