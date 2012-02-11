@@ -7,6 +7,8 @@ import java.util.Map;
 import java.net.*;
 import java.nio.ByteBuffer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
@@ -17,6 +19,7 @@ import net.bobah.nio.TcpClient;
 
 public class Bridge {
 
+	private static Log log = LogFactory.getLog(Bridge.class);
 
 	private TcpClient connection;
 	
@@ -146,7 +149,7 @@ public class Bridge {
 
 	protected void write(String jsonStr) {
 		try {
-			Utils.info("Sending JSON = " +  jsonStr);
+			log.info("Sending JSON = " +  jsonStr);
 			byte[] jsonBytes = jsonStr.getBytes();
 
 			ByteBuffer data = ByteBuffer.allocate(jsonBytes.length + 4);
@@ -202,7 +205,7 @@ public class Bridge {
 					throw new Exception("Expected message length not equal to buffer size");
 				}
 
-				Utils.info("Message = " + new String(body));
+				log.info("Message = " + new String(body));
 
 
 				if(Bridge.this.getClientId() == null) {
@@ -222,11 +225,11 @@ public class Bridge {
 		@Override protected void onDisconnected() {
 			// No reconnect system yet so new connectionId every connection
 			Bridge.this.setClientId(null);
-			Utils.warn("disconnected to tcp server");
+			log.warn("disconnected to tcp server");
 
 		}
 		@Override protected void onConnected() throws Exception {
-			Utils.info("connected to tcp server");
+			log.info("connected to tcp server");
 			Map<String, Object> connectBody = new HashMap<String, Object>();
 			connectBody.put("session", Arrays.asList(new String[]{"0","0"}));
 			
