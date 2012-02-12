@@ -39,7 +39,7 @@ class Executor {
 		final Service service = services.get(serviceName);
 		
 		if(service == null){
-			Utils.error("No such service: " + serviceName);
+			log.error("No such service: " + serviceName);
 			return;
 		}
 
