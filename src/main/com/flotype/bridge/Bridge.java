@@ -84,6 +84,12 @@ public class Bridge {
 	}
 
 	public void publishService(String name, Service service, Service callback) {
+		
+		if(name.equals("system")) {
+			log.error("Invalid service name: " + name);
+			return;
+		}
+		
 		executor.addService(name, service);
 		service.createReference(name);
 		joinWorkerPool(name, callback);
