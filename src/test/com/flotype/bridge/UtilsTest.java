@@ -1,4 +1,4 @@
-package com.flotype.bridge.tests;
+package com.flotype.bridge;
 
 import junit.framework.TestCase;
 

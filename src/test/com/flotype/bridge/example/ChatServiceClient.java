@@ -1,4 +1,8 @@
-package com.flotype.bridge;
+package com.flotype.bridge.example;
+
+import com.flotype.bridge.Reference;
+import com.flotype.bridge.Service;
+import com.flotype.bridge.ServiceClient;
 
 public class ChatServiceClient extends ServiceClient {
 

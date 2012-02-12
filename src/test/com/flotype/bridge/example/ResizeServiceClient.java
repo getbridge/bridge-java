@@ -1,4 +1,4 @@
-package com.flotype.bridge;
+package com.flotype.bridge.example;
 
 import com.flotype.bridge.Callback;
 import com.flotype.bridge.Reference;
