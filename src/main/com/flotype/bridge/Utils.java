@@ -97,16 +97,4 @@ public class Utils {
         return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16),
             (byte) (value >>> 8), (byte) value };
     }
-
-    protected static String join(Collection<String> s, String delimiter) {
-        StringBuffer buffer = new StringBuffer();
-        Iterator<String> iter = s.iterator();
-        while (iter.hasNext()) {
-            buffer.append(iter.next());
-            if (iter.hasNext()) {
-                buffer.append(delimiter);
-            }
-        }
-        return buffer.toString();
-    }
 }
