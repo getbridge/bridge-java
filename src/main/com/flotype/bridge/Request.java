@@ -33,8 +33,8 @@ public class Request {
 			Class<?> theClass = arg.getClass();
 			parameterList[pos] = theClass;
 
-			Object deserializedValue = Utils.deserialize(arg);
-			argumentsList[pos] = deserializedValue;
+			Object normalizedValue = Utils.normalizeValue(arg);
+			argumentsList[pos] = normalizedValue;
 
 			pos++;
 		}

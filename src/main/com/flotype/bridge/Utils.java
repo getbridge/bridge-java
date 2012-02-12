@@ -83,7 +83,7 @@ public class Utils {
         return Long.toHexString(Double.doubleToLongBits(Math.random()));
     }
 
-    protected static Object deserialize(Object value) {
+    protected static Object normalizeValue(Object value) {
         Class<?> klass = value.getClass();
         if (klass == Double.class || klass == Integer.class) {
             // All numbers are floats
