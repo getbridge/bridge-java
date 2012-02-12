@@ -33,7 +33,7 @@ public class SystemService extends Service {
 	}
 	
 	public void remoteError(String error) {
-		log.error(error);
+		log.warn(error);
 		bridge.eventHandler.onRemoteError(error);
 	}
 
