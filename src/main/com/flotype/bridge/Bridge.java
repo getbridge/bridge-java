@@ -39,10 +39,11 @@ public class Bridge {
 		ReferenceFactory.createFactory(this);
 	}
 	
-	public Bridge(String host, Integer port, BridgeEventHandler eventHandler) {	
-		this.host = host;
-		this.port = port;
-		this.eventHandler = eventHandler;
+	public Bridge(String host, Integer port, BridgeEventHandler eventHandler) {
+		this();
+		this.setHost(host);
+		this.setPort(port);
+		this.setEventHandler(eventHandler);
 	}
 
 	public boolean connect() {
