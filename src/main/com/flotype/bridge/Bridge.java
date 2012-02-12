@@ -36,7 +36,7 @@ public class Bridge {
 	BridgeEventHandler eventHandler = null;
 
 	public Bridge() {
-		
+		ReferenceFactory.createFactory(this);
 	}
 	
 	public Bridge(String host, Integer port, BridgeEventHandler eventHandler) {	
@@ -58,7 +58,6 @@ public class Bridge {
 			return false;
 		}
 
-		ReferenceFactory.createFactory(this);
 		executor.addService("system", new SystemService(this, executor));
 		return true;
 	}
