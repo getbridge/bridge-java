@@ -83,7 +83,7 @@ public class Utils {
         return Long.toHexString(Double.doubleToLongBits(Math.random()));
     }
 
-    protected static Object deserialize(Object value) {
+    protected static Object normalizeValue(Object value) {
         Class<?> klass = value.getClass();
         if (klass == Double.class || klass == Integer.class) {
             // All numbers are floats
@@ -97,35 +97,4 @@ public class Utils {
         return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16),
             (byte) (value >>> 8), (byte) value };
     }
-
-    protected static String join(Collection<String> s, String delimiter) {
-        StringBuffer buffer = new StringBuffer();
-        Iterator<String> iter = s.iterator();
-        while (iter.hasNext()) {
-            buffer.append(iter.next());
-            if (iter.hasNext()) {
-                buffer.append(delimiter);
-            }
-        }
-        return buffer.toString();
-    }
-
-    public static void info(Object obj) {
-        if (Utils.logLevel > 2) {
-            System.out.println(obj);
-        }
-    }
-
-    public static void warn(Object obj) {
-        if (Utils.logLevel > 1) {
-            System.out.println(obj);
-        }
-    }
-
-    public static void error(Object obj) {
-        if (Utils.logLevel > 0) {
-            System.out.println(obj);
-        }
-    }
-
 }

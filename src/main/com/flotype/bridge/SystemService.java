@@ -2,9 +2,14 @@ package com.flotype.bridge;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class SystemService extends Service {
 	Executor executor;
 	private Bridge bridge;
+	
+	private static Log log = LogFactory.getLog(SystemService.class);
 
 	public SystemService(Bridge bridge, Executor executor) {
 		this.executor = executor;
@@ -28,7 +33,7 @@ public class SystemService extends Service {
 	}
 	
 	public void remoteError(String error) {
-		System.err.println(error);
+		log.warn(error);
 		bridge.eventHandler.onRemoteError(error);
 	}
 

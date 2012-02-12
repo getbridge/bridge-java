@@ -37,14 +37,15 @@ public class Bridge {
 	BridgeEventHandler eventHandler = null;
 
 	public Bridge() {
-		
+		ReferenceFactory.createFactory(this);
 	}
 	
-	public Bridge(String host, Integer port, String apiKey, BridgeEventHandler eventHandler) {	
-		this.host = host;
-		this.port = port;
-		this.apiKey = apiKey;
-		this.eventHandler = eventHandler;
+	public Bridge(String host, Integer port, String apiKey, BridgeEventHandler eventHandler) {
+		this();
+		this.setHost(host);
+		this.setPort(port);
+		this.setApiKey(apiKey);
+		this.setEventHandler(eventHandler);
 	}
 
 	public boolean connect() {
@@ -60,7 +61,6 @@ public class Bridge {
 			return false;
 		}
 
-		ReferenceFactory.createFactory(this);
 		executor.addService("system", new SystemService(this, executor));
 		return true;
 	}
@@ -86,6 +86,12 @@ public class Bridge {
 	}
 
 	public void publishService(String name, Service service, Service callback) {
+		
+		if(name.equals("system")) {
+			log.error("Invalid service name: " + name);
+			return;
+		}
+		
 		executor.addService(name, service);
 		service.createReference(name);
 		joinWorkerPool(name, callback);
