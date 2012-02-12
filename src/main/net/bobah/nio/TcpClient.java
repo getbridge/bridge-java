@@ -193,7 +193,7 @@ public abstract class TcpClient implements Runnable {
 				}
 			}
 		} catch (Exception e) {
-			Utils.error("unrecoverable error");
+			log.error("unrecoverable error");
 		}
 
 		log.warn("event loop terminated");
