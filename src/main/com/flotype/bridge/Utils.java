@@ -109,23 +109,4 @@ public class Utils {
         }
         return buffer.toString();
     }
-
-    public static void info(Object obj) {
-        if (Utils.logLevel > 2) {
-            System.out.println(obj);
-        }
-    }
-
-    public static void warn(Object obj) {
-        if (Utils.logLevel > 1) {
-            System.out.println(obj);
-        }
-    }
-
-    public static void error(Object obj) {
-        if (Utils.logLevel > 0) {
-            System.out.println(obj);
-        }
-    }
-
 }
