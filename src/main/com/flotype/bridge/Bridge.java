@@ -22,14 +22,14 @@ public class Bridge {
 	private static Log log = LogFactory.getLog(Bridge.class);
 
 	private TcpClient connection;
-	
+
 	private String clientId;
 
 	// Secret used for reconnects
 	private String secret;
 
 	Executor executor = new Executor();
-	
+
 	// Options
 	String host;
 	Integer port;
@@ -38,7 +38,7 @@ public class Bridge {
 	public Bridge() {
 		ReferenceFactory.createFactory(this);
 	}
-	
+
 	public Bridge(String host, Integer port, BridgeEventHandler eventHandler) {
 		this();
 		this.setHost(host);
@@ -47,11 +47,11 @@ public class Bridge {
 	}
 
 	public boolean connect() {
-		
+
 		// Setup TCP
 		connection = new Bridge.TCPConnection();
 		connection.setAddress(new InetSocketAddress(host, port));
-		
+
 		try {
 			connection.start();
 		} catch (IOException e) {
@@ -84,12 +84,12 @@ public class Bridge {
 	}
 
 	public void publishService(String name, Service service, Service callback) {
-		
+
 		if(name.equals("system")) {
 			log.error("Invalid service name: " + name);
 			return;
 		}
-		
+
 		executor.addService(name, service);
 		service.createReference(name);
 		joinWorkerPool(name, callback);
@@ -178,12 +178,12 @@ public class Bridge {
 		this.host = host;
 		return this;
 	}
-	
+
 	public Bridge setPort(Integer port) {
 		this.port = port;
 		return this;
 	}
-	
+
 	public Bridge setEventHandler(BridgeEventHandler eventHandler) {
 		this.eventHandler = eventHandler;
 		return this;
@@ -203,6 +203,11 @@ public class Bridge {
 			while(buf.hasRemaining()){
 				// Assuming 4 byte little endian ints
 				int length = buf.getInt();
+
+				if(buf.remaining() < length){
+					// Header received but not the body. Wait until next time.
+					break;
+				}
 
 				byte[] body = new byte[length];
 				buf.get(body);
@@ -238,7 +243,7 @@ public class Bridge {
 			log.info("connected to tcp server");
 			Map<String, Object> connectBody = new HashMap<String, Object>();
 			connectBody.put("session", Arrays.asList(new String[]{"0","0"}));
-			
+
 			Bridge.this.sendCommand("CONNECT", connectBody);
 		}
 
@@ -247,7 +252,7 @@ public class Bridge {
 	private void setSecret(String secret) {
 		this.secret = secret;
 	}
-	
+
 	private String getSecret() {
 		return this.secret;
 	}
