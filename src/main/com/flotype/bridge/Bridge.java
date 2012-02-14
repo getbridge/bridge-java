@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 import java.nio.ByteBuffer;
 
@@ -63,12 +65,21 @@ public class Bridge {
 		return true;
 	}
 
-	public Reference getService(String serviceName){
+	public <T extends ServiceClient > T getService(String serviceName, Class<T> serviceClass){
 		Reference result = new Reference(null, this);
 		result.setRoutingPrefix("named");
 		result.setRoutingId(serviceName);
 		result.setServiceName(serviceName);
-		return result;
+		
+		Constructor ctor;
+		try {
+			ctor = serviceClass.getConstructor(Reference.class);
+			return (T) ctor.newInstance(result);
+		} catch (Exception e) {
+			// One of the billion reflection things has gone wrong
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	protected Reference getChannel(String channelName){
