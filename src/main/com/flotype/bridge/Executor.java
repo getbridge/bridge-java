@@ -44,6 +44,12 @@ class Executor {
 		}
 
 		final Method m = getConformingMethod(methodName, req.getArguments(), serviceToClass.get(service));
+		
+		if(m == null){
+			log.error("No method found: " + methodName);
+			return;
+		}
+		
 		tp.execute(new Runnable(){
 			public void run() {
 				try {
