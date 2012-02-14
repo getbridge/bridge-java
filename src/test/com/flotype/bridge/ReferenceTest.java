@@ -130,8 +130,11 @@ public class ReferenceTest  {
 	@Test
 	public void testHashCode() {
 		// hashcode of reference is same as hashcode of its tostring
+		Reference newRef = new Reference(pathchain, bridge);
+		assertEquals(reference, newRef);
 		
 		// .equal references have .equal hashcodes
+		assertEquals(reference.hashCode(), newRef.hashCode());
 	}
 	
 	@Test
