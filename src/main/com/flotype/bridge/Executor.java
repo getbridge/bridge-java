@@ -53,6 +53,9 @@ class Executor {
 		tp.execute(new Runnable(){
 			public void run() {
 				try {
+					// avoids JVM bug involving member access to anonymous classes
+					m.setAccessible(true);
+					
 					m.invoke(service, req.getArguments());
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
