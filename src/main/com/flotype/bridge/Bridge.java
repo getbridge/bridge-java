@@ -45,6 +45,9 @@ public class Bridge {
 
 	public Bridge() {
 		ReferenceFactory.createFactory(this);
+		this.setHost(Utils.DEFAULT_HOST);
+		this.setPort(Utils.DEFAULT_PORT);
+		this.setEventHandler(Utils.DEFAULT_EVENT_HANDLER);
 	}
 
 	public Bridge(String host, Integer port, BridgeEventHandler eventHandler) {
@@ -55,7 +58,6 @@ public class Bridge {
 	}
 
 	public boolean connect() {
-
 		// Setup TCP
 		connection = new Bridge.TCPConnection();
 		connection.setAddress(new InetSocketAddress(host, port));
@@ -188,6 +190,9 @@ public class Bridge {
 	}
 	
 	private void processCommandQueue() {
+		
+		// TODO: Fix clientId refs
+		
 		for (String str : commandQueue ) {
 			this.write(str);
 		}
