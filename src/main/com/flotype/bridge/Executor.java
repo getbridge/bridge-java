@@ -26,7 +26,6 @@ class Executor {
 		tp = Executors.newFixedThreadPool(4);
 	}
 
-	// TODO synchronize this. Being invoked from different consumer threads
 	protected void execute(final Request req){
 		Reference reference = req.getReference();
 
