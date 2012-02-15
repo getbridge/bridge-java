@@ -23,10 +23,10 @@ public class Bridge {
 
 	private TcpClient connection;
 
-	private String clientId = "0";
+	private String clientId;
 
 	// Secret used for reconnects
-	private String secret = "0";
+	private String secret;
 
 	Executor executor = new Executor();
 
@@ -236,14 +236,13 @@ public class Bridge {
 		@Override protected void onDisconnected() {
 			// No reconnect system yet so new connectionId every connection
 			Bridge.this.setClientId(null);
-			log.warn("disconnected from server");
+			log.warn("disconnected to tcp server");
+
 		}
 		@Override protected void onConnected() throws Exception {
 			log.info("connected to tcp server");
 			Map<String, Object> connectBody = new HashMap<String, Object>();
-			
-			// Initially "0", "0". Gets set later for reconnects
-			connectBody.put("session", Arrays.asList(new String[]{clientId, secret}));
+			connectBody.put("session", Arrays.asList(new String[]{"0","0"}));
 
 			Bridge.this.sendCommand("CONNECT", connectBody);
 		}
