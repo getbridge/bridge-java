@@ -26,7 +26,6 @@ class Executor {
 		tp = Executors.newFixedThreadPool(4);
 	}
 
-	// TODO synchronize this. Being invoked from different consumer threads
 	protected void execute(final Request req){
 		Reference reference = req.getReference();
 
@@ -53,6 +52,9 @@ class Executor {
 		tp.execute(new Runnable(){
 			public void run() {
 				try {
+					// avoids JVM bug involving member access to anonymous classes
+					m.setAccessible(true);
+					
 					m.invoke(service, req.getArguments());
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
