@@ -268,11 +268,8 @@ public class Bridge {
 			
 			// Queue up connect command
 			Map<String, Object> connectBody = new HashMap<String, Object>();
-			if(Bridge.this.getClientId() == null) {
-				connectBody.put("session", new int[]{0, 0});	
-			} else {
-				connectBody.put("session", new String[]{Bridge.this.getClientId(), Bridge.this.getSecret()});
-			}
+			connectBody.put("session", new String[]{Bridge.this.getClientId(), Bridge.this.getSecret()});
+			
 			
 
 			Bridge.this.sendCommand("CONNECT", connectBody);
