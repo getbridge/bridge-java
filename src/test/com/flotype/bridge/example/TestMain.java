@@ -37,14 +37,6 @@ public class TestMain {
 				final ChatChannelClient c = new ChatChannelClient(bridge.getChannel("lobby"));
 				
 				bridge.publishService("javachat", new Service(){
-					public void die(){
-						try {
-							bridge.connection.channel.close();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
 					public void send(String x){
 						c.msg("java", x);
 					}
