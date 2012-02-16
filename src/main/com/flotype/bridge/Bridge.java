@@ -23,7 +23,7 @@ public class Bridge {
 
 	private static Log log = LogFactory.getLog(Bridge.class);
 
-	private TcpClient connection;
+	private TcpClient connection = new Bridge.TCPConnection();;
 
 	private String clientId;
 
@@ -48,18 +48,19 @@ public class Bridge {
 		this.setHost(Utils.DEFAULT_HOST);
 		this.setPort(Utils.DEFAULT_PORT);
 		this.setEventHandler(Utils.DEFAULT_EVENT_HANDLER);
+		this.setReconnect(Utils.DEFAULT_RECONNECT);
 	}
 
-	public Bridge(String host, Integer port, BridgeEventHandler eventHandler) {
+	public Bridge(String host, Integer port, BridgeEventHandler eventHandler, boolean reconnect) {
 		this();
 		this.setHost(host);
 		this.setPort(port);
 		this.setEventHandler(eventHandler);
+		this.setReconnect(reconnect);
 	}
 
 	public boolean connect() {
 		// Setup TCP
-		connection = new Bridge.TCPConnection();
 		connection.setAddress(new InetSocketAddress(host, port));
 
 		try {
@@ -292,6 +293,11 @@ public class Bridge {
 		return this;
 	}
 
+	public Bridge setReconnect(boolean reconnect) {
+		this.connection.setReconnect(reconnect);
+		return this;
+	}
+	
 	protected void setClientId(String clientId) {
 		this.clientId = clientId;
 	}
