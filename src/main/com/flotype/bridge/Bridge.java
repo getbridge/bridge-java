@@ -82,7 +82,7 @@ public class Bridge {
 		return result;
 	}
 
-	protected Reference getChannel(String channelName){
+	public Reference getChannel(String channelName){
 		Reference result = new Reference(null, this);
 		result.setRoutingPrefix("channel");
 		result.setRoutingId(channelName);
