@@ -26,7 +26,6 @@ class Executor {
 		tp = Executors.newFixedThreadPool(4);
 	}
 
-	// TODO synchronize this. Being invoked from different consumer threads
 	protected void execute(final Request req){
 		Reference reference = req.getReference();
 
@@ -44,9 +43,18 @@ class Executor {
 		}
 
 		final Method m = getConformingMethod(methodName, req.getArguments(), serviceToClass.get(service));
+		
+		if(m == null){
+			log.error("No method found: " + methodName);
+			return;
+		}
+		
 		tp.execute(new Runnable(){
 			public void run() {
 				try {
+					// avoids JVM bug involving member access to anonymous classes
+					m.setAccessible(true);
+					
 					m.invoke(service, req.getArguments());
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
@@ -69,10 +77,10 @@ class Executor {
 		return services.get(serviceName);
 	}
 
-	public void addExistingServiceByKey(String channelName, String key) {
+	public void addExistingServiceByKey(String oldKey, String newKey) {
 		// TODO Auto-generated method stub
-		Service s = services.get(key);
-		addService(channelName, s);
+		Service s = services.get(oldKey);
+		addService(newKey, s);
 	}
 
 	

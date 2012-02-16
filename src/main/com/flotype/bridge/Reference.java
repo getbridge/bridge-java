@@ -81,6 +81,20 @@ public class Reference {
             return null;
         }
     }
+    
+    @Override
+    public boolean equals(Object o){
+    	if(o instanceof Reference){
+    		return this.pathchain.equals(((Reference) o).getPathchain());
+    	} else {
+    		return false;
+    	}
+    }
+    
+    @Override
+    public int hashCode(){
+    	return pathchain.hashCode();
+    }
 
     public void invokeRPC(String methodName, Object... args) throws IOException {
 
