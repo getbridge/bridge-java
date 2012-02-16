@@ -1,5 +1,7 @@
 package com.flotype.bridge.example;
 
+import java.io.IOException;
+
 import com.flotype.bridge.Bridge;
 import com.flotype.bridge.BridgeEventHandler;
 import com.flotype.bridge.Reference;
@@ -31,6 +33,15 @@ public class TestMain {
 							}
 						}
 				);
+				
+				final ChatChannelClient c = new ChatChannelClient(bridge.getChannel("lobby"));
+				
+				bridge.publishService("javachat", new Service(){
+					public void send(String x){
+						c.msg("java", x);
+					}
+					
+				});
 
 			}
 		});

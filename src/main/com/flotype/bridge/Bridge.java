@@ -23,7 +23,7 @@ public class Bridge {
 
 	private static Log log = LogFactory.getLog(Bridge.class);
 
-	private TcpClient connection;
+	private TcpClient connection = new Bridge.TCPConnection();;
 
 	private String clientId;
 
@@ -48,18 +48,19 @@ public class Bridge {
 		this.setHost(Utils.DEFAULT_HOST);
 		this.setPort(Utils.DEFAULT_PORT);
 		this.setEventHandler(Utils.DEFAULT_EVENT_HANDLER);
+		this.setReconnect(Utils.DEFAULT_RECONNECT);
 	}
 
-	public Bridge(String host, Integer port, BridgeEventHandler eventHandler) {
+	public Bridge(String host, Integer port, BridgeEventHandler eventHandler, boolean reconnect) {
 		this();
 		this.setHost(host);
 		this.setPort(port);
 		this.setEventHandler(eventHandler);
+		this.setReconnect(reconnect);
 	}
 
 	public boolean connect() {
 		// Setup TCP
-		connection = new Bridge.TCPConnection();
 		connection.setAddress(new InetSocketAddress(host, port));
 
 		try {
@@ -82,7 +83,7 @@ public class Bridge {
 		return result;
 	}
 
-	protected Reference getChannel(String channelName){
+	public Reference getChannel(String channelName){
 		Reference result = new Reference(null, this);
 		result.setRoutingPrefix("channel");
 		result.setRoutingId(channelName);
@@ -268,11 +269,8 @@ public class Bridge {
 			
 			// Queue up connect command
 			Map<String, Object> connectBody = new HashMap<String, Object>();
-			if(Bridge.this.getClientId() == null) {
-				connectBody.put("session", new int[]{0, 0});	
-			} else {
-				connectBody.put("session", new String[]{Bridge.this.getClientId(), Bridge.this.getSecret()});
-			}
+			connectBody.put("session", new String[]{Bridge.this.getClientId(), Bridge.this.getSecret()});
+			
 			
 
 			Bridge.this.sendCommand("CONNECT", connectBody);
@@ -295,6 +293,11 @@ public class Bridge {
 		return this;
 	}
 
+	public Bridge setReconnect(boolean reconnect) {
+		this.connection.setReconnect(reconnect);
+		return this;
+	}
+	
 	protected void setClientId(String clientId) {
 		this.clientId = clientId;
 	}
