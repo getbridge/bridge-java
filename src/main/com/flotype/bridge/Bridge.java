@@ -131,7 +131,7 @@ public class Bridge {
 		joinWorkerPoolBody.put("name", name);
 
 		if(callback != null) {
-			joinWorkerPoolBody.put("callback", callback.getReference());
+			joinWorkerPoolBody.put("callback", callback);
 		}
 
 		this.sendCommand("JOINWORKERPOOL", joinWorkerPoolBody);
@@ -145,10 +145,10 @@ public class Bridge {
 		Map<String, Object> joinChannelBody = new HashMap<String, Object>();
 
 		joinChannelBody.put("name", name);
-		joinChannelBody.put("handler", handler.getReference());
+		joinChannelBody.put("handler", handler);
 
 		if(callback != null) {
-			joinChannelBody.put("callback", callback.getReference());
+			joinChannelBody.put("callback", callback);
 		}
 
 		this.sendCommand("JOINCHANNEL", joinChannelBody);
