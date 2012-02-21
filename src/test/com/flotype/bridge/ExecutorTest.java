@@ -1,5 +1,11 @@
 package com.flotype.bridge;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -10,6 +16,7 @@ public class ExecutorTest {
 
 	private Executor executor;
 	private Service service;
+	private boolean success;
 
 	public void testExecutor() {
 		fail("Not yet implemented");
@@ -17,10 +24,13 @@ public class ExecutorTest {
 
 	@Before
 	public void setUp() {
+		success = false;
 		executor  = new Executor();
+		
 		service = new Service(){
 			public void aMethod(){
-
+				success = true;
+				assertTrue(success);
 			}
 		};
 
@@ -28,12 +38,22 @@ public class ExecutorTest {
 	}
 
 	@Test
-	public void testExecute() {		
+	public void testExecute() {
+		Bridge b = new Bridge();
+		Reference reference = new Reference(Arrays.asList(new String[]{"a", "b", "c", "d"}), b);
+		List<Object> args = Arrays.asList(new Object[]{});
+		Request request = new Request(reference, args);
+
 		// No existent service
+		executor.execute(request);
 
 		// Nonexistent method
+		reference.setServiceName("some service");
+		executor.execute(request);
 
 		// Service + method both exist
+		reference.setMethodName("aMethod");
+		executor.execute(request); // The assertion is inside the service itself because it's threaded
 	}
 
 	@Test
@@ -73,6 +93,7 @@ public class ExecutorTest {
 	public void testAddNonExistingServiceByKey(){
 		executor.addExistingServiceByKey("does not exist", "should not exist");
 	}
+	
 
 	public void testGetConformingMethod() {
 		fail("Not yet implemented");

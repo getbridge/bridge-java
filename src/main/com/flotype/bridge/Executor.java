@@ -1,5 +1,4 @@
 package com.flotype.bridge;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -12,7 +11,7 @@ import org.apache.commons.logging.LogFactory;
 
 
 class Executor {
-
+	
 	private static Log log = LogFactory.getLog(Executor.class);
 
 	private Map<Service, Class<?>> serviceToClass;
@@ -27,7 +26,6 @@ class Executor {
 		tp = Executors.newFixedThreadPool(4);
 	}
 
-	// TODO synchronize this. Being invoked from different consumer threads
 	protected void execute(final Request req){
 		Reference reference = req.getReference();
 
@@ -38,23 +36,25 @@ class Executor {
 
 
 		final Service service = services.get(serviceName);
-
+		
 		if(service == null){
 			log.error("No such service: " + serviceName);
 			return;
 		}
 
 		final Method m = getConformingMethod(methodName, req.getArguments(), serviceToClass.get(service));
+		
 		if(m == null){
-			log.error("No such method: " + methodName);
+			log.error("No method found: " + methodName);
 			return;
 		}
 		
 		tp.execute(new Runnable(){
 			public void run() {
 				try {
-					// Fixes JVM bug in which reflection API does not understand the visibility of members of an anonymous class
+					// avoids JVM bug involving member access to anonymous classes
 					m.setAccessible(true);
+					
 					m.invoke(service, req.getArguments());
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
@@ -72,7 +72,7 @@ class Executor {
 		serviceToClass.put(service, service.getClass());
 		services.put(serviceName, service);
 	}
-
+	
 	protected Service getService(String serviceName) {
 		return services.get(serviceName);
 	}
@@ -83,6 +83,8 @@ class Executor {
 		addService(newKey, s);
 	}
 
+	
+	
 	protected Method getConformingMethod(String methodName, Object[] arguments, Class<?> cls) {
 		Method[] publicMethods = cls.getMethods();
 		Method m = null;
@@ -96,21 +98,9 @@ class Executor {
 					while ((m != null) && (idxParam < formalParameters.length)) {
 						Class<?> param = formalParameters[idxParam];
 						if (!param.isAssignableFrom(arguments[idxParam].getClass())) {
-							if(!(arguments[idxParam] instanceof Reference && param.getSuperclass() ==  ServiceClient.class)){
-								m = null;
-							} else {
-								try {
-									Constructor ctor = param.getConstructor(Reference.class);
-									arguments[idxParam] = ctor.newInstance(arguments[idxParam]);
-									idxParam++;
-								} catch (Exception e) {
-									// One of the billion reflection things has gone wrong
-									m = null;
-								}
-							}
-						} else {
-							idxParam++;
+							m = null;
 						}
+						idxParam++;
 					}
 				} else {
 					m = null;
@@ -120,7 +110,6 @@ class Executor {
 			}
 			idxMethod++;
 		}
-
 		return m;
 	}
 

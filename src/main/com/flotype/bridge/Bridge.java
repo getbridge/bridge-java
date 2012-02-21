@@ -2,7 +2,9 @@ package com.flotype.bridge;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -23,13 +25,19 @@ public class Bridge {
 
 	private static Log log = LogFactory.getLog(Bridge.class);
 
-	private TcpClient connection;
+	private TcpClient connection = new Bridge.TCPConnection();;
 
 	private String clientId;
 
 	// Secret used for reconnects
 	private String secret;
+	
+	// Queue for commands before connects happen
+	private Queue<String> commandQueue = new LinkedList<String>();
 
+	// Whether handshake has occurred
+	private boolean handshaken = false;
+	
 	Executor executor = new Executor();
 
 	// Options
@@ -39,19 +47,22 @@ public class Bridge {
 
 	public Bridge() {
 		ReferenceFactory.createFactory(this);
+		this.setHost(Utils.DEFAULT_HOST);
+		this.setPort(Utils.DEFAULT_PORT);
+		this.setEventHandler(Utils.DEFAULT_EVENT_HANDLER);
+		this.setReconnect(Utils.DEFAULT_RECONNECT);
 	}
 
-	public Bridge(String host, Integer port, BridgeEventHandler eventHandler) {
+	public Bridge(String host, Integer port, BridgeEventHandler eventHandler, boolean reconnect) {
 		this();
 		this.setHost(host);
 		this.setPort(port);
 		this.setEventHandler(eventHandler);
+		this.setReconnect(reconnect);
 	}
 
 	public boolean connect() {
-
 		// Setup TCP
-		connection = new Bridge.TCPConnection();
 		connection.setAddress(new InetSocketAddress(host, port));
 
 		try {
@@ -62,6 +73,7 @@ public class Bridge {
 		}
 
 		executor.addService("system", new SystemService(this, executor));
+
 		return true;
 	}
 
@@ -82,7 +94,7 @@ public class Bridge {
 		}
 	}
 
-	protected Reference getChannel(String channelName){
+	public Reference getChannel(String channelName){
 		Reference result = new Reference(null, this);
 		result.setRoutingPrefix("channel");
 		result.setRoutingId(channelName);
@@ -165,49 +177,48 @@ public class Bridge {
 	}
 
 	protected void write(String jsonStr) {
-		try {
-			log.info("Sending JSON = " +  jsonStr);
-			byte[] jsonBytes = jsonStr.getBytes();
-
-			ByteBuffer data = ByteBuffer.allocate(jsonBytes.length + 4);
-
-			data.put(Utils.intToByteArray(jsonBytes.length));
-			data.put(jsonBytes);
-			data.flip();
-
-			connection.send(data);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(!this.connection.isConnected()) {
+			commandQueue.add(jsonStr);
+		} else {
+			try {
+				log.info("Sending JSON = " +  jsonStr);
+				byte[] jsonBytes = jsonStr.getBytes();
+	
+				ByteBuffer data = ByteBuffer.allocate(jsonBytes.length + 4);
+	
+				data.put(Utils.intToByteArray(jsonBytes.length));
+				data.put(jsonBytes);
+				data.flip();
+	
+				connection.send(data);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
-
-	public Bridge setHost(String host) {
-		this.host = host;
-		return this;
+	
+	private void processCommandQueue() {
+		
+		// TODO: Fix clientId refs
+		
+		for (String str : commandQueue ) {
+			this.write(str);
+		}
+		commandQueue.clear();
+	}
+	
+	private void setSecret(String secret) {
+		this.secret = secret;
 	}
 
-	public Bridge setPort(Integer port) {
-		this.port = port;
-		return this;
+	private String getSecret() {
+		return this.secret;
 	}
-
-	public Bridge setEventHandler(BridgeEventHandler eventHandler) {
-		this.eventHandler = eventHandler;
-		return this;
-	}
-
-	protected void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
-
-	public String getClientId () {
-		return this.clientId;
-	}
-
+	
 	class TCPConnection extends TcpClient {
 
 		@Override protected void onRead(ByteBuffer buf) throws Exception {
@@ -230,12 +241,27 @@ public class Bridge {
 				log.info("Message = " + new String(body));
 
 
-				if(Bridge.this.getClientId() == null) {
+				if(!Bridge.this.handshaken) {
 					// Client not handshaken
 					String[] ids = (new String(body)).split("\\|");
-					Bridge.this.setClientId(ids[0]);
-					Bridge.this.setSecret(ids[1]);
-					Bridge.this.eventHandler.onReady();	
+					
+					if(ids.length == 2) {
+						String oldId = Bridge.this.getClientId();
+						
+						Bridge.this.setClientId(ids[0]);
+						Bridge.this.setSecret(ids[1]);
+						
+						if(oldId == null) {
+							// This is a first connection (not a reconnect)
+							Bridge.this.eventHandler.onReady();	
+						} else {
+							Bridge.this.eventHandler.onReconnect();
+						}
+						Bridge.this.handshaken = true;
+						Bridge.this.processCommandQueue();	
+					} else {
+						log.error("Improper connect response");
+					}
 
 				} else {
 					// Parse as normal
@@ -245,26 +271,52 @@ public class Bridge {
 			}
 		}
 		@Override protected void onDisconnected() {
-			// No reconnect system yet so new connectionId every connection
-			Bridge.this.setClientId(null);
-			log.warn("disconnected to tcp server");
-
+			Bridge.this.handshaken = false;
+			
+			log.warn("Disconnected from TCP server");
 		}
 		@Override protected void onConnected() throws Exception {
-			log.info("connected to tcp server");
+			log.info("Connected to TCP server");	
+			
+			// Queue up connect command
 			Map<String, Object> connectBody = new HashMap<String, Object>();
-			connectBody.put("session", Arrays.asList(new String[]{"0","0"}));
+			connectBody.put("session", new String[]{Bridge.this.getClientId(), Bridge.this.getSecret()});
+			
+			
 
 			Bridge.this.sendCommand("CONNECT", connectBody);
 		}
 
 	}
 
-	private void setSecret(String secret) {
-		this.secret = secret;
+	public Bridge setHost(String host) {
+		this.host = host;
+		return this;
 	}
 
-	private String getSecret() {
-		return this.secret;
+	public Bridge setPort(Integer port) {
+		this.port = port;
+		return this;
 	}
+
+	public Bridge setEventHandler(BridgeEventHandler eventHandler) {
+		this.eventHandler = eventHandler;
+		return this;
+	}
+
+	public Bridge setReconnect(boolean reconnect) {
+		this.connection.setReconnect(reconnect);
+		return this;
+	}
+	
+	protected void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+
+	public String getClientId () {
+		return this.clientId;
+	}
+
+
+
 }
