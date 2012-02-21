@@ -7,6 +7,10 @@ public class ServiceClient {
 	public ServiceClient(Reference reference){
 		this.reference = reference;
 	}
+	
+	public Reference getReference(){
+		return reference;
+	}
 
 	protected void invokeRPC(String methodName, Object... args){
 		try {
