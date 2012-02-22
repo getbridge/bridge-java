@@ -18,6 +18,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 
 import com.flotype.bridge.serializers.ReferenceSerializer;
+import com.flotype.bridge.serializers.ServiceClientSerializer;
+import com.flotype.bridge.serializers.ServiceSerializer;
 
 import net.bobah.nio.TcpClient;
 
@@ -78,13 +80,13 @@ public class Bridge {
 
         return true;
     }
-    
+  
 	public <T extends ServiceClient > T getService(String serviceName, Class<T> serviceClass){
 		Reference result = new Reference(null, this);
 		result.setRoutingPrefix("named");
 		result.setRoutingId(serviceName);
 		result.setServiceName(serviceName);
-		
+
 		Constructor ctor;
 		try {
 			ctor = serviceClass.getConstructor(Reference.class);
@@ -95,7 +97,6 @@ public class Bridge {
 			return null;
 		}
 	}
-	
     public Reference getChannel(String channelName){
         Reference result = new Reference(null, this);
         result.setRoutingPrefix("channel");
@@ -133,7 +134,7 @@ public class Bridge {
         joinWorkerPoolBody.put("name", name);
 
         if(callback != null) {
-            joinWorkerPoolBody.put("callback", callback.getReference());
+            joinWorkerPoolBody.put("callback", callback);
         }
 
         this.sendCommand("JOINWORKERPOOL", joinWorkerPoolBody);
@@ -147,10 +148,10 @@ public class Bridge {
         Map<String, Object> joinChannelBody = new HashMap<String, Object>();
 
         joinChannelBody.put("name", name);
-        joinChannelBody.put("handler", handler.getReference());
+        joinChannelBody.put("handler", handler);
 
         if(callback != null) {
-            joinChannelBody.put("callback", callback.getReference());
+            joinChannelBody.put("callback", callback);
         }
 
         this.sendCommand("JOINCHANNEL", joinChannelBody);
@@ -160,7 +161,9 @@ public class Bridge {
     private void sendCommand(String command, Map<String, Object> data){
         ObjectMapper mapper = new ObjectMapper();
         SimpleModule module = new SimpleModule("Handler", new Version(0, 1, 0, "alpha"));
-        module.addSerializer(new ReferenceSerializer(Reference.class));
+        module.addSerializer(new ReferenceSerializer(Reference.class))
+		.addSerializer(new ServiceSerializer(Service.class))
+		.addSerializer(new ServiceClientSerializer(ServiceClient.class));
         mapper.registerModule(module);
 
         try {
