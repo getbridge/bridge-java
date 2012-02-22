@@ -98,8 +98,9 @@ public class Reference {
     }
 
     public void invokeRPC(String methodName, Object... args) throws IOException {
-
-        ObjectMapper mapper = new ObjectMapper();
+    	boolean handshaken = client.isHandshaken();
+    	
+    	ObjectMapper mapper = new ObjectMapper();
         SimpleModule module =
             new SimpleModule("NowSerializers", new Version(0, 1, 0, "alpha"));
         module.addSerializer(new ReferenceSerializer(Reference.class))
@@ -125,7 +126,11 @@ public class Reference {
 
         String commandString = mapper.writeValueAsString(commandBody);
 
-        client.write(commandString);
+        if(!handshaken) {
+        	client.addCommandQueue(commandString);	
+        } else {
+        	client.write(commandString);
+        }
     }
 
 }

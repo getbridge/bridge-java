@@ -84,7 +84,14 @@ class Executor {
 		addService(newKey, s);
 	}
 
-	
+	protected void fixServiceClientId(String clientId) {
+		for(Service service : services.values()) {
+			Reference ref = service.getReference();
+			if (ref != null && ref.getRoutingId() == null) {
+				ref.setRoutingId(clientId);
+			}
+		}
+	}
 	
 	protected Method getConformingMethod(String methodName, Object[] arguments, Class<?> cls) {
 		Method[] publicMethods = cls.getMethods();

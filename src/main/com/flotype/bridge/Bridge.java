@@ -40,7 +40,7 @@ public class Bridge {
     // Whether handshake has occurred
     private boolean handshaken = false;
 
-    Executor executor = new Executor();
+    private Executor executor = new Executor();
 
     // Options
     String host;
@@ -180,49 +180,52 @@ public class Bridge {
 
             String commandString = mapper.writeValueAsString(commandBody);
 
-            this.write(commandString);
+            if(!this.handshaken && !command.equals("CONNECT")) {
+            	this.addCommandQueue(commandString);	
+            } else {
+            	this.write(commandString);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     
     protected void write(String jsonStr) {
-        if(!this.connection.isConnected()) {
-            commandQueue.add(jsonStr);
-        } else {
-            try {
-                log.info("Sending JSON = " +  jsonStr);
-                byte[] jsonBytes = jsonStr.getBytes();
+    	try {
+            log.info("Sending JSON = " +  jsonStr);
+            byte[] jsonBytes = jsonStr.getBytes();
 
-                ByteBuffer data = ByteBuffer.allocate(jsonBytes.length + 4);
+            ByteBuffer data = ByteBuffer.allocate(jsonBytes.length + 4);
 
-                data.put(Utils.intToByteArray(jsonBytes.length));
-                data.put(jsonBytes);
-                data.flip();
+            data.put(Utils.intToByteArray(jsonBytes.length));
+            data.put(jsonBytes);
+            data.flip();
 
-                connection.send(data);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            connection.send(data);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
     
     private void processCommandQueue() {
-
-        // TODO: Fix clientId refs
-
-        for (String str : commandQueue ) {
-            this.write(str);
+    	for (String str : commandQueue ) {
+        	this.write(str.replace("\"ref\":[\"client\",null,", "\"ref\":[\"client\",\""+this.getClientId()+"\","));
         }
         commandQueue.clear();
     }
 
 
-
+    protected void addCommandQueue(String jsonStr) {
+    	if(this.handshaken) {
+    		this.write(jsonStr.replace("\"ref\":[\"client\",null,", "\"ref\":[\"client\",\""+this.getClientId()+"\","));
+    	} else {
+    		commandQueue.add(jsonStr);
+    	}
+    }
 
     class TCPConnection extends TcpClient {
 
@@ -263,6 +266,7 @@ public class Bridge {
                             Bridge.this.eventHandler.onReconnect();
                         }
                         Bridge.this.handshaken = true;
+                        Bridge.this.getExecutor().fixServiceClientId(ids[0]);
                         Bridge.this.processCommandQueue();
                     } else {
                         log.error("Improper connect response");
@@ -295,7 +299,9 @@ public class Bridge {
 
     }
 
-
+    protected Executor getExecutor() {
+    	return this.executor;
+    }
     
     public Bridge setApiKey(String apiKey) {
         this.apiKey = apiKey;
@@ -337,6 +343,10 @@ public class Bridge {
 
     public String getClientId () {
         return this.clientId;
+    }
+    
+    public boolean isHandshaken() {
+    	return this.handshaken;
     }
 
 }
