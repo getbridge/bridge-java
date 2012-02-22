@@ -16,10 +16,12 @@ public class SystemService extends Service {
 		this.bridge = bridge;
 	}
 	public void hook_channel_handler(String channel, Reference handler, Reference callback){
-		String channelName = "channel:"+channel;
-		String key = handler.getServiceName();
-		executor.addExistingServiceByKey(channelName, key);
+		hook_channel(channel, handler);
 		(new ServiceClient(callback)).invokeRPC("callback", bridge.getChannel(channel), channel);
+	}
+	
+	public void hook_channel_handler(String channel, Reference handler){
+		hook_channel(channel, handler);
 	}
 	
 	public void getservice(String name, Reference callback) throws IOException {
@@ -30,6 +32,12 @@ public class SystemService extends Service {
 			callback.invokeRPC("callback", null, "Cannot find service " + name);
 		}
 		
+	}
+	
+	private void hook_channel (String channel, Reference handler) {
+		String channelName = "channel:"+channel;
+		String key = handler.getServiceName();
+		executor.addExistingServiceByKey(key, channelName);
 	}
 	
 	public void remoteError(String error) {

@@ -2,8 +2,12 @@ package com.flotype.bridge;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 import java.nio.ByteBuffer;
 
@@ -14,241 +18,335 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 
 import com.flotype.bridge.serializers.ReferenceSerializer;
+import com.flotype.bridge.serializers.ServiceClientSerializer;
+import com.flotype.bridge.serializers.ServiceSerializer;
 
 import net.bobah.nio.TcpClient;
 
 public class Bridge {
 
-	private static Log log = LogFactory.getLog(Bridge.class);
+    private static Log log = LogFactory.getLog(Bridge.class);
 
-	private TcpClient connection;
-	
-	private String clientId;
+    private TcpClient connection = new Bridge.TCPConnection();;
 
-	// Secret used for reconnects
-	private String secret;
+    private String clientId;
 
-	Executor executor = new Executor();
-	
-	// Options
-	String host;
-	Integer port;
-	BridgeEventHandler eventHandler = null;
+    // Secret used for reconnects
+    private String secret;
 
-	public Bridge() {
-		ReferenceFactory.createFactory(this);
-	}
-	
-	public Bridge(String host, Integer port, BridgeEventHandler eventHandler) {
-		this();
-		this.setHost(host);
-		this.setPort(port);
-		this.setEventHandler(eventHandler);
-	}
+    // Queue for commands before connects happen
+    private Queue<String> commandQueue = new LinkedList<String>();
 
-	public boolean connect() {
-		
-		// Setup TCP
-		connection = new Bridge.TCPConnection();
-		connection.setAddress(new InetSocketAddress(host, port));
-		
-		try {
-			connection.start();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
+    // Whether handshake has occurred
+    private boolean handshaken = false;
 
-		executor.addService("system", new SystemService(this, executor));
-		return true;
-	}
+    private Executor executor = new Executor();
 
-	public Reference getService(String serviceName){
+    // Options
+    String host;
+    Integer port;
+    String apiKey;
+    BridgeEventHandler eventHandler = null;
+    
+    public Bridge() {
+        ReferenceFactory.createFactory(this);
+        this.setHost(Utils.DEFAULT_HOST);
+        this.setPort(Utils.DEFAULT_PORT);
+        this.setEventHandler(Utils.DEFAULT_EVENT_HANDLER);
+        this.setReconnect(Utils.DEFAULT_RECONNECT);
+    }
+
+    public Bridge(String host, Integer port, String apiKey, BridgeEventHandler eventHandler, boolean reconnect) {
+        this();
+        this.setHost(host);
+        this.setPort(port);
+        this.setApiKey(apiKey);
+        this.setEventHandler(eventHandler);
+        this.setReconnect(reconnect);
+    }
+    
+    public boolean connect() {
+        // Setup TCP
+        connection.setAddress(new InetSocketAddress(host, port));
+
+        try {
+            connection.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        executor.addService("system", new SystemService(this, executor));
+
+        return true;
+    }
+  
+	public <T extends ServiceClient > T getService(String serviceName, Class<T> serviceClass){
 		Reference result = new Reference(null, this);
 		result.setRoutingPrefix("named");
 		result.setRoutingId(serviceName);
 		result.setServiceName(serviceName);
-		return result;
-	}
 
-	protected Reference getChannel(String channelName){
-		Reference result = new Reference(null, this);
-		result.setRoutingPrefix("channel");
-		result.setRoutingId(channelName);
-		result.setServiceName("channel:" + channelName);
-		return result;
-	}
-
-	public void publishService(String name, Service service) {
-		publishService(name, service, null);
-	}
-
-	public void publishService(String name, Service service, Service callback) {
-		
-		if(name.equals("system")) {
-			log.error("Invalid service name: " + name);
-			return;
-		}
-		
-		executor.addService(name, service);
-		service.createReference(name);
-		joinWorkerPool(name, callback);
-	}
-
-	protected void publishService(Service service){
-		String name = Utils.generateId();
-		service.createReference(name);
-		executor.addService(name, service);
-	}
-
-	public void joinWorkerPool(String name, Service callback) {
-
-		Map<String, Object> joinWorkerPoolBody = new HashMap<String, Object>();
-
-		joinWorkerPoolBody.put("name", name);
-
-		if(callback != null) {
-			joinWorkerPoolBody.put("callback", callback.getReference());
-		}
-
-		this.sendCommand("JOINWORKERPOOL", joinWorkerPoolBody);
-	}
-
-	public void joinChannel(String name, Service handler) {
-		joinChannel(name, handler, null);
-	}
-
-	public void joinChannel(String name, Service handler, Service callback) {
-		Map<String, Object> joinChannelBody = new HashMap<String, Object>();
-
-		joinChannelBody.put("name", name);
-		joinChannelBody.put("handler", handler.getReference());
-
-		if(callback != null) {
-			joinChannelBody.put("callback", callback.getReference());
-		}
-
-		this.sendCommand("JOINCHANNEL", joinChannelBody);
-	}
-
-	private void sendCommand(String command, Map<String, Object> data){
-		ObjectMapper mapper = new ObjectMapper();
-		SimpleModule module = new SimpleModule("Handler", new Version(0, 1, 0, "alpha"));
-		module.addSerializer(new ReferenceSerializer(Reference.class));
-		mapper.registerModule(module);
-
+		Constructor ctor;
 		try {
-
-			// Construct the request body here
-			Map<String, Object> commandBody = new HashMap<String, Object>();
-
-			commandBody.put("command", command);
-			commandBody.put("data", data);
-
-			String commandString = mapper.writeValueAsString(commandBody);
-
-			this.write(commandString);
-		} catch (IOException e) {
+			ctor = serviceClass.getConstructor(Reference.class);
+			return (T) ctor.newInstance(result);
+		} catch (Exception e) {
+			// One of the billion reflection things has gone wrong
 			e.printStackTrace();
+			return null;
 		}
 	}
+    public Reference getChannel(String channelName){
+    	Map<String, Object> getChannelBody = new HashMap<String, Object>();
+        getChannelBody.put("name", channelName);
+        sendCommand("GETCHANNEL", getChannelBody);
+    	
+    	Reference result = new Reference(null, this);
+        result.setRoutingPrefix("channel");
+        result.setRoutingId(channelName);
+        result.setServiceName("channel:" + channelName);
+        return result;
+    }
+    
+    public void publishService(String name, Service service) {
+        publishService(name, service, null);
+    }
 
-	protected void write(String jsonStr) {
-		try {
-			log.info("Sending JSON = " +  jsonStr);
-			byte[] jsonBytes = jsonStr.getBytes();
+    public void publishService(String name, Service service, Service callback) {
 
-			ByteBuffer data = ByteBuffer.allocate(jsonBytes.length + 4);
+        if(name.equals("system")) {
+            log.error("Invalid service name: " + name);
+            return;
+        }
 
-			data.put(Utils.intToByteArray(jsonBytes.length));
-			data.put(jsonBytes);
-			data.flip();
+        executor.addService(name, service);
+        service.createReference(name);
+        joinWorkerPool(name, callback);
+    }
 
-			connection.send(data);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    protected void publishService(Service service){
+        String name = Utils.generateId();
+        service.createReference(name);
+        executor.addService(name, service);
+    }
+    
+    public void joinWorkerPool(String name, Service callback) {
 
-	public Bridge setHost(String host) {
-		this.host = host;
-		return this;
-	}
-	
-	public Bridge setPort(Integer port) {
-		this.port = port;
-		return this;
-	}
-	
-	public Bridge setEventHandler(BridgeEventHandler eventHandler) {
-		this.eventHandler = eventHandler;
-		return this;
-	}
+        Map<String, Object> joinWorkerPoolBody = new HashMap<String, Object>();
 
-	protected void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
+        joinWorkerPoolBody.put("name", name);
 
-	public String getClientId () {
-		return this.clientId;
-	}
+        if(callback != null) {
+            joinWorkerPoolBody.put("callback", callback);
+        }
 
-	class TCPConnection extends TcpClient {
+        this.sendCommand("JOINWORKERPOOL", joinWorkerPoolBody);
+    }
+    
+    public void joinChannel(String name, Service handler) {
+        joinChannel(name, handler, null);
+    }
 
-		@Override protected void onRead(ByteBuffer buf) throws Exception {
-			while(buf.hasRemaining()){
-				// Assuming 4 byte little endian ints
-				int length = buf.getInt();
+    public void joinChannel(String name, Service handler, Service callback) {
+        Map<String, Object> joinChannelBody = new HashMap<String, Object>();
 
-				byte[] body = new byte[length];
-				buf.get(body);
+        joinChannelBody.put("name", name);
+        joinChannelBody.put("handler", handler);
 
-				if (length != body.length) {
-					throw new Exception("Expected message length not equal to buffer size");
-				}
+        if(callback != null) {
+            joinChannelBody.put("callback", callback);
+        }
 
-				log.info("Message = " + new String(body));
+        this.sendCommand("JOINCHANNEL", joinChannelBody);
+    }
 
 
-				if(Bridge.this.getClientId() == null) {
-					// Client not handshaken
-					String[] ids = (new String(body)).split("\\|");
-					Bridge.this.setClientId(ids[0]);
-					Bridge.this.setSecret(ids[1]);
-					Bridge.this.eventHandler.onReady();	
+    private void sendCommand(String command, Map<String, Object> data){
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule("Handler", new Version(0, 1, 0, "alpha"));
+        module.addSerializer(new ReferenceSerializer(Reference.class))
+		.addSerializer(new ServiceSerializer(Service.class))
+		.addSerializer(new ServiceClientSerializer(ServiceClient.class));
+        mapper.registerModule(module);
 
-				} else {
-					// Parse as normal
-					Request req = Utils.deserialize(body);
-					executor.execute(req);
-				}
-			}
-		}
-		@Override protected void onDisconnected() {
-			// No reconnect system yet so new connectionId every connection
-			Bridge.this.setClientId(null);
-			log.warn("disconnected to tcp server");
+        try {
 
-		}
-		@Override protected void onConnected() throws Exception {
-			log.info("connected to tcp server");
-			Map<String, Object> connectBody = new HashMap<String, Object>();
-			connectBody.put("session", Arrays.asList(new String[]{"0","0"}));
-			
-			Bridge.this.sendCommand("CONNECT", connectBody);
-		}
+            // Construct the request body here
+            Map<String, Object> commandBody = new HashMap<String, Object>();
 
-	}
+            commandBody.put("command", command);
+            commandBody.put("data", data);
 
-	private void setSecret(String secret) {
-		this.secret = secret;
-	}
-	
-	private String getSecret() {
-		return this.secret;
-	}
+            String commandString = mapper.writeValueAsString(commandBody);
+
+            if(!this.handshaken && !command.equals("CONNECT")) {
+            	this.addCommandQueue(commandString);	
+            } else {
+            	this.write(commandString);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    protected void write(String jsonStr) {
+    	try {
+            log.info("Sending JSON = " +  jsonStr);
+            byte[] jsonBytes = jsonStr.getBytes();
+
+            ByteBuffer data = ByteBuffer.allocate(jsonBytes.length + 4);
+
+            data.put(Utils.intToByteArray(jsonBytes.length));
+            data.put(jsonBytes);
+            data.flip();
+
+            connection.send(data);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
+    private void processCommandQueue() {
+    	for (String str : commandQueue ) {
+        	this.write(str.replace("\"ref\":[\"client\",null,", "\"ref\":[\"client\",\""+this.getClientId()+"\","));
+        }
+        commandQueue.clear();
+    }
+
+
+    protected void addCommandQueue(String jsonStr) {
+    	if(this.handshaken) {
+    		this.write(jsonStr.replace("\"ref\":[\"client\",null,", "\"ref\":[\"client\",\""+this.getClientId()+"\","));
+    	} else {
+    		commandQueue.add(jsonStr);
+    	}
+    }
+
+    class TCPConnection extends TcpClient {
+
+        @Override protected void onRead(ByteBuffer buf) throws Exception {
+            while(buf.hasRemaining()){
+                // Assuming 4 byte little endian ints
+                int length = buf.getInt();
+
+                if(buf.remaining() < length){
+                    // Header received but not the body. Wait until next time.
+                    break;
+                }
+
+                byte[] body = new byte[length];
+                buf.get(body);
+
+                if (length != body.length) {
+                    throw new Exception("Expected message length not equal to buffer size");
+                }
+
+                log.info("Message = " + new String(body));
+
+
+                if(!Bridge.this.handshaken) {
+                    // Client not handshaken
+                    String[] ids = (new String(body)).split("\\|");
+
+                    if(ids.length == 2) {
+                        String oldId = Bridge.this.getClientId();
+
+                        Bridge.this.setClientId(ids[0]);
+                        Bridge.this.setSecret(ids[1]);
+
+                        if(oldId == null) {
+                            // This is a first connection (not a reconnect)
+                            Bridge.this.eventHandler.onReady();
+                        } else {
+                            Bridge.this.eventHandler.onReconnect();
+                        }
+                        Bridge.this.handshaken = true;
+                        Bridge.this.getExecutor().fixServiceClientId(ids[0]);
+                        Bridge.this.processCommandQueue();
+                    } else {
+                        log.error("Improper connect response");
+                        Request req = Utils.deserialize(body);
+                        executor.execute(req);
+                    }
+
+                } else {
+                    // Parse as normal
+                    Request req = Utils.deserialize(body);
+                    executor.execute(req);
+                }
+            }
+        }
+        @Override protected void onDisconnected() {
+            Bridge.this.handshaken = false;
+
+            log.warn("Disconnected from TCP server");
+        }
+        @Override protected void onConnected() throws Exception {
+            log.info("Connected to TCP server");
+
+            // Queue up connect command
+            Map<String, Object> connectBody = new HashMap<String, Object>();
+            connectBody.put("session", new String[]{Bridge.this.getClientId(), Bridge.this.getSecret()});
+            connectBody.put("api_key", Bridge.this.apiKey);
+
+            Bridge.this.sendCommand("CONNECT", connectBody);
+        }
+
+    }
+
+    protected Executor getExecutor() {
+    	return this.executor;
+    }
+    
+    public Bridge setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+        return this;
+    }
+
+    private void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    private String getSecret() {
+        return this.secret;
+    }
+
+    
+    public Bridge setHost(String host) {
+        this.host = host;
+        return this;
+    }
+
+    public Bridge setPort(Integer port) {
+        this.port = port;
+        return this;
+    }
+
+    public Bridge setEventHandler(BridgeEventHandler eventHandler) {
+        this.eventHandler = eventHandler;
+        return this;
+    }
+
+    public Bridge setReconnect(boolean reconnect) {
+        this.connection.setReconnect(reconnect);
+        return this;
+    }
+
+    protected void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getClientId () {
+        return this.clientId;
+    }
+    
+    public boolean isHandshaken() {
+    	return this.handshaken;
+    }
+
 }

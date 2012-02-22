@@ -3,6 +3,7 @@ package com.flotype.bridge;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ public class Utils {
     public static final int DEFAULT_PORT = 8082;
     public static final String DEFAULT_HOST = "127.0.0.1";
     public static final BridgeEventHandler DEFAULT_EVENT_HANDLER = new BridgeEventHandler();
+    public static final boolean DEFAULT_RECONNECT = true;
     public static int logLevel = 5;
 
     @SuppressWarnings("unchecked")
@@ -49,9 +51,9 @@ public class Utils {
             Object value = entry.getValue();
 
             if (value != null
-                && value.getClass() == java.util.LinkedHashMap.class) {
+                && value instanceof HashMap) {
                 value = constructRefs((Map<String, Object>) value);
-            } else if (value != null && value.getClass() == ArrayList.class) {
+            } else if (value != null && value instanceof ArrayList) {
                 value = constructRefs((List<Object>) value);
             }
 
@@ -67,9 +69,9 @@ public class Utils {
         int idx = 0;
         for (Object value : list) {
             if (value != null
-                && value.getClass() == java.util.LinkedHashMap.class) {
+                && value instanceof HashMap) {
                 value = constructRefs((Map<String, Object>) value);
-            } else if (value != null && value.getClass() == ArrayList.class) {
+            } else if (value != null && value instanceof ArrayList) {
                 value = constructRefs((List<Object>) value);
             }
             list.set(idx, value);

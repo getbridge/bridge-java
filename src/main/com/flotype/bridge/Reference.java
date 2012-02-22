@@ -11,6 +11,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 
 import com.flotype.bridge.serializers.ReferenceSerializer;
+import com.flotype.bridge.serializers.ServiceClientSerializer;
 import com.flotype.bridge.serializers.ServiceSerializer;
 
 public class Reference {
@@ -81,14 +82,30 @@ public class Reference {
             return null;
         }
     }
+    
+    @Override
+    public boolean equals(Object o){
+    	if(o instanceof Reference){
+    		return this.pathchain.equals(((Reference) o).getPathchain());
+    	} else {
+    		return false;
+    	}
+    }
+    
+    @Override
+    public int hashCode(){
+    	return pathchain.hashCode();
+    }
 
     public void invokeRPC(String methodName, Object... args) throws IOException {
-
-        ObjectMapper mapper = new ObjectMapper();
+    	boolean handshaken = client.isHandshaken();
+    	
+    	ObjectMapper mapper = new ObjectMapper();
         SimpleModule module =
             new SimpleModule("NowSerializers", new Version(0, 1, 0, "alpha"));
         module.addSerializer(new ReferenceSerializer(Reference.class))
-            .addSerializer(new ServiceSerializer(Service.class));
+            .addSerializer(new ServiceSerializer(Service.class))
+            .addSerializer(new ServiceClientSerializer(ServiceClient.class));
         mapper.registerModule(module);
 
         // Construct the request body here
@@ -109,7 +126,11 @@ public class Reference {
 
         String commandString = mapper.writeValueAsString(commandBody);
 
-        client.write(commandString);
+        if(!handshaken) {
+        	client.addCommandQueue(commandString);	
+        } else {
+        	client.write(commandString);
+        }
     }
 
 }

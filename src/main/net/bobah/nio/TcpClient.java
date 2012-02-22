@@ -44,6 +44,8 @@ public abstract class TcpClient implements Runnable {
 
 	private long reconnectInterval = INITIAL_RECONNECT_INTERVAL;
 
+	private boolean reconnect = true;
+	
 	private ByteBuffer readBuf = ByteBuffer.allocateDirect(READ_BUFFER_SIZE); // 1Mb
 	private ByteBuffer writeBuf = ByteBuffer.allocateDirect(WRITE_BUFFER_SIZE); // 1Mb
 
@@ -185,6 +187,9 @@ public abstract class TcpClient implements Runnable {
 				}
 
 				try {
+					if (!reconnect) {
+						stop();
+					}
 					Thread.sleep(reconnectInterval);
 					if (reconnectInterval < MAXIMUM_RECONNECT_INTERVAL) reconnectInterval *= 2;
 					log.warn("reconnecting to " + address);
@@ -282,4 +287,7 @@ public abstract class TcpClient implements Runnable {
 		return bytesIn.get();
 	}
 
+	public void setReconnect (boolean reconnect) {
+		this.reconnect = reconnect;
+	}
 }
