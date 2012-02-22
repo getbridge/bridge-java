@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 import java.nio.ByteBuffer;
 
@@ -43,7 +45,7 @@ public class Bridge {
     Integer port;
     String apiKey;
     BridgeEventHandler eventHandler = null;
-
+    
     public Bridge() {
         ReferenceFactory.createFactory(this);
         this.setHost(Utils.DEFAULT_HOST);
@@ -60,7 +62,7 @@ public class Bridge {
         this.setEventHandler(eventHandler);
         this.setReconnect(reconnect);
     }
-
+    
     public boolean connect() {
         // Setup TCP
         connection.setAddress(new InetSocketAddress(host, port));
@@ -76,15 +78,24 @@ public class Bridge {
 
         return true;
     }
-
-    public Reference getService(String serviceName){
-        Reference result = new Reference(null, this);
-        result.setRoutingPrefix("named");
-        result.setRoutingId(serviceName);
-        result.setServiceName(serviceName);
-        return result;
-    }
-
+    
+	public <T extends ServiceClient > T getService(String serviceName, Class<T> serviceClass){
+		Reference result = new Reference(null, this);
+		result.setRoutingPrefix("named");
+		result.setRoutingId(serviceName);
+		result.setServiceName(serviceName);
+		
+		Constructor ctor;
+		try {
+			ctor = serviceClass.getConstructor(Reference.class);
+			return (T) ctor.newInstance(result);
+		} catch (Exception e) {
+			// One of the billion reflection things has gone wrong
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
     public Reference getChannel(String channelName){
         Reference result = new Reference(null, this);
         result.setRoutingPrefix("channel");
@@ -92,7 +103,7 @@ public class Bridge {
         result.setServiceName("channel:" + channelName);
         return result;
     }
-
+    
     public void publishService(String name, Service service) {
         publishService(name, service, null);
     }
@@ -114,7 +125,7 @@ public class Bridge {
         service.createReference(name);
         executor.addService(name, service);
     }
-
+    
     public void joinWorkerPool(String name, Service callback) {
 
         Map<String, Object> joinWorkerPoolBody = new HashMap<String, Object>();
@@ -127,7 +138,7 @@ public class Bridge {
 
         this.sendCommand("JOINWORKERPOOL", joinWorkerPoolBody);
     }
-
+    
     public void joinChannel(String name, Service handler) {
         joinChannel(name, handler, null);
     }
@@ -144,6 +155,7 @@ public class Bridge {
 
         this.sendCommand("JOINCHANNEL", joinChannelBody);
     }
+
 
     private void sendCommand(String command, Map<String, Object> data){
         ObjectMapper mapper = new ObjectMapper();
@@ -166,7 +178,7 @@ public class Bridge {
             e.printStackTrace();
         }
     }
-
+    
     protected void write(String jsonStr) {
         if(!this.connection.isConnected()) {
             commandQueue.add(jsonStr);
@@ -191,7 +203,7 @@ public class Bridge {
             }
         }
     }
-
+    
     private void processCommandQueue() {
 
         // TODO: Fix clientId refs
@@ -202,27 +214,8 @@ public class Bridge {
         commandQueue.clear();
     }
 
-    public Bridge setApiKey(String apiKey) {
-        this.apiKey = apiKey;
-        return this;
-    }
 
-    public Bridge setEventHandler(BridgeEventHandler eventHandler) {
-        this.eventHandler = eventHandler;
-        return this;
-    }
 
-    protected void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    private void setSecret(String secret) {
-        this.secret = secret;
-    }
-
-    private String getSecret() {
-        return this.secret;
-    }
 
     class TCPConnection extends TcpClient {
 
@@ -266,6 +259,8 @@ public class Bridge {
                         Bridge.this.processCommandQueue();
                     } else {
                         log.error("Improper connect response");
+                        Request req = Utils.deserialize(body);
+                        executor.execute(req);
                     }
 
                 } else {
@@ -293,6 +288,22 @@ public class Bridge {
 
     }
 
+
+    
+    public Bridge setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+        return this;
+    }
+
+    private void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    private String getSecret() {
+        return this.secret;
+    }
+
+    
     public Bridge setHost(String host) {
         this.host = host;
         return this;
@@ -320,7 +331,5 @@ public class Bridge {
     public String getClientId () {
         return this.clientId;
     }
-
-
 
 }

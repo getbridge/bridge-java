@@ -17,10 +17,11 @@ public class TestMain {
 			.setHost("localhost")
 			.setApiKey("asdffdsa")
 			.setPort(8090);
+
 		bridge.setEventHandler(new BridgeEventHandler() {
 			public void onReady() {
-				Reference chat = bridge.getService("chatserver");
-				(new ChatServiceClient(chat)).join(
+				ChatServiceClient chat = bridge.getService("chatserver", ChatServiceClient.class);
+				chat.join(
 						"lobby", 
 						new Service(){
 							public void msg(String s, String t){
@@ -28,9 +29,9 @@ public class TestMain {
 							}
 						},
 						new Service(){
-							public void callback(Reference l, String name){
+							public void callback(ChatChannelClient l, String name){
 								System.out.println("JOINED " + name);
-								(new ChatChannelClient(l)).msg("peter piper", "picked a peck of pickled peppers");
+								l.msg("peter piper", "picked a peck of pickled peppers");
 							}
 						}
 				);
@@ -46,8 +47,8 @@ public class TestMain {
 
 			}
 		});
-		
+
 		bridge.connect();
-		
+
 	}
 }

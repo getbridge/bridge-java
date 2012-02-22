@@ -37,9 +37,8 @@ public class Test2 {
             @Override
             public void onReady() {
                 System.out.print("aaa4");
-                Reference service =
-                    bridgeClient.getService("test1_consolelog_java");
-                (new ConsoleLogHandler(service)).log("123");
+                ConsoleLogHandler handler = bridgeClient.getService("test1_consolelog_java", ConsoleLogHandler.class);
+                handler.log("123");
             }
         });
 

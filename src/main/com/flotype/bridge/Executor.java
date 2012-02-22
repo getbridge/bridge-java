@@ -1,4 +1,5 @@
 package com.flotype.bridge;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -98,9 +99,21 @@ class Executor {
 					while ((m != null) && (idxParam < formalParameters.length)) {
 						Class<?> param = formalParameters[idxParam];
 						if (!param.isAssignableFrom(arguments[idxParam].getClass())) {
-							m = null;
+							if(!(arguments[idxParam] instanceof Reference && param.getSuperclass() ==  ServiceClient.class)){
+								m = null;
+							} else {
+								try {
+									Constructor ctor = param.getConstructor(Reference.class);
+									arguments[idxParam] = ctor.newInstance(arguments[idxParam]);
+									idxParam++;
+								} catch (Exception e) {
+									// One of the billion reflection things has gone wrong
+									m = null;
+								}
+							}
+						} else {
+							idxParam++;
 						}
-						idxParam++;
 					}
 				} else {
 					m = null;
@@ -110,6 +123,7 @@ class Executor {
 			}
 			idxMethod++;
 		}
+
 		return m;
 	}
 
