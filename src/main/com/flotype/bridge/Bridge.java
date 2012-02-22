@@ -98,7 +98,11 @@ public class Bridge {
 		}
 	}
     public Reference getChannel(String channelName){
-        Reference result = new Reference(null, this);
+    	Map<String, Object> getChannelBody = new HashMap<String, Object>();
+        getChannelBody.put("name", channelName);
+        sendCommand("GETCHANNEL", getChannelBody);
+    	
+    	Reference result = new Reference(null, this);
         result.setRoutingPrefix("channel");
         result.setRoutingId(channelName);
         result.setServiceName("channel:" + channelName);
