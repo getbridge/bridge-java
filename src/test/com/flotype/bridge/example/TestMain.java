@@ -15,7 +15,7 @@ public class TestMain {
 
 		final Bridge bridge = new Bridge()
 			.setHost("localhost")
-			.setApiKey("asdffdsa")
+			.setApiKey("abcdefgh")
 			.setPort(8090);
 
 		bridge.setEventHandler(new BridgeEventHandler() {
