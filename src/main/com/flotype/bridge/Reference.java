@@ -11,6 +11,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 
 import com.flotype.bridge.serializers.ReferenceSerializer;
+import com.flotype.bridge.serializers.ServiceClientSerializer;
 import com.flotype.bridge.serializers.ServiceSerializer;
 
 public class Reference {
@@ -102,7 +103,8 @@ public class Reference {
         SimpleModule module =
             new SimpleModule("NowSerializers", new Version(0, 1, 0, "alpha"));
         module.addSerializer(new ReferenceSerializer(Reference.class))
-            .addSerializer(new ServiceSerializer(Service.class));
+            .addSerializer(new ServiceSerializer(Service.class))
+            .addSerializer(new ServiceClientSerializer(ServiceClient.class));
         mapper.registerModule(module);
 
         // Construct the request body here

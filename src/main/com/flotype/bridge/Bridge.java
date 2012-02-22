@@ -18,6 +18,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 
 import com.flotype.bridge.serializers.ReferenceSerializer;
+import com.flotype.bridge.serializers.ServiceClientSerializer;
+import com.flotype.bridge.serializers.ServiceSerializer;
 
 import net.bobah.nio.TcpClient;
 
@@ -31,13 +33,13 @@ public class Bridge {
 
 	// Secret used for reconnects
 	private String secret;
-	
+
 	// Queue for commands before connects happen
 	private Queue<String> commandQueue = new LinkedList<String>();
 
 	// Whether handshake has occurred
 	private boolean handshaken = false;
-	
+
 	Executor executor = new Executor();
 
 	// Options
@@ -82,7 +84,7 @@ public class Bridge {
 		result.setRoutingPrefix("named");
 		result.setRoutingId(serviceName);
 		result.setServiceName(serviceName);
-		
+
 		Constructor ctor;
 		try {
 			ctor = serviceClass.getConstructor(Reference.class);
@@ -157,7 +159,10 @@ public class Bridge {
 	private void sendCommand(String command, Map<String, Object> data){
 		ObjectMapper mapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule("Handler", new Version(0, 1, 0, "alpha"));
-		module.addSerializer(new ReferenceSerializer(Reference.class));
+		module.addSerializer(new ReferenceSerializer(Reference.class))
+		.addSerializer(new ServiceSerializer(Service.class))
+		.addSerializer(new ServiceClientSerializer(ServiceClient.class));
+
 		mapper.registerModule(module);
 
 		try {
@@ -183,13 +188,13 @@ public class Bridge {
 			try {
 				log.info("Sending JSON = " +  jsonStr);
 				byte[] jsonBytes = jsonStr.getBytes();
-	
+
 				ByteBuffer data = ByteBuffer.allocate(jsonBytes.length + 4);
-	
+
 				data.put(Utils.intToByteArray(jsonBytes.length));
 				data.put(jsonBytes);
 				data.flip();
-	
+
 				connection.send(data);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -200,17 +205,17 @@ public class Bridge {
 			}
 		}
 	}
-	
+
 	private void processCommandQueue() {
-		
+
 		// TODO: Fix clientId refs
-		
+
 		for (String str : commandQueue ) {
 			this.write(str);
 		}
 		commandQueue.clear();
 	}
-	
+
 	private void setSecret(String secret) {
 		this.secret = secret;
 	}
@@ -218,7 +223,7 @@ public class Bridge {
 	private String getSecret() {
 		return this.secret;
 	}
-	
+
 	class TCPConnection extends TcpClient {
 
 		@Override protected void onRead(ByteBuffer buf) throws Exception {
@@ -244,13 +249,13 @@ public class Bridge {
 				if(!Bridge.this.handshaken) {
 					// Client not handshaken
 					String[] ids = (new String(body)).split("\\|");
-					
+
 					if(ids.length == 2) {
 						String oldId = Bridge.this.getClientId();
-						
+
 						Bridge.this.setClientId(ids[0]);
 						Bridge.this.setSecret(ids[1]);
-						
+
 						if(oldId == null) {
 							// This is a first connection (not a reconnect)
 							Bridge.this.eventHandler.onReady();	
@@ -272,17 +277,17 @@ public class Bridge {
 		}
 		@Override protected void onDisconnected() {
 			Bridge.this.handshaken = false;
-			
+
 			log.warn("Disconnected from TCP server");
 		}
 		@Override protected void onConnected() throws Exception {
 			log.info("Connected to TCP server");	
-			
+
 			// Queue up connect command
 			Map<String, Object> connectBody = new HashMap<String, Object>();
 			connectBody.put("session", new String[]{Bridge.this.getClientId(), Bridge.this.getSecret()});
-			
-			
+
+
 
 			Bridge.this.sendCommand("CONNECT", connectBody);
 		}
@@ -308,7 +313,7 @@ public class Bridge {
 		this.connection.setReconnect(reconnect);
 		return this;
 	}
-	
+
 	protected void setClientId(String clientId) {
 		this.clientId = clientId;
 	}
