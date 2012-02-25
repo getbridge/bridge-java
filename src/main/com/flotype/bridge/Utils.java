@@ -15,8 +15,8 @@ import org.codehaus.jackson.type.TypeReference;
 
 public class Utils {
 
-    public static final int DEFAULT_PORT = 8082;
-    public static final String DEFAULT_HOST = "127.0.0.1";
+    public static final int DEFAULT_PORT = -1;
+    public static final String DEFAULT_HOST = "http://redirector.flotype.com";
     public static final BridgeEventHandler DEFAULT_EVENT_HANDLER = new BridgeEventHandler();
     public static final boolean DEFAULT_RECONNECT = true;
     public static int logLevel = 5;

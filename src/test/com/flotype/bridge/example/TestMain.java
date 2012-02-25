@@ -14,9 +14,7 @@ public class TestMain {
 	public static void main (String[] args) throws Exception {
 
 		final Bridge bridge = new Bridge()
-			.setHost("localhost")
-			.setApiKey("abcdefgh")
-			.setPort(8090);
+			.setApiKey("abcdefgh");
 		bridge.connect();
 		
 		ChatServiceClient chat = bridge.getService("chatserver", ChatServiceClient.class);
