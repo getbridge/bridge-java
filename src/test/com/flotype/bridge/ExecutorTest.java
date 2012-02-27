@@ -7,6 +7,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,28 +102,41 @@ public class ExecutorTest {
 	
 
 	@Test
-	public void testGetConformingMethod() {
+	public void testGetConformingMethod() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		
+		ConformingMethodTestClass testInstance = new ConformingMethodTestClass();
+		
 		// Argument types are same class as parameter type
-		Method method = executor.getConformingMethod("nonPolymorphic", new Object[]{1.0f, new ArrayList<String>()}, ConformingMethodTestClass.class);
+		Object[] methodArgs = new Object[]{1.0f, new ArrayList<String>()};
+		Method method = executor.getConformingMethod("nonPolymorphic", methodArgs, ConformingMethodTestClass.class);
 		assertNotNull(method);
+		assertTrue((Boolean) method.invoke(testInstance, methodArgs));
 		
 		// Argument types inherit from parameter types
-		Method polyMethod = executor.getConformingMethod("polymorphic", new Object[]{1.0f, new ArrayList<String>(), new ArrayList<String>()}, ConformingMethodTestClass.class);
+		Object[] polyMethodArgs = new Object[]{1.0f, new ArrayList<String>(), new ArrayList<String>()};
+		Method polyMethod = executor.getConformingMethod("polymorphic", polyMethodArgs, ConformingMethodTestClass.class);
 		assertNotNull(polyMethod);
+		assertTrue((Boolean) polyMethod.invoke(testInstance, polyMethodArgs));
 		
 		// Argument is a reference, parameter is a ServiceClient subclass
 		
 		// Arguments have type parameters. Params do not
-		Method erasedMethod = executor.getConformingMethod("collectionsTypeErased", new Object[]{new HashMap<String, Object>(), new ArrayList<String>()}, ConformingMethodTestClass.class);
+		Object[] erasedMethodArgs = new Object[]{new HashMap<String, Object>(), new ArrayList<String>()};
+		Method erasedMethod = executor.getConformingMethod("collectionsTypeErased", erasedMethodArgs, ConformingMethodTestClass.class);
 		assertNotNull(erasedMethod);
+		assertTrue((Boolean) erasedMethod.invoke(testInstance, erasedMethodArgs));
 		
 		// Arguments have type parameters. Params also have types
-		Method typedMethod = executor.getConformingMethod("collectionsWithTypes", new Object[]{new HashMap<String, Object>(), new ArrayList<String>()}, ConformingMethodTestClass.class);
+		Object[] typedMethodArgs = new Object[]{new HashMap<String, Object>(), new ArrayList<String>()};
+		Method typedMethod = executor.getConformingMethod("collectionsWithTypes", typedMethodArgs, ConformingMethodTestClass.class);
 		assertNotNull(typedMethod);
+		assertTrue((Boolean) typedMethod.invoke(testInstance, typedMethodArgs));
 
-		Method nxTypedMethod = executor.getConformingMethod("collectionsWithTypes", new Object[]{new HashMap<Float, Object>(), new ArrayList<Float>()}, ConformingMethodTestClass.class);
+		Object[] nxTypedMethodArgs = new Object[]{new HashMap<Float, Object>(), new ArrayList<Float>()};
+		Method nxTypedMethod = executor.getConformingMethod("collectionsWithTypes", nxTypedMethodArgs, ConformingMethodTestClass.class);
 		// This should be null. I don't fully understand why it is not
 		//assertNull(nxTypedMethod);
+		assertTrue((Boolean) nxTypedMethod.invoke(testInstance, nxTypedMethodArgs));
 		
 		// No such method name
 		Method nxMethod = executor.getConformingMethod("doesNotExist", new Object[]{new HashMap<String, Object>(), new ArrayList<String>()}, ConformingMethodTestClass.class);
@@ -130,24 +144,24 @@ public class ExecutorTest {
 	}
 	
 	class ConformingMethodTestClass {
-		public void nonPolymorphic(Float theFloat, ArrayList theList){
-			
+		public boolean nonPolymorphic(Float theFloat, ArrayList theList){
+			return true;
 		}
 		
-		public void polymorphic(Number theNumber, List theList, Object theObject) {
-			
+		public boolean polymorphic(Number theNumber, List theList, Object theObject) {
+			return true;
 		}
 		
-		public void collectionsTypeErased(Map theMap, List theList){
-			
+		public boolean collectionsTypeErased(Map theMap, List theList){
+			return true;
 		}
 		
-		public void collectionsWithTypes(Map<String, Object> theMap, List<String> theList){
-			
+		public boolean collectionsWithTypes(Map<String, Object> theMap, List<String> theList){
+			return true;
 		}
 		
-		public void referenceToClient(ServiceClient client){
-			
+		public boolean referenceToClient(ServiceClient client){
+			return true;
 		}
 	}
 
