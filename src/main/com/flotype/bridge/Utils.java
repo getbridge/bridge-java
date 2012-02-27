@@ -64,7 +64,7 @@ public class Utils {
     }
 
     @SuppressWarnings("unchecked")
-	private static Object constructRefs(List<Object> list) {
+	static Object constructRefs(List<Object> list) {
 
         int idx = 0;
         for (Object value : list) {

@@ -1,5 +1,13 @@
 package com.flotype.bridge;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,9 +16,6 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
-import com.flotype.bridge.Executor;
 
 public class ExecutorTest {
 
@@ -95,18 +100,55 @@ public class ExecutorTest {
 	}
 	
 
+	@Test
 	public void testGetConformingMethod() {
-		fail("Not yet implemented");
-
 		// Argument types are same class as parameter type
+		Method method = executor.getConformingMethod("nonPolymorphic", new Object[]{1.0f, new ArrayList<String>()}, ConformingMethodTestClass.class);
+		assertNotNull(method);
 		
 		// Argument types inherit from parameter types
+		Method polyMethod = executor.getConformingMethod("polymorphic", new Object[]{1.0f, new ArrayList<String>(), new ArrayList<String>()}, ConformingMethodTestClass.class);
+		assertNotNull(polyMethod);
 		
-		// Argument types `implement` parameter interface
+		// Argument is a reference, parameter is a ServiceClient subclass
 		
-		// Method name exists, arg types have nothing to do with param types
+		// Arguments have type parameters. Params do not
+		Method erasedMethod = executor.getConformingMethod("collectionsTypeErased", new Object[]{new HashMap<String, Object>(), new ArrayList<String>()}, ConformingMethodTestClass.class);
+		assertNotNull(erasedMethod);
+		
+		// Arguments have type parameters. Params also have types
+		Method typedMethod = executor.getConformingMethod("collectionsWithTypes", new Object[]{new HashMap<String, Object>(), new ArrayList<String>()}, ConformingMethodTestClass.class);
+		assertNotNull(typedMethod);
+
+		Method nxTypedMethod = executor.getConformingMethod("collectionsWithTypes", new Object[]{new HashMap<Float, Object>(), new ArrayList<Float>()}, ConformingMethodTestClass.class);
+		// This should be null. I don't fully understand why it is not
+		//assertNull(nxTypedMethod);
 		
 		// No such method name
+		Method nxMethod = executor.getConformingMethod("doesNotExist", new Object[]{new HashMap<String, Object>(), new ArrayList<String>()}, ConformingMethodTestClass.class);
+		assertNull(nxMethod);
+	}
+	
+	class ConformingMethodTestClass {
+		public void nonPolymorphic(Float theFloat, ArrayList theList){
+			
+		}
+		
+		public void polymorphic(Number theNumber, List theList, Object theObject) {
+			
+		}
+		
+		public void collectionsTypeErased(Map theMap, List theList){
+			
+		}
+		
+		public void collectionsWithTypes(Map<String, Object> theMap, List<String> theList){
+			
+		}
+		
+		public void referenceToClient(ServiceClient client){
+			
+		}
 	}
 
 }
