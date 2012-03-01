@@ -1,7 +1,6 @@
 package com.flotype.bridge.example.adder;
 import com.flotype.bridge.Bridge;
 import com.flotype.bridge.BridgeEventHandler;
-import com.flotype.bridge.Reference;
 
 
 public class AdderTest {
@@ -30,8 +29,8 @@ public class AdderTest {
 		bridgeClient.setEventHandler(new BridgeEventHandler() {
 			
 			public void onReady() {
-				Reference channel = bridgeClient.getChannel("friendlyPerson");
-				(new AdderHandler(channel)).greeting();
+				AdderHandler adder = new AdderHandler(bridgeClient.getChannel("friendlyPerson"));
+				adder.greeting();
 			}
 			
 		});
