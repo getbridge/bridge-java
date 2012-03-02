@@ -108,11 +108,25 @@ public class Bridge {
 			return null;
 		}
 	}
-	public Reference getChannel(String channelName){
+	public <T extends ServiceClient > T getChannel(String channelName, Class<T> serviceClass){
 		Map<String, Object> getChannelBody = new HashMap<String, Object>();
 		getChannelBody.put("name", channelName);
 		sendCommand("GETCHANNEL", getChannelBody);
 
+		Reference result = getChannelReference(channelName);
+		
+		Constructor ctor;
+		try {
+			ctor = serviceClass.getConstructor(Reference.class);
+			return (T) ctor.newInstance(result);
+		} catch (Exception e) {
+			// One of the billion reflection things has gone wrong
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	protected Reference getChannelReference(String channelName) {
 		Reference result = new Reference(null, this);
 		result.setRoutingPrefix("channel");
 		result.setRoutingId(channelName);
@@ -170,6 +184,23 @@ public class Bridge {
 		}
 
 		this.sendCommand("JOINCHANNEL", joinChannelBody);
+	}
+	
+	public void leaveChannel(String name, Service handler) {
+		leaveChannel(name, handler, null);
+	}
+	
+	public void leaveChannel(String name, Service handler, Service callback) {
+		Map<String, Object> leaveChannelBody = new HashMap<String, Object>();
+
+		leaveChannelBody.put("name", name);
+		leaveChannelBody.put("handler", handler);
+		
+		if(callback != null) {
+			leaveChannelBody.put("callback", callback);
+		}
+
+		this.sendCommand("LEAVECHANNEL", leaveChannelBody);
 	}
 
 
