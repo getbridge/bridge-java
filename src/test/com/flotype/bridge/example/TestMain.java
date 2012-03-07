@@ -33,7 +33,7 @@ public class TestMain {
 				}
 		);
 		
-		final ChatChannelClient c = new ChatChannelClient(bridge.getChannel("lobby"));
+		final ChatChannelClient c = bridge.getChannel("lobby", ChatChannelClient.class);
 		
 		bridge.publishService("javachat", new Service(){
 			public void send(String x){
