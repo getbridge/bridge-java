@@ -59,7 +59,7 @@ public class Bridge {
 			return;
 		}
 
-		Reference serviceRef = dispatcher.storeObject(name, service);
+		dispatcher.storeObject(name, service);
 		Reference callbackRef = dispatcher.storeRandomObject(callback);
 		String msg = JSONCodec.createJWP(this, name, callbackRef);
 		this.connection.send(msg);
