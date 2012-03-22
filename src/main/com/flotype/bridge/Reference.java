@@ -1,136 +1,123 @@
 package com.flotype.bridge;
 
-import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.jackson.Version;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.module.SimpleModule;
+public class Reference implements InvocationHandler{
 
-import com.flotype.bridge.serializers.ReferenceSerializer;
-import com.flotype.bridge.serializers.ServiceClientSerializer;
-import com.flotype.bridge.serializers.ServiceSerializer;
+	private Bridge client;
+	private String destinationType;
+	private String destinationId;
+	private String objectId;
+	private String methodName;
+	private List<String> operations;
+	
 
-public class Reference {
+	
+	protected Reference(Bridge client, String dT, String dI, String oI, String mN, List<String> operations) {
+		this.client = client;
+		destinationType = dT;
+		destinationId = dI;
+		objectId = oI;
+		methodName = mN;
+		this.operations = operations;
+	}
+	
+	protected Reference(Reference other){
+		this(other.client, other.destinationType, other.destinationId, other.objectId, other.methodName, other.operations);
+	}
+	
+	public Reference(Bridge bridge, List<String> address, List<String> operations) {
+		this(bridge, address.get(0), address.get(1), address.get(2), null, operations);
+		if(address.size() == 4){
+			this.setMethodName(address.get(3));
+		}
+	}
 
-    private List<String> pathchain;
-    private Bridge client;
+	public Map<String, Object> toDict(){
+		Map<String, Object> dict = new HashMap<String, Object>();
+		List<String> address = new ArrayList<String>();
+		address.add(destinationType);
+		address.add(destinationId);
+		address.add(objectId);
+		if(methodName != null){
+			address.add(methodName);
+		} 
+		
+		dict.put("ref", address);
+		
+		if(methodName == null){
+			dict.put("operations", operations);
+		}
+		
+		return dict;
+	}
 
-    protected Reference(List<String> pathchain, Bridge client) {
-        this.client = client;
+	public Object invoke(Object proxy, Method method, Object[] args) {
+		return invokeByName(proxy, method.getName(), args);
+	}
+	
+	public Object invokeByName(Object proxy, String methodName, Object[] args) {
+		Reference destination = new Reference(this);
+		destination.setMethodName(methodName);
+		client.send(destination, args);
+		return null;
+	}	
+	
+	// Static helper methods
+	
+	static Reference createClientReference(Bridge bridge, String objectId, List<String> operations){
+		return new Reference(bridge, "client", bridge.getClientId(), objectId, null, operations);
+	}
+	
+	static Reference createServiceReference(Bridge bridge, String serviceName, List<String> operations){
+		return new Reference(bridge, "named", serviceName, serviceName, null, operations);
+	}
+	
+	static Reference createChannelReference(Bridge bridge, String channelName, List<String> operations){
+		return new Reference(bridge, "channel", channelName, "channel:"+channelName, null, operations);
+	}
+	
+	// Setters and getters
+	
+	public String getDestinationType() {
+		return destinationType;
+	}
 
-        if (pathchain != null) {
-            this.pathchain = pathchain;
-        } else {
-            this.pathchain = new ArrayList<String>();
-            this.pathchain.add("");
-            this.pathchain.add("");
-            this.pathchain.add("");
+	public void setDestinationType(String destinationType) {
+		this.destinationType = destinationType;
+	}
 
-            this.setRoutingPrefix("client");
-            this.setRoutingId(client.getClientId());
-        }
-    }
+	public String getDestinationId() {
+		return destinationId;
+	}
 
-    protected Reference(Reference other) {
-        this(other.getPathchain(), other.client);
-    }
+	public void setDestinationId(String destinationId) {
+		this.destinationId = destinationId;
+	}
 
-    public List<String> getPathchain() {
-        return pathchain;
-    }
+	public String getObjectId() {
+		return objectId;
+	}
 
-    protected void setRoutingPrefix(String prefix) {
-        pathchain.set(0, prefix);
-    }
+	public void setObjectId(String objectId) {
+		this.objectId = objectId;
+	}
 
-    protected void setRoutingId(String id) {
-        pathchain.set(1, id);
-    }
+	public String getMethodName() {
+		return methodName;
+	}
 
-    protected void setServiceName(String serviceName) {
-        pathchain.set(2, serviceName);
-    }
+	public void setMethodName(String methodName) {
+		this.methodName = methodName;
+	}
 
-    protected void setMethodName(String methodName) {
-        if (pathchain.size() == 4) {
-            pathchain.set(3, methodName);
-        } else {
-            pathchain.add(3, methodName);
-        }
-    }
-
-    protected String getRoutingPrefix() {
-        return pathchain.get(0);
-    }
-
-    protected String getRoutingId() {
-        return pathchain.get(1);
-    }
-
-    protected String getServiceName() {
-        return pathchain.get(2);
-    }
-
-    protected String getMethodName() {
-        if (pathchain.size() == 4) {
-            return pathchain.get(3);
-        } else {
-            return null;
-        }
-    }
-    
-    @Override
-    public boolean equals(Object o){
-    	if(o instanceof Reference){
-    		return this.pathchain.equals(((Reference) o).getPathchain());
-    	} else {
-    		return false;
-    	}
-    }
-    
-    @Override
-    public int hashCode(){
-    	return pathchain.hashCode();
-    }
-
-    public void invokeRPC(String methodName, Object... args) throws IOException {
-    	boolean handshaken = client.isHandshaken();
-    	
-    	ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module =
-            new SimpleModule("NowSerializers", new Version(0, 1, 0, "alpha"));
-        module.addSerializer(new ReferenceSerializer(Reference.class))
-            .addSerializer(new ServiceSerializer(Service.class))
-            .addSerializer(new ServiceClientSerializer(ServiceClient.class));
-        mapper.registerModule(module);
-
-        // Construct the request body here
-        Map<String, Object> sendBody = new HashMap<String, Object>();
-
-        Reference destination =
-            ReferenceFactory.getFactory().generateReference(this);
-        destination.setMethodName(methodName);
-
-        sendBody.put("destination", destination);
-        sendBody.put("args", args);
-
-        // Construct the request body here
-        Map<String, Object> commandBody = new HashMap<String, Object>();
-
-        commandBody.put("command", "SEND");
-        commandBody.put("data", sendBody);
-
-        String commandString = mapper.writeValueAsString(commandBody);
-
-        if(!handshaken) {
-        	client.addCommandQueue(commandString);	
-        } else {
-        	client.write(commandString);
-        }
-    }
+	public List<String> getOperations() {
+		return operations;
+	}
 
 }
