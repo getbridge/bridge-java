@@ -5,39 +5,39 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class SystemService extends Service {
-	Executor executor;
+public class SystemService implements Service {
+	Dispatcher dispatcher;
 	private Bridge bridge;
 	
 	private static Log log = LogFactory.getLog(SystemService.class);
 
-	public SystemService(Bridge bridge, Executor executor) {
-		this.executor = executor;
+	public SystemService(Bridge bridge, Dispatcher dispatcher) {
+		this.dispatcher = dispatcher;
 		this.bridge = bridge;
 	}
-	public void hook_channel_handler(String channel, Reference handler, Reference callback){
-		hook_channel(channel, handler);
-		(new ServiceClient(callback)).invokeRPC("callback", bridge.getChannelReference(channel), channel);
+	public void hookChannelHandler(String channel, Reference handler, Reference callback){
+		hookChannel(channel, handler);
+		callback.invokeByName(null, "callback", new Object[]{Reference.createChannelReference(bridge, channel, handler.getOperations()), channel});
 	}
 	
-	public void hook_channel_handler(String channel, Reference handler){
-		hook_channel(channel, handler);
+	public void hookChannelHandler(String channel, Reference handler){
+		hookChannel(channel, handler);
+	}	
+	
+	private void hookChannel (String channel, Reference handler) {
+		String channelName = "channel:"+channel;
+		String key = handler.getObjectId();
+		dispatcher.storeExistingObjectByKey(key, channelName);
 	}
 	
-	public void getservice(String name, Reference callback) throws IOException {
-		Service service = executor.getService(name);
+	public void getService(String name, Reference callback) throws IOException {
+		Object service = dispatcher.getObject(name);
 		if(service != null) {
-			callback.invokeRPC("callback", service);
+			callback.invokeByName(null, "callback", new Object[]{service});
 		} else {
-			callback.invokeRPC("callback", null, "Cannot find service " + name);
+			callback.invokeByName(null, "callback", new Object[]{null});
 		}
 		
-	}
-	
-	private void hook_channel (String channel, Reference handler) {
-		String channelName = "channel:"+channel;
-		String key = handler.getServiceName();
-		executor.addExistingServiceByKey(key, channelName);
 	}
 	
 	public void remoteError(String error) {
