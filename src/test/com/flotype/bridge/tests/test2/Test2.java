@@ -1,10 +1,11 @@
 package com.flotype.bridge.tests.test2;
 
+import java.io.IOException;
+
 import org.junit.Test;
 
 import com.flotype.bridge.Bridge;
 import com.flotype.bridge.BridgeEventHandler;
-import com.flotype.bridge.Reference;
 
 public class Test2 {
 
@@ -12,12 +13,12 @@ public class Test2 {
     final Bridge bridgeClient = new Bridge().setHost("localhost").setPort(8090);
 
     @Test
-    public void runTest1() {
+    public void runTest1() throws IOException {
         startService();
         startClient();
     }
 
-    private void startService() {
+    private void startService() throws IOException {
         System.out.print("aaa1");
         bridgeServer.setEventHandler(new BridgeEventHandler() {
             @Override
@@ -31,7 +32,7 @@ public class Test2 {
         bridgeServer.connect();
     }
 
-    private void startClient() {
+    private void startClient() throws IOException {
         System.out.print("aaa3");
         bridgeClient.setEventHandler(new BridgeEventHandler() {
             @Override

@@ -1,4 +1,6 @@
 package com.flotype.bridge.example.adder;
+import java.io.IOException;
+
 import com.flotype.bridge.Bridge;
 import com.flotype.bridge.BridgeEventHandler;
 
@@ -13,7 +15,7 @@ public class AdderTest {
 		streamChannel();
 	}
 	
-	public static void startChannel() {
+	public static void startChannel() throws IOException {
 		bridgeServer.setEventHandler(new BridgeEventHandler() {
 			
 			public void onReady() {
@@ -25,11 +27,11 @@ public class AdderTest {
 		bridgeServer.connect();
 	}
 	
-	public static void streamChannel() {
+	public static void streamChannel() throws IOException {
 		bridgeClient.setEventHandler(new BridgeEventHandler() {
 			
 			public void onReady() {
-				AdderHandler adder = new AdderHandler(bridgeClient.getChannel("friendlyPerson"));
+				AdderHandler adder = bridgeClient.getChannel("friendlyPerson", AdderHandler.class);
 				adder.greeting();
 			}
 			
