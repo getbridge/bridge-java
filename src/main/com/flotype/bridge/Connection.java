@@ -53,7 +53,7 @@ public class Connection extends TcpClient{
 		if(bridge.ready) {
 			write(string.getBytes());
 		} else {
-			addCommandQueue(string);
+			commandQueue.add(string);
 		}
 	}
 	
@@ -119,14 +119,6 @@ public class Connection extends TcpClient{
 		commandQueue.clear();
 	}
 
-	protected void addCommandQueue(String jsonStr) {
-		if(this.handshaken) {
-			this.send(jsonStr.replace("\"ref\":[\"client\",null,", "\"ref\":[\"client\",\""+ this.clientId+"\","));
-		} else {
-			commandQueue.add(jsonStr);
-		}
-	}
-
 	@Override 
 	protected void onRead(ByteBuffer buf) throws Exception {
 		while(buf.hasRemaining()){
@@ -150,8 +142,8 @@ public class Connection extends TcpClient{
 					secret = ids[1];
 					this.handshaken = true;
 					
-					processCommandQueue();
 					bridge.onReady();
+					processCommandQueue();
 					return;
 				}
 			} 
