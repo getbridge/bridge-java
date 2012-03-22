@@ -1,7 +1,6 @@
 package com.flotype.bridge;
 
-public class Callback extends Service{
+public class Callback implements Service{
 	public Callback() {
-		ReferenceFactory.client.publishService(this);
 	}
 }
