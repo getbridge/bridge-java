@@ -23,11 +23,9 @@ public class JSONCodec {
 		return createCommand(bridge, "SEND", data);
 	}
 
-	public static String createJWP(Bridge bridge, String name, Reference serviceRef,
-			Reference callbackRef) {
+	public static String createJWP(Bridge bridge, String name, Reference callbackRef) {
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("name", name);
-		data.put("handler", serviceRef);
 		if(callbackRef != null){
 			data.put("callback", callbackRef);
 		}

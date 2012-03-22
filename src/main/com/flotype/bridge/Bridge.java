@@ -52,7 +52,7 @@ public class Bridge {
 		publishService(name, service, null);
 	}
 
-	public void publishService(String name, Service service, Callback callback) {
+	public void publishService(String name, Service service, Service callback) {
 
 		if(name.equals("system")) {
 			log.error("Invalid service name: " + name);
@@ -61,7 +61,7 @@ public class Bridge {
 
 		Reference serviceRef = dispatcher.storeObject(name, service);
 		Reference callbackRef = dispatcher.storeRandomObject(callback);
-		String msg = JSONCodec.createJWP(this, name, serviceRef, callbackRef);
+		String msg = JSONCodec.createJWP(this, name, callbackRef);
 		this.connection.send(msg);
 	}
 	
