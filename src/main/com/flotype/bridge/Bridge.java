@@ -1,30 +1,9 @@
 package com.flotype.bridge;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.*;
-import java.nio.ByteBuffer;
+import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.Version;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.module.SimpleModule;
-import org.codehaus.jackson.type.TypeReference;
-
-import com.flotype.bridge.serializers.ReferenceSerializer;
-import com.flotype.bridge.serializers.ServiceClientSerializer;
-import com.flotype.bridge.serializers.ServiceSerializer;
-
-import net.bobah.nio.TcpClient;
 
 public class Bridge {
 
