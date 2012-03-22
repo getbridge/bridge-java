@@ -18,8 +18,6 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.flotype.bridge.Utils;
-
 
 /**
  * A simple NIO TCP client
