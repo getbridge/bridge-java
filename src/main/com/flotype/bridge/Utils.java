@@ -77,8 +77,9 @@ public class Utils<T> {
 		return list;
 	}
 
-	protected static Object createProxy(InvocationHandler handler, Class<?> proxiedClass){
-		return java.lang.reflect.Proxy.newProxyInstance(proxiedClass.getClassLoader(),
+	@SuppressWarnings("unchecked")
+	protected static <T> T createProxy(InvocationHandler handler, Class<T> proxiedClass){
+		return (T) java.lang.reflect.Proxy.newProxyInstance(proxiedClass.getClassLoader(),
                 new Class[] { proxiedClass },
                 handler);
 	}

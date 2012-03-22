@@ -67,7 +67,7 @@ public class Bridge {
 	
 	public <T> T getService(String serviceName, Class<T> serviceClass){
 		Reference result = Reference.createServiceReference(this, serviceName, Utils.getMethods(serviceClass));
-		return (T) Utils.createProxy(result, serviceClass);
+		return Utils.createProxy(result, serviceClass);
 	}
 
 	public <T> T getChannel(String channelName, Class<T> serviceClass){
@@ -75,7 +75,7 @@ public class Bridge {
 		this.connection.send(msg);
 		
 		Reference result = Reference.createChannelReference(this, channelName, Utils.getMethods(serviceClass));
-		return (T) Utils.createProxy(result, serviceClass);
+		return Utils.createProxy(result, serviceClass);
 	}
 	
 	public void joinChannel(String name, Service handler) {
