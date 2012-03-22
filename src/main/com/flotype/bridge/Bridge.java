@@ -139,7 +139,7 @@ public class Bridge {
 		
 	}
 
-	public void onConnected() {
+	protected void onConnected() {
 		
 	}
 
