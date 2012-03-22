@@ -83,8 +83,8 @@ public class Bridge {
 	}
 	
 	public void joinChannel(String name, Service handler, Service callback) {
-		Reference handlerRef = dispatcher.storeObject("channel:"+name, handler);
-		Reference callbackRef = dispatcher.storeRandomObject(handler);
+		Reference handlerRef = dispatcher.storeRandomObject(handler);
+		Reference callbackRef = dispatcher.storeRandomObject(callback);
 		String msg = JSONCodec.createJC(this, name, handlerRef, callbackRef);
 		this.connection.send(msg);
 	}
@@ -146,5 +146,5 @@ public class Bridge {
 	protected String getClientId() {
 		return connection.clientId;
 	}
-	
+
 }
