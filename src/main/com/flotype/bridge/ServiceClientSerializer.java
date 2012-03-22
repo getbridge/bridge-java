@@ -12,7 +12,7 @@ import com.flotype.bridge.ServiceClient;
 
 
 
-public class ServiceClientSerializer extends SerializerBase<ServiceClient> {
+class ServiceClientSerializer extends SerializerBase<ServiceClient> {
 	Bridge bridge;
 
 	public ServiceClientSerializer(Bridge bridge, Class<ServiceClient> t) {

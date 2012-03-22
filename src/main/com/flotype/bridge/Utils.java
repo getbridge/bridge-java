@@ -13,7 +13,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
-public class Utils<T> {
+class Utils<T> {
 
 	public static final int DEFAULT_PORT = -1;
 	public static final String DEFAULT_HOST = "http://redirector.flotype.com";

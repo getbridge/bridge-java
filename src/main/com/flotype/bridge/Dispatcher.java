@@ -11,7 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-public class Dispatcher {
+class Dispatcher {
 
 	private static Log log = LogFactory.getLog(Dispatcher.class);
 

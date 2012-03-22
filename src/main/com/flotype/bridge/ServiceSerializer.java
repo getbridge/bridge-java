@@ -8,7 +8,7 @@ import org.codehaus.jackson.map.ser.std.SerializerBase;
 
 
 
-public class ServiceSerializer extends SerializerBase<Service> {
+class ServiceSerializer extends SerializerBase<Service> {
 	Bridge bridge;
 
 	public ServiceSerializer(Bridge bridge, Class<Service> t) {

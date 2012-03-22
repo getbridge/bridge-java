@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class SystemService implements Service {
+class SystemService implements Service {
 	Dispatcher dispatcher;
 	private Bridge bridge;
 	

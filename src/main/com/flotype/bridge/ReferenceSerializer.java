@@ -9,7 +9,7 @@ import org.codehaus.jackson.map.ser.std.SerializerBase;
 
 
 
-public class ReferenceSerializer extends SerializerBase<Reference> {
+class ReferenceSerializer extends SerializerBase<Reference> {
 
 	public ReferenceSerializer(Bridge bridge, Class<Reference> t) {
 		super(t);

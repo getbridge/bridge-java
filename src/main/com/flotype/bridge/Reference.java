@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Reference implements InvocationHandler{
+class Reference implements InvocationHandler{
 
 	private Bridge client;
 	private String destinationType;

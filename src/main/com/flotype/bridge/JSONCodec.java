@@ -14,7 +14,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 import org.codehaus.jackson.type.TypeReference;
 
-public class JSONCodec {
+class JSONCodec {
 
 	public static String createSEND(Bridge bridge, Reference destination, Object[] args) {
 		Map<String, Object> data = new HashMap<String, Object>();
