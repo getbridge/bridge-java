@@ -1,39 +1,24 @@
-package com.flotype.bridge.serializers;
+package com.flotype.bridge;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.ser.std.SerializerBase;
 
-import com.flotype.bridge.Reference;
-import com.flotype.bridge.Service;
-
 
 
 public class ServiceSerializer extends SerializerBase<Service> {
+	Bridge bridge;
 
-	public ServiceSerializer(Class<Service> t) {
+	public ServiceSerializer(Bridge bridge, Class<Service> t) {
 		super(t);
+		this.bridge = bridge;
 	}
 
 	public void serialize(Service value, JsonGenerator jsonGen, SerializerProvider serializerProvider)
 	throws IOException, JsonProcessingException {
-		value.ensureReference();
-		
-		Reference ref = value.getReference();
-		
-		Map<String, Object> obj = null;
-
-		if(value != null) {
-			obj = new HashMap<String, Object>();
-			obj.put("ref", ref.getPathchain());
-			obj.put("operations", value.getMethodNames());
-		}
-		
-		serializerProvider.defaultSerializeValue(obj, jsonGen);
-		
+		Reference ref = bridge.dispatcher.storeRandomObject(value);
+		serializerProvider.defaultSerializeValue(ref, jsonGen);
 	}
 }
