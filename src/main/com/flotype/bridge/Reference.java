@@ -58,7 +58,12 @@ class Reference implements InvocationHandler{
 	}
 
 	public Object invoke(Object proxy, Method method, Object[] args) {
-		return invokeByName(proxy, method.getName(), args);
+		invokeByName(proxy, method.getName(), args);
+		if(method.getReturnType() == Void.TYPE){
+			return null;
+		} else {
+			return Utils.defaultValueForPrimitive(method.getReturnType());
+		}
 	}
 	
 	public Object invokeByName(Object proxy, String methodName, Object[] args) {

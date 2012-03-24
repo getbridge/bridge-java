@@ -130,4 +130,32 @@ class Utils<T> {
 		}
 		return false;
 	}
+	
+	public static Object defaultValueForPrimitive(Class<?> primitive){
+		boolean bool = false;
+		int i = 0;
+		float f = 0;
+		double d = 0;
+		byte b = 0x0;
+		char c = 0;
+		long l = 0;
+		
+		if(primitive.equals(boolean.class)){
+			return bool;
+		} else if(primitive.equals(int.class)) {
+			return i;
+		} else if(primitive.equals(float.class)) {
+			return f;
+		} else if(primitive.equals(double.class)) {
+			return d;
+		} else if(primitive.equals(byte.class)) {
+			return b;
+		} else if(primitive.equals(char.class)) {
+			return c;
+		} else if(primitive.equals(long.class)) {
+			return l;
+		}
+		
+		return null;
+	}
 }
