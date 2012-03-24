@@ -76,6 +76,23 @@ class Reference implements InvocationHandler{
 		return null;
 	}	
 	
+	public boolean equals(Object o){
+		if(o instanceof Reference){
+			Reference ref = (Reference) o;
+			return this.toDict().equals(ref.toDict());
+		}
+		
+		return false;
+	}
+	
+	public int hashCode(){
+		return this.toString().hashCode();
+	}
+	
+	public String toString(){
+		return this.toDict().toString();
+	}
+	
 	// Static helper methods
 	
 	static Reference createClientReference(Bridge bridge, String objectId, List<String> operations){
