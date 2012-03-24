@@ -69,6 +69,9 @@ class Reference implements InvocationHandler{
 	public Object invokeByName(Object proxy, String methodName, Object[] args) {
 		Reference destination = new Reference(this);
 		destination.setMethodName(methodName);
+		if(args == null){
+			args = new Object[0];
+		}
 		client.send(destination, args);
 		return null;
 	}	
