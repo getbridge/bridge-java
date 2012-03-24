@@ -104,11 +104,19 @@ class Utils<T> {
 	}
 
 	protected static List<String> getMethods(Class<?> klass){
+		Map<Method, Boolean> methodMap = new HashMap<Method, Boolean>();
+		for(Method m : klass.getMethods()){
+			methodMap.put(m, true);
+		}
+		
 		Method[] methods = klass.getDeclaredMethods();
 		List<String> methodNames = new ArrayList<String>();
 
 		for(int i = 0; i < methods.length; i++) {
-			methodNames.add(methods[i].getName());
+			Method m = methods[i];
+			if(methodMap.get(m) != null && methodMap.get(m) == true){
+				methodNames.add(m.getName());
+			}
 		}
 		return methodNames;
 	}
