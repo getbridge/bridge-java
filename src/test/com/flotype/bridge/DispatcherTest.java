@@ -4,6 +4,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -18,10 +19,13 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ExecutorTest {
+import static org.mockito.Mockito.*;
 
-	private Executor executor;
+public class DispatcherTest {
+
+	private Dispatcher dispatcher;
 	private Service service;
+	private Bridge bridge;
 	private boolean success;
 
 	public void testExecutor() {
@@ -31,7 +35,9 @@ public class ExecutorTest {
 	@Before
 	public void setUp() {
 		success = false;
-		executor  = new Executor();
+		bridge = mock(Bridge.class);
+		when(bridge.getClientId()).thenReturn("abcdefgh");
+		dispatcher  = new Dispatcher(bridge);
 		
 		service = new Service(){
 			public void aMethod(){
@@ -40,64 +46,62 @@ public class ExecutorTest {
 			}
 		};
 
-		executor.addService("some service", service);
+		dispatcher.storeObject("s1", service);
 	}
 
 	@Test
 	public void testExecute() {
-		Bridge b = new Bridge();
-		Reference reference = new Reference(Arrays.asList(new String[]{"a", "b", "c", "d"}), b);
+		Reference destination = Reference.createClientReference(bridge, "doesNotExist", null);
+		destination.setMethodName("some method");
 		List<Object> args = Arrays.asList(new Object[]{});
-		Request request = new Request(reference, args);
-
+		
 		// No existent service
-		executor.execute(request);
+		dispatcher.execute(destination, args);
 
 		// Nonexistent method
-		reference.setServiceName("some service");
-		executor.execute(request);
+		dispatcher.execute(destination, args);
 
 		// Service + method both exist
-		reference.setMethodName("aMethod");
-		executor.execute(request); // The assertion is inside the service itself because it's threaded
+		destination.setMethodName("aMethod");
+		dispatcher.execute(destination, args); // The assertion is inside the service itself because it's threaded
 	}
 
 	@Test
-	public void testAddService() {		
+	public void testStoreObject() {		
 		// Add service with key that didn't exist
 		Service service2 = new Service(){};
-		executor.addService("service2", service2);
-		assertSame(service2, executor.getService("service2"));
+		Reference ref2 = dispatcher.storeObject("s2", service2);
+		assertSame(service2, dispatcher.getObject("s2"));
+		assertEquals(ref2, Reference.createClientReference(bridge, "s2", Arrays.asList(new String[]{})));
 
 		// Add service with key that existed before
-		executor.addService("some service", service2);
-		assertNotSame(service, executor.getService("some service"));
-		assertSame(service2, executor.getService("some service"));
+		Reference ref1 = dispatcher.storeObject("s1", service2);
+		assertEquals(ref1, Reference.createClientReference(bridge, "s1", Arrays.asList(new String[]{})));
+		assertNotSame(service, dispatcher.getObject("s1"));
+		assertSame(service2, dispatcher.getObject("s1"));
 	}
 
 	@Test
-	public void testGetService() {
+	public void testgetObject() {
 		// Get a service that exists
-		Service s = executor.getService("some service");
+		Service s = (Service) dispatcher.getObject("s1");
 		assertSame(service, s);
 
 		// Get a service that does not exist
-		Service nonExistent = executor.getService("does not exist");
+		Service nonExistent = (Service) dispatcher.getObject("does not exist");
 		assertNull(nonExistent);
 	}
 
 	@Test
-	public void testAddExistingServiceByKey(){
+	public void teststoreExistingObjectByKey(){
 		// Key that exists
-		executor.addExistingServiceByKey("some service", "another name");
-		assertSame(executor.getService("some service"), executor.getService("another name"));
-
-
+		Reference ref = dispatcher.storeExistingObjectByKey("s1", "another name");
+		assertEquals(ref, Reference.createClientReference(bridge, "another name", Arrays.asList(new String[]{"aMethod"})));
+		assertSame(dispatcher.getObject("s1"), dispatcher.getObject("another name"));
 	}
 
-	@Test(expected=NullPointerException.class)
 	public void testAddNonExistingServiceByKey(){
-		executor.addExistingServiceByKey("does not exist", "should not exist");
+		assertNull(dispatcher.storeExistingObjectByKey("does not exist", "should not exist"));
 	}
 	
 
@@ -108,13 +112,13 @@ public class ExecutorTest {
 		
 		// Argument types are same class as parameter type
 		Object[] methodArgs = new Object[]{1.0f, new ArrayList<String>()};
-		Method method = executor.getConformingMethod("nonPolymorphic", methodArgs, ConformingMethodTestClass.class);
+		Method method = dispatcher.getConformingMethod("nonPolymorphic", methodArgs, ConformingMethodTestClass.class);
 		assertNotNull(method);
 		assertTrue((Boolean) method.invoke(testInstance, methodArgs));
 		
 		// Argument types inherit from parameter types
 		Object[] polyMethodArgs = new Object[]{1.0f, new ArrayList<String>(), new ArrayList<String>()};
-		Method polyMethod = executor.getConformingMethod("polymorphic", polyMethodArgs, ConformingMethodTestClass.class);
+		Method polyMethod = dispatcher.getConformingMethod("polymorphic", polyMethodArgs, ConformingMethodTestClass.class);
 		assertNotNull(polyMethod);
 		assertTrue((Boolean) polyMethod.invoke(testInstance, polyMethodArgs));
 		
@@ -122,24 +126,24 @@ public class ExecutorTest {
 		
 		// Arguments have type parameters. Params do not
 		Object[] erasedMethodArgs = new Object[]{new HashMap<String, Object>(), new ArrayList<String>()};
-		Method erasedMethod = executor.getConformingMethod("collectionsTypeErased", erasedMethodArgs, ConformingMethodTestClass.class);
+		Method erasedMethod = dispatcher.getConformingMethod("collectionsTypeErased", erasedMethodArgs, ConformingMethodTestClass.class);
 		assertNotNull(erasedMethod);
 		assertTrue((Boolean) erasedMethod.invoke(testInstance, erasedMethodArgs));
 		
 		// Arguments have type parameters. Params also have types
 		Object[] typedMethodArgs = new Object[]{new HashMap<String, Object>(), new ArrayList<String>()};
-		Method typedMethod = executor.getConformingMethod("collectionsWithTypes", typedMethodArgs, ConformingMethodTestClass.class);
+		Method typedMethod = dispatcher.getConformingMethod("collectionsWithTypes", typedMethodArgs, ConformingMethodTestClass.class);
 		assertNotNull(typedMethod);
 		assertTrue((Boolean) typedMethod.invoke(testInstance, typedMethodArgs));
 
 		Object[] nxTypedMethodArgs = new Object[]{new HashMap<Float, Object>(), new ArrayList<Float>()};
-		Method nxTypedMethod = executor.getConformingMethod("collectionsWithTypes", nxTypedMethodArgs, ConformingMethodTestClass.class);
+		Method nxTypedMethod = dispatcher.getConformingMethod("collectionsWithTypes", nxTypedMethodArgs, ConformingMethodTestClass.class);
 		// This should be null. I don't fully understand why it is not
 		//assertNull(nxTypedMethod);
 		assertTrue((Boolean) nxTypedMethod.invoke(testInstance, nxTypedMethodArgs));
 		
 		// No such method name
-		Method nxMethod = executor.getConformingMethod("doesNotExist", new Object[]{new HashMap<String, Object>(), new ArrayList<String>()}, ConformingMethodTestClass.class);
+		Method nxMethod = dispatcher.getConformingMethod("doesNotExist", new Object[]{new HashMap<String, Object>(), new ArrayList<String>()}, ConformingMethodTestClass.class);
 		assertNull(nxMethod);
 	}
 	

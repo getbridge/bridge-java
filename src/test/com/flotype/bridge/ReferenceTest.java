@@ -7,75 +7,49 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class ReferenceTest  {
 	
 	Bridge bridge;
 	
-	String routingPrefix = "a";
-	String routingId = "b";
-	String serviceName = "c";
+	String destinationType= "a";
+	String destinationId = "b";
+	String objectId = "c";
 	String methodName = "d";
 	
-	private List<String> pathchain;
+	private List<String> operations;
 	private Reference reference;
 	
-	private List<String> path3;
 	private Reference ref3;
 	
 	@Before
 	public void setUp() {
-		bridge = new Bridge();
+		bridge = mock(Bridge.class);
+		when(bridge.getClientId()).thenReturn("abcdefgh");
 		
-		pathchain = Arrays.asList(new String[]{routingPrefix, routingId, serviceName, methodName});
-		reference = new Reference(pathchain, bridge);
+		operations = Arrays.asList(new String[]{"foo", "bar"});
+		reference = new Reference(bridge, destinationType, destinationId, objectId, methodName, operations);
 		
-		
-		path3 = Arrays.asList(new String[]{routingPrefix, routingId, serviceName});
-		ref3 = new Reference(path3, bridge);
+		ref3= new Reference(bridge, destinationType, destinationId, objectId, null, operations);
 	}
 
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void testReferenceWithTooSmallList() {
-		// Array with too few elements
-		List<String> tooFewPath = Arrays.asList(new String[]{});
-		Reference tooFewRef = new Reference(tooFewPath, bridge);
-	}
-	
-	@Test
-	public void testReferenceWithNullPathchain(){
-		// Array with null pathchain
-		Reference refNull = new Reference(null, bridge);
-		assertEquals("client", refNull.getRoutingPrefix());
-	}
-	
-	@Test
-	public void testGetPathchain() {
-		// Reference created from List<String> has pathchain .equals original
-		assertEquals(pathchain, reference.getPathchain());
-		
-		// Reference created from other reference has pathchain .equals original
-		Reference newRef = new Reference(reference);
-		assertEquals(reference.getPathchain(), newRef.getPathchain());
-	}
-	
-	public void testGetRoutingPrefix() {
-		assertEquals(reference.getRoutingPrefix(), routingPrefix);
-		assertEquals(ref3.getRoutingPrefix(), routingPrefix);
+	public void testgetDestinationType() {
+		assertEquals(reference.getDestinationType(), destinationType);
+		assertEquals(ref3.getDestinationType(), destinationType);
 	}
 
-	public void testGetRoutingId() {
-		assertEquals(reference.getRoutingId(), routingId);
-		assertEquals(ref3.getRoutingId(), routingId);
+	public void testgetDestinationId() {
+		assertEquals(reference.getDestinationId(), destinationId);
+		assertEquals(ref3.getDestinationId(), destinationId);
 	}
 	
 	@Test
-	public void testGetServiceName() {
-		assertEquals(reference.getServiceName(), serviceName);
+	public void testgetObjectId() {
+		assertEquals(reference.getObjectId(), objectId);
 		
 		// Getting on a 3 part service
-		assertEquals(ref3.getServiceName(), serviceName);
+		assertEquals(ref3.getObjectId(), objectId);
 
 	}
 	
@@ -89,25 +63,25 @@ public class ReferenceTest  {
 	}
 	
 	@Test
-	public void testSetRoutingPrefix() {
+	public void testsetDestinationType() {
 		// Create reference. Set to something. Check via getter
-		reference.setRoutingPrefix("foobar");
-		assertEquals(reference.getRoutingPrefix(), "foobar");
+		reference.setDestinationType("foobar");
+		assertEquals(reference.getDestinationType(), "foobar");
 	}
 
 	@Test
-	public void testSetRoutingId() {
+	public void testsetDestinationId() {
 		// Create reference. Set to something. Check via getter
-		reference.setRoutingId("foobar");
-		assertEquals(reference.getRoutingId(), "foobar");
+		reference.setDestinationId("foobar");
+		assertEquals(reference.getDestinationId(), "foobar");
 		
 	}
 	
 	@Test
-	public void testSetServiceName() {
+	public void testsetObjectId() {
 		// Create reference. Set to something. Check via getter
-		reference.setServiceName("foobar");
-		assertEquals(reference.getServiceName(), "foobar");
+		reference.setObjectId("foobar");
+		assertEquals(reference.getObjectId(), "foobar");
 	}
 	
 	@Test
@@ -122,15 +96,9 @@ public class ReferenceTest  {
 	}
 	
 	@Test
-	public void testToString() {
-		// ToString value of reference is the same as JSON encoding it
-		
-	}
-	
-	@Test
 	public void testHashCode() {
 		// hashcode of reference is same as hashcode of its tostring
-		Reference newRef = new Reference(pathchain, bridge);
+		Reference newRef = new Reference(bridge, destinationType, destinationId, objectId, methodName, operations);
 		assertEquals(reference, newRef);
 		
 		// .equal references have .equal hashcodes
@@ -144,12 +112,22 @@ public class ReferenceTest  {
 		assertEquals(reference, newRef);
 		
 		// Ref via constructor .equals Ref with parts set by setters
-		Reference setterRef = new Reference(null, bridge);
-		setterRef.setRoutingPrefix(routingPrefix);
-		setterRef.setRoutingId(routingId);
-		setterRef.setServiceName(serviceName);
+		Reference setterRef = new Reference(bridge, null, null, null, null, null);
+		setterRef.setDestinationType(destinationType);
+		setterRef.setDestinationId(destinationId);
+		setterRef.setObjectId(objectId);
 		setterRef.setMethodName(methodName);
 		
 		assertEquals(reference, setterRef);
+	}
+	
+	@Test
+	public void testProxy(){
+		Reference methodReference = new Reference(reference);
+		methodReference.setMethodName("add");
+		
+		List a = Utils.createProxy(reference, List.class);
+		a.add(1);
+		verify(bridge).send(methodReference, new Object[]{1});
 	}
 }

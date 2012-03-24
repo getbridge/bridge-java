@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import static org.mockito.Mockito.*;
 
 public class UtilsTest {
 	
@@ -18,14 +19,11 @@ public class UtilsTest {
 	private static Reference reference;
 	
 	static {
-		bridge = new Bridge();
+		bridge = mock(Bridge.class);
+		
 		refObj = new HashMap<String, List<String> >();
 		refObj.put("ref", Arrays.asList("a", "b", "c", "d"));
-		reference = new Reference(Arrays.asList("a", "b", "c", "d"), bridge);
-	}
-
-	public void testDeserializeByteArray() {
-		fail("Not yet implemented");
+		reference = new Reference( bridge, "a", "b", "c", "d", Arrays.asList(new String[]{}));
 	}
 
 	@Test
@@ -40,12 +38,12 @@ public class UtilsTest {
 		resultMap.put("a", 1.0);
 		resultMap.put("b", reference);
 		
-		assertEquals(resultMap, Utils.constructRefs(map));
+		assertEquals(resultMap, Utils.constructRefs(bridge, map));
 		
 		// List with a ref inside
 		List<Object> list = Arrays.asList(new Object[]{"a", "b", refObj});
 		List<Object> resultList = Arrays.asList(new Object[]{"a", "b", reference});
-		assertEquals(resultList, Utils.constructRefs(list));
+		assertEquals(resultList, Utils.constructRefs(bridge, list));
 		
 		// List with null values
 		List<Object> nullList = Arrays.asList(new Object[]{"a", "b", null, 2});
@@ -62,12 +60,12 @@ public class UtilsTest {
 		resultNestMap.put("a", 1.0);
 		resultNestMap.put("b", resultList);
 		
-		assertEquals(resultNestMap, Utils.constructRefs(nestMap));
+		assertEquals(resultNestMap, Utils.constructRefs(bridge, nestMap));
 		
 		// List with a map inside containing ref
 		List<Object> nestList = Arrays.asList(new Object[]{"a", "b", map});
 		List<Object> resultNestList = Arrays.asList(new Object[]{"a", "b", resultMap});
-		assertEquals(resultNestList, Utils.constructRefs(nestList));
+		assertEquals(resultNestList, Utils.constructRefs(bridge, nestList));
 	}
 
 	@Test
@@ -110,5 +108,18 @@ public class UtilsTest {
 		// Negative int
 		byte[] negBytes = new byte[]{(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xf4};
 		assertArrayEquals(negBytes, Utils.intToByteArray(-12));
+	}
+	
+	@Test
+	public void testGetMethods(){
+		Object a = new Object(){
+			public void foo(){}
+			public void bar(){}
+			protected void baz(){}
+			private void qux(){}
+		};
+		
+		List<String> methods = Utils.getMethods(a.getClass());
+		assertEquals(Arrays.asList("foo", "bar"), methods);
 	}
 }
