@@ -49,7 +49,6 @@ public class Connection extends TcpClient{
 	}
 
 	protected void send(String string) {
-		System.out.println(string);
 		if(bridge.ready) {
 			write(string.getBytes());
 		} else {
