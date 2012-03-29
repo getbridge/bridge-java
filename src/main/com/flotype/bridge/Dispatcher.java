@@ -121,9 +121,4 @@ class Dispatcher {
 		return result;
 	}
 
-	public void fixClientIds(String clientId) {
-		// TODO Auto-generated method stub
-
-	}
-
 }

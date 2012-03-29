@@ -241,7 +241,6 @@ public class Bridge {
 	
 	protected void onReady(){
 		this.ready = true;
-		dispatcher.fixClientIds(this.connection.clientId);
 		this.eventHandler.onReady();
 	}
 
