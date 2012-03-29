@@ -34,6 +34,7 @@ public class Connection extends TcpClient{
 	private String apiKey;
 	private String host;
 	private int port;
+	private String redirector;
 
 	protected Connection(Bridge bridge){
 		this.bridge = bridge;
@@ -73,14 +74,13 @@ public class Connection extends TcpClient{
 
 	private void redirector()
 	{
-		String endpoint = this.host;
 		String result = null;
-		if (endpoint.startsWith("http://"))
+		if (redirector.startsWith("http://"))
 		{
 			try
 			{
 				// Send data
-				String urlStr = endpoint;
+				String urlStr = redirector;
 				if(urlStr.charAt(urlStr.length()-1) != '/') {
 					urlStr += '/';
 				}
@@ -182,6 +182,10 @@ public class Connection extends TcpClient{
 
 	public void setPort(int port){
 		this.port = port;
+	}
+
+	public void setRedirector(String redirectorUrl) {
+		this.redirector = redirectorUrl;
 	}
 
 }

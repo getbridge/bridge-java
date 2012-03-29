@@ -34,19 +34,19 @@ public class Bridge {
 	 */
 	public Bridge() {
 		connection = new Connection(this);
-		
-		this.setHost(Utils.DEFAULT_HOST);
-		this.setPort(Utils.DEFAULT_PORT);
+		this.setRedirector(Utils.DEFAULT_REDIRECTOR);
 		this.setEventHandler(Utils.DEFAULT_EVENT_HANDLER);
 		this.setReconnect(Utils.DEFAULT_RECONNECT);
 		
 		dispatcher.storeObject("system", new SystemService(this, dispatcher));
 	}
 
+
+
 	/**
 	 * Bridge constructor which allows all options to be specified manually
 	 * This constructor calls the default constructor and then calls setter methods to change from the defaults.
-	 * @param host Either a hostname for direct connection or HTTP endpoint for redirected connection
+	 * @param host Either a hostname for direct connection
 	 * @param port Positive integer value if hostname specified. Else, null
 	 * @param apiKey An API key issued and recognized by the Bridge server
 	 * @param eventHandler An instance of {@link BridgeEventHandler} to receive event notifications
@@ -63,13 +63,17 @@ public class Bridge {
 
 	/**
 	 * Bridge constructor to be used for a redirected connection.
-	 * @param host Must be a valid HTTP URL
+	 * @param redirectorUrl Must be a valid HTTP URL
 	 * @param apiKey An API key issued and recognized by the Bridge server
 	 * @param eventHandler An instance of {@link BridgeEventHandler} to receive event notifications
 	 * @param reconnect Boolean specifying whether or not to reconnect if connection is disrupted
 	 */
-	public Bridge(String host, String apiKey, BridgeEventHandler eventHandler, boolean reconnect) {
-		this(host, null, apiKey, eventHandler, reconnect);
+	public Bridge(String redirectorUrl, String apiKey, BridgeEventHandler eventHandler, boolean reconnect) {
+		this();
+		this.setRedirector(redirectorUrl);
+		this.setApiKey(apiKey);
+		this.setEventHandler(eventHandler);
+		this.setReconnect(reconnect);
 	}
 
 	/**
@@ -213,6 +217,10 @@ public class Bridge {
 	public Bridge setApiKey(String apiKey) {
 		this.connection.setApiKey(apiKey);
 		return this;
+	}
+	
+	public void setRedirector(String redirectorUrl) {
+		this.connection.setRedirector(redirectorUrl);
 	}
 
 	public Bridge setHost(String host) {
