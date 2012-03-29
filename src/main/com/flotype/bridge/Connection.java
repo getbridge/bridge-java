@@ -52,14 +52,15 @@ public class Connection extends TcpClient{
 		if(bridge.ready) {
 			write(string.getBytes());
 		} else {
+			// Buffer messages until reconnection happens
 			commandQueue.add(string);
 		}
 	}
 	
 	public void write(byte[] buffer) {			
 		ByteBuffer data = ByteBuffer.allocate(buffer.length + 4);
-		data.put(Utils.intToByteArray(buffer.length));
-		data.put(buffer);
+		data.put(Utils.intToByteArray(buffer.length)); // Put the length header
+		data.put(buffer); // Put the data
 		data.flip();
 		try {
 			this.send(data);
@@ -98,7 +99,7 @@ public class Connection extends TcpClient{
 				rd.close();
 				result = sb.toString();
 
-				// Return a request object parsed by mapper
+				// Parse response JSON, set fields on self, and connect
 				Map<String, Object> jsonObj = JSONCodec.parseRedirector(result);				
 				Map<String, String> data = (Map<String, String>) jsonObj.get("data");
 				this.host = data.get("bridge_host");
@@ -113,6 +114,7 @@ public class Connection extends TcpClient{
 
 	private void processCommandQueue() {
 		for (String str : commandQueue ) {
+			// Replace the 'null' in the JSON reference address with the now-known client ID
 			this.send(str.replace("\"ref\":[\"client\",null,", "\"ref\":[\"client\",\""+this.clientId+"\","));
 		}
 		commandQueue.clear();
@@ -137,6 +139,7 @@ public class Connection extends TcpClient{
 				// Client not handshaken
 				String[] ids = (new String(body)).split("\\|");
 				if(ids.length == 2) {
+					// Got a ID and secret as response
 					clientId = ids[0];
 					secret = ids[1];
 					this.handshaken = true;
@@ -163,7 +166,7 @@ public class Connection extends TcpClient{
 	protected void onConnected() throws Exception {
 		log.info("Connected to TCP server");
 		String connectString = JSONCodec.createCONNECT(bridge, clientId, secret, apiKey);
-		// Use write instead of send for immediate
+		// Use write instead of send for unbuffered sending
 		this.write(connectString.getBytes());
 		bridge.onConnected();
 	}

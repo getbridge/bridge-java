@@ -17,6 +17,7 @@ import org.codehaus.jackson.type.TypeReference;
 class JSONCodec {
 
 	public static String createSEND(Bridge bridge, Reference destination, Object[] args) {
+		// Format: {destination: BRIDGEREF , args: [...]}
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("destination", destination);
 		data.put("args", args);
@@ -24,6 +25,7 @@ class JSONCodec {
 	}
 
 	public static String createJWP(Bridge bridge, String name, Reference callbackRef) {
+		// Format: {name: STRING, callback: BRIDGEREF }
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("name", name);
 		if(callbackRef != null){
@@ -33,7 +35,7 @@ class JSONCodec {
 	}
 
 	public static String createGETCHANNEL(Bridge bridge, String channelName) {
-		// TODO Auto-generated method stub
+		// Format: {name: STRING }
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("name", channelName);
 		return createCommand(bridge, "GETCHANNEL", data);
@@ -41,6 +43,7 @@ class JSONCodec {
 
 	public static String createLEAVECHANNEL(Bridge bridge, String name, Reference handlerRef,
 			Reference callbackRef) {
+		// Format: {name: STRING, handler: BRIDGEREF , callback: BRIDGEREF }
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("name", name);
 		data.put("handler", handlerRef);
@@ -52,6 +55,7 @@ class JSONCodec {
 
 	public static String createJC(Bridge bridge, String name, Reference handlerRef,
 			Reference callbackRef) {
+		// Format: {name: STRING, handler: BRIDGEREF , callback: BRIDGEREF 
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("name", name);
 		data.put("handler", handlerRef);
@@ -62,6 +66,7 @@ class JSONCodec {
 	}	
 	
 	public static String createCONNECT(Bridge bridge, String sessionId, String secret, String apiKey) {
+		// Format: {session: [SESSIONID, SECRET] || [null ,null], api_key: API_KEY || null}
 		Map<String, Object> data = new HashMap<String, Object>();
 		List<String> session = Arrays.asList(sessionId, secret);
 		data.put("session", session);
@@ -70,6 +75,7 @@ class JSONCodec {
 	}
 	
 	private static String createCommand(Bridge bridge, String command, Map<String, Object> data) {
+		// Format: {command: STRING, data: {...}}
 		ObjectMapper mapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule("Handler", new Version(0, 1, 0, "alpha"));
 		module.addSerializer(new ReferenceSerializer(bridge, Reference.class))

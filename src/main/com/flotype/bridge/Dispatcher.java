@@ -37,6 +37,7 @@ class Dispatcher {
 			return;
 		}
 
+		// Turn List<Object> to Object[] as reflection requires
 		final Object[] args = new Object[argList.size()];
 		int idx = 0;
 		for(Object o : argList){
@@ -85,7 +86,6 @@ class Dispatcher {
 	}
 
 	protected Reference storeExistingObjectByKey(String oldKey, String newKey) {
-		// TODO Auto-generated method stub
 		Object s = services.get(oldKey);
 		return storeObject(newKey, s);
 	}
@@ -108,6 +108,7 @@ class Dispatcher {
 									// Argument is not assignable and is not proxyable. Skip this method
 									continue methodLoop;
 								} else {
+									// Can create a proxy using the Reference object and the interface that is expected
 									arguments[iParam] = Utils.createProxy((Reference) arguments[iParam], param);
 								}
 							}
