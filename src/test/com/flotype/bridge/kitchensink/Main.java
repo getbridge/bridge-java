@@ -22,11 +22,11 @@ public class Main {
 		.setPort(8090)
 		.setApiKey("abcdefgh");
 		
-		Service handler = new Service(){
+		BridgeObject handler = new BridgeObject(){
 			public void someFn(){}
 		};
 
-		Service callback = new Service(){
+		BridgeObject callback = new BridgeObject(){
 			public void callback(){
 				
 			}
@@ -53,7 +53,7 @@ public class Main {
 		
 		service.someFn(handler, callback); // TEST
 		
-		Map<String, Service> serviceMap = new HashMap<String, Service>();
+		Map<String, BridgeObject> serviceMap = new HashMap<String, BridgeObject>();
 		serviceMap.put("foo", callback);
 		List<Object> someList = new ArrayList<Object>();
 		someList.add(callback);

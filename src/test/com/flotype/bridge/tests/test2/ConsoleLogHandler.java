@@ -1,7 +1,7 @@
 package com.flotype.bridge.tests.test2;
 
-import com.flotype.bridge.ServiceClient;
+import com.flotype.bridge.BridgeRemoteObject;
 
-public interface ConsoleLogHandler extends ServiceClient {
+public interface ConsoleLogHandler extends BridgeRemoteObject {
     public void log(String s);
 }

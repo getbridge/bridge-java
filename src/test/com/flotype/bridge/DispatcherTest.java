@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 public class DispatcherTest {
 
 	private Dispatcher dispatcher;
-	private Service service;
+	private BridgeObject bridgeObject;
 	private Bridge bridge;
 	private boolean success;
 
@@ -39,14 +39,14 @@ public class DispatcherTest {
 		when(bridge.getClientId()).thenReturn("abcdefgh");
 		dispatcher  = new Dispatcher(bridge);
 		
-		service = new Service(){
+		bridgeObject = new BridgeObject(){
 			public void aMethod(){
 				success = true;
 				assertTrue(success);
 			}
 		};
 
-		dispatcher.storeObject("s1", service);
+		dispatcher.storeObject("s1", bridgeObject);
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class DispatcherTest {
 	@Test
 	public void testStoreObject() {		
 		// Add service with key that didn't exist
-		Service service2 = new Service(){};
+		BridgeObject service2 = new BridgeObject(){};
 		Reference ref2 = dispatcher.storeObject("s2", service2);
 		assertSame(service2, dispatcher.getObject("s2"));
 		assertEquals(ref2, Reference.createClientReference(bridge, "s2", Arrays.asList(new String[]{})));
@@ -77,18 +77,18 @@ public class DispatcherTest {
 		// Add service with key that existed before
 		Reference ref1 = dispatcher.storeObject("s1", service2);
 		assertEquals(ref1, Reference.createClientReference(bridge, "s1", Arrays.asList(new String[]{})));
-		assertNotSame(service, dispatcher.getObject("s1"));
+		assertNotSame(bridgeObject, dispatcher.getObject("s1"));
 		assertSame(service2, dispatcher.getObject("s1"));
 	}
 
 	@Test
 	public void testgetObject() {
 		// Get a service that exists
-		Service s = (Service) dispatcher.getObject("s1");
-		assertSame(service, s);
+		BridgeObject s = (BridgeObject) dispatcher.getObject("s1");
+		assertSame(bridgeObject, s);
 
 		// Get a service that does not exist
-		Service nonExistent = (Service) dispatcher.getObject("does not exist");
+		BridgeObject nonExistent = (BridgeObject) dispatcher.getObject("does not exist");
 		assertNull(nonExistent);
 	}
 
@@ -164,7 +164,7 @@ public class DispatcherTest {
 			return true;
 		}
 		
-		public boolean referenceToClient(ServiceClient client){
+		public boolean referenceToClient(BridgeRemoteObject client){
 			return true;
 		}
 	}

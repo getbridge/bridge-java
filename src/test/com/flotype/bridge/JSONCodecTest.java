@@ -1,10 +1,20 @@
 package com.flotype.bridge;
 
 import static org.junit.Assert.*;
-
+import static org.mockito.Mockito.*;
+import org.junit.Before;
 import org.junit.Test;
 
+import static org.mockito.Mockito.*;
+
 public class JSONCodecTest {
+	
+	private static Bridge bridge;
+	
+	@Before
+	public void setUp(){
+		bridge = mock(Bridge.class);
+	}
 
 	@Test
 	public void testCreateSEND() {
@@ -13,7 +23,8 @@ public class JSONCodecTest {
 
 	@Test
 	public void testCreateJWP() {
-		fail("Not yet implemented");
+		String noCallbackJSON = JSONCodec.createJWP(bridge, "FOO", null);
+		assertEquals("{\"command\":\"JOINWORKERPOOL\",\"data\":{\"name\":\"FOO\"}}", noCallbackJSON);
 	}
 
 	@Test

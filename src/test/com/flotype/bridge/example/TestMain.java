@@ -2,7 +2,7 @@ package com.flotype.bridge.example;
 
 import com.flotype.bridge.Bridge;
 import com.flotype.bridge.BridgeEventHandler;
-import com.flotype.bridge.Service;
+import com.flotype.bridge.BridgeObject;
 
 
 public class TestMain {
@@ -18,12 +18,12 @@ public class TestMain {
 		ChatServiceClient chat = bridge.getService("chatserver", ChatServiceClient.class);
 		chat.join(
 				"lobby", 
-				new Service(){
+				new BridgeObject(){
 					public void msg(String s, String t){
 						System.out.println(s + ":" + t);
 					}
 				},
-				new Service(){
+				new BridgeObject(){
 					public void callback(ChatChannelClient l, String name){
 						System.out.println("JOINED " + name);
 						l.msg("peter piper", "picked a peck of pickled peppers");

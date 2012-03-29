@@ -73,8 +73,8 @@ class JSONCodec {
 		ObjectMapper mapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule("Handler", new Version(0, 1, 0, "alpha"));
 		module.addSerializer(new ReferenceSerializer(bridge, Reference.class))
-		.addSerializer(new ServiceSerializer(bridge, Service.class))
-		.addSerializer(new ServiceClientSerializer(bridge, ServiceClient.class));
+		.addSerializer(new BridgeObjectSerializer(bridge, BridgeObject.class))
+		.addSerializer(new BridgeRemoteObjectSerializer(bridge, BridgeRemoteObject.class));
 		mapper.registerModule(module);
 		
 		

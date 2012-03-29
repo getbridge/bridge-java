@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import java.lang.reflect.Proxy;
 
 public class Bridge {
 	
@@ -48,52 +49,69 @@ public class Bridge {
 		this.connection.send(msg);
 	}
 	
-	public void publishService(String name, Service service) {
-		publishService(name, service, null);
+	public void publishService(String name, BridgeObjectBase bridgeObject) {
+		BridgeObject callback = null;
+		publishService(name, bridgeObject, callback);
 	}
-
-	public void publishService(String name, Service service, Service callback) {
-
+	public void publishService(String name, BridgeObjectBase bridgeObject, BridgeObjectBase callback) {
 		if(name.equals("system")) {
 			log.error("Invalid service name: " + name);
 			return;
 		}
-
-		dispatcher.storeObject(name, service);
-		Reference callbackRef = dispatcher.storeRandomObject(callback);
+		
+		if(bridgeObject instanceof BridgeObject) {
+			dispatcher.storeObject(name, bridgeObject);
+		}
+		
+		Reference callbackRef = null;
+		if(callback instanceof BridgeObject) {
+			callbackRef = dispatcher.storeRandomObject(callback);
+		} else if (callback instanceof BridgeRemoteObject){
+			callbackRef = (Reference) Proxy.getInvocationHandler(callback);
+		}
 		String msg = JSONCodec.createJWP(this, name, callbackRef);
 		this.connection.send(msg);
 	}
 	
-	public <T> T getService(String serviceName, Class<T> serviceClass){
-		Reference result = Reference.createServiceReference(this, serviceName, Utils.getMethods(serviceClass));
-		return Utils.createProxy(result, serviceClass);
+	public <T> T getService(String serviceName, Class<T> serviceInterface){
+		Reference result = Reference.createServiceReference(this, serviceName, Utils.getMethods(serviceInterface));
+		return Utils.createProxy(result, serviceInterface);
 	}
 
-	public <T> T getChannel(String channelName, Class<T> serviceClass){
+	public <T> T getChannel(String channelName, Class<T> channelInterface){
 		String msg = JSONCodec.createGETCHANNEL(this, channelName);
 		this.connection.send(msg);
 		
-		Reference result = Reference.createChannelReference(this, channelName, Utils.getMethods(serviceClass));
-		return Utils.createProxy(result, serviceClass);
+		Reference result = Reference.createChannelReference(this, channelName, Utils.getMethods(channelInterface));
+		return Utils.createProxy(result, channelInterface);
 	}
 	
-	public void joinChannel(String name, Service handler) {
-		joinChannel(name, handler, null);
+	public void joinChannel(String channelName, BridgeObject handler) {
+		joinChannel(channelName, handler, null);
 	}
 	
-	public void joinChannel(String name, Service handler, Service callback) {
-		Reference handlerRef = dispatcher.storeRandomObject(handler);
-		Reference callbackRef = dispatcher.storeRandomObject(callback);
-		String msg = JSONCodec.createJC(this, name, handlerRef, callbackRef);
+	public void joinChannel(String channelName, BridgeObjectBase handler, BridgeObjectBase callback) {
+		Reference handlerRef = null;
+		if(handler instanceof BridgeObject) {
+			handlerRef = dispatcher.storeRandomObject(handler);
+		} else if (handler instanceof BridgeRemoteObject) {
+			handlerRef = (Reference) Proxy.getInvocationHandler(handler);
+		}
+		Reference callbackRef = null;
+		if(handler instanceof BridgeObject) {
+			callbackRef = dispatcher.storeRandomObject(callback);
+		} else if (callback instanceof BridgeRemoteObject) {
+			callbackRef = (Reference) Proxy.getInvocationHandler(callback);
+		}
+		String msg = JSONCodec.createJC(this, channelName, handlerRef, callbackRef);
 		this.connection.send(msg);
 	}
 
-	public void leaveChannel(String name, Service handler) {
+	public void leaveChannel(String name, BridgeObject handler) {
 		leaveChannel(name, handler, null);
 	}
 	
-	public void leaveChannel(String name, Service handler, Service callback) {
+	public void leaveChannel(String name, BridgeObject handler, BridgeObject callback) {
 		Reference handlerRef = dispatcher.storeObject(name, handler);
 		Reference callbackRef = dispatcher.storeRandomObject(callback);
 		String msg = JSONCodec.createLEAVECHANNEL(this, name, handlerRef, callbackRef);

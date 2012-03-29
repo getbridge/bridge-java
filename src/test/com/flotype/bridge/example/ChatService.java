@@ -1,8 +1,8 @@
 package com.flotype.bridge.example;
 
-import com.flotype.bridge.Service;
+import com.flotype.bridge.BridgeObject;
 
-public class ChatService implements Service {
+public class ChatService implements BridgeObject {
 	public void msg(String name, String s){
 		System.out.println(name);
 	}

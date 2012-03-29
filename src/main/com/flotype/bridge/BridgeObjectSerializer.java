@@ -8,15 +8,15 @@ import org.codehaus.jackson.map.ser.std.SerializerBase;
 
 
 
-class ServiceSerializer extends SerializerBase<Service> {
+class BridgeObjectSerializer extends SerializerBase<BridgeObject> {
 	Bridge bridge;
 
-	public ServiceSerializer(Bridge bridge, Class<Service> t) {
+	public BridgeObjectSerializer(Bridge bridge, Class<BridgeObject> t) {
 		super(t);
 		this.bridge = bridge;
 	}
 
-	public void serialize(Service value, JsonGenerator jsonGen, SerializerProvider serializerProvider)
+	public void serialize(BridgeObject value, JsonGenerator jsonGen, SerializerProvider serializerProvider)
 	throws IOException, JsonProcessingException {
 		Reference ref = bridge.dispatcher.storeRandomObject(value);
 		serializerProvider.defaultSerializeValue(ref, jsonGen);
