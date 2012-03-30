@@ -18,23 +18,18 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
 /**
- * A simple NIO TCP client
- * Assumptions:
- * - the client should always be connected,
- *   once it gets disconnected it reconnects
- * - the exception thrown by onRead means protocol error
- *   so client disconnects and reconnects
- * - the incoming flow is higher than outgoing, so
- *   direct channel write method is not implemented
- *
+ * A simple NIO TCP client Assumptions: - the client should always be connected,
+ * once it gets disconnected it reconnects - the exception thrown by onRead
+ * means protocol error so client disconnects and reconnects - the incoming flow
+ * is higher than outgoing, so direct channel write method is not implemented
+ * 
  * @author Vladimir Lysyy (mail@bobah.net)
- *
+ * 
  */
 public abstract class TcpClient implements Runnable {
-	private static Log log  = LogFactory.getLog(TcpClient.class);
-	
+	private static Log log = LogFactory.getLog(TcpClient.class);
+
 	private static final long INITIAL_RECONNECT_INTERVAL = 500; // 500 ms.
 	private static final long MAXIMUM_RECONNECT_INTERVAL = 30000; // 30 sec.
 	private static final int READ_BUFFER_SIZE = 0x100000;
@@ -43,7 +38,7 @@ public abstract class TcpClient implements Runnable {
 	private long reconnectInterval = INITIAL_RECONNECT_INTERVAL;
 
 	private boolean reconnect = true;
-	
+
 	private ByteBuffer readBuf = ByteBuffer.allocateDirect(READ_BUFFER_SIZE); // 1Mb
 	private ByteBuffer writeBuf = ByteBuffer.allocateDirect(WRITE_BUFFER_SIZE); // 1Mb
 
@@ -64,7 +59,7 @@ public abstract class TcpClient implements Runnable {
 
 	@PostConstruct
 	public void init() {
-		assert address != null: "server address missing";
+		assert address != null : "server address missing";
 	}
 
 	public void start() throws IOException {
@@ -73,7 +68,8 @@ public abstract class TcpClient implements Runnable {
 	}
 
 	public void join() throws InterruptedException {
-		if (Thread.currentThread().getId() != thread.getId()) thread.join();
+		if (Thread.currentThread().getId() != thread.getId())
+			thread.join();
 	}
 
 	public void stop() throws IOException, InterruptedException {
@@ -87,35 +83,46 @@ public abstract class TcpClient implements Runnable {
 	}
 
 	/**
-	 * @param buffer data to send, the buffer should be flipped (ready for read)
+	 * @param buffer
+	 *            data to send, the buffer should be flipped (ready for read)
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	public void send(ByteBuffer buffer) throws InterruptedException, IOException {
-		if (!connected.get()) throw new IOException("not connected");
+	public void send(ByteBuffer buffer) throws InterruptedException,
+			IOException {
+		if (!connected.get())
+			throw new IOException("not connected");
 		synchronized (writeBuf) {
 
 			// try direct write of what's in the buffer to free up space
 			if (writeBuf.remaining() < buffer.remaining()) {
 				writeBuf.flip();
 				int bytesOp = 0, bytesTotal = 0;
-				while (writeBuf.hasRemaining() && (bytesOp = channel.write(writeBuf)) > 0) bytesTotal += bytesOp;
+				while (writeBuf.hasRemaining()
+						&& (bytesOp = channel.write(writeBuf)) > 0)
+					bytesTotal += bytesOp;
 				writeBuf.compact();
 			}
 
 			// if didn't help, wait till some space appears
 			if (Thread.currentThread().getId() != thread.getId()) {
-				while (writeBuf.remaining() < buffer.remaining()) writeBuf.wait();
-			}
-			else {
-				if (writeBuf.remaining() < buffer.remaining()) throw new IOException("send buffer full"); // TODO: add reallocation or buffers chain
+				while (writeBuf.remaining() < buffer.remaining())
+					writeBuf.wait();
+			} else {
+				if (writeBuf.remaining() < buffer.remaining())
+					throw new IOException("send buffer full"); // TODO: add
+																// reallocation
+																// or buffers
+																// chain
 			}
 			writeBuf.put(buffer);
 
 			// try direct write to decrease the latency
 			writeBuf.flip();
 			int bytesOp = 0, bytesTotal = 0;
-			while (writeBuf.hasRemaining() && (bytesOp = channel.write(writeBuf)) > 0) bytesTotal += bytesOp;
+			while (writeBuf.hasRemaining()
+					&& (bytesOp = channel.write(writeBuf)) > 0)
+				bytesTotal += bytesOp;
 			writeBuf.compact();
 
 			if (writeBuf.hasRemaining()) {
@@ -128,18 +135,21 @@ public abstract class TcpClient implements Runnable {
 
 	/**
 	 * Override with something meaningful
+	 * 
 	 * @param buf
 	 */
 	protected abstract void onRead(ByteBuffer buf) throws Exception;
 
 	/**
 	 * Override with something meaningful
+	 * 
 	 * @param buf
 	 */
 	protected abstract void onConnected() throws Exception;
 
 	/**
 	 * Override with something meaningful
+	 * 
 	 * @param buf
 	 */
 	protected abstract void onDisconnected();
@@ -159,7 +169,7 @@ public abstract class TcpClient implements Runnable {
 	public void run() {
 		log.info("event loop running");
 		try {
-			while(! Thread.interrupted()) { // reconnection loop
+			while (!Thread.interrupted()) { // reconnection loop
 				try {
 					selector = Selector.open();
 					channel = SocketChannel.open();
@@ -168,8 +178,11 @@ public abstract class TcpClient implements Runnable {
 					channel.connect(address);
 					channel.register(selector, SelectionKey.OP_CONNECT);
 
-					while(!thread.isInterrupted() && channel.isOpen()) { // events multiplexing loop
-						if (selector.select() > 0) processSelectedKeys(selector.selectedKeys());
+					while (!thread.isInterrupted() && channel.isOpen()) { // events
+																			// multiplexing
+																			// loop
+						if (selector.select() > 0)
+							processSelectedKeys(selector.selectedKeys());
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -179,8 +192,10 @@ public abstract class TcpClient implements Runnable {
 					onDisconnected();
 					writeBuf.clear();
 					readBuf.clear();
-					if (channel != null) channel.close();
-					if (selector != null) selector.close();
+					if (channel != null)
+						channel.close();
+					if (selector != null)
+						selector.close();
 					log.warn("connection closed");
 				}
 
@@ -189,7 +204,8 @@ public abstract class TcpClient implements Runnable {
 						stop();
 					}
 					Thread.sleep(reconnectInterval);
-					if (reconnectInterval < MAXIMUM_RECONNECT_INTERVAL) reconnectInterval *= 2;
+					if (reconnectInterval < MAXIMUM_RECONNECT_INTERVAL)
+						reconnectInterval *= 2;
 					log.warn("reconnecting to " + address);
 				} catch (InterruptedException e) {
 					break;
@@ -206,10 +222,14 @@ public abstract class TcpClient implements Runnable {
 		Iterator<SelectionKey> itr = keys.iterator();
 		while (itr.hasNext()) {
 			SelectionKey key = itr.next();
-			if (key.isReadable()) processRead(key);
-			if (key.isWritable()) processWrite(key);
-			if (key.isConnectable()) processConnect(key);
-			if (key.isAcceptable()) ;
+			if (key.isReadable())
+				processRead(key);
+			if (key.isWritable())
+				processWrite(key);
+			if (key.isConnectable())
+				processConnect(key);
+			if (key.isAcceptable())
+				;
 			itr.remove();
 		}
 	}
@@ -227,17 +247,17 @@ public abstract class TcpClient implements Runnable {
 	}
 
 	private void processRead(SelectionKey key) throws Exception {
-		ReadableByteChannel ch = (ReadableByteChannel)key.channel();
+		ReadableByteChannel ch = (ReadableByteChannel) key.channel();
 
 		int bytesOp = 0, bytesTotal = 0;
-		while (readBuf.hasRemaining() && (bytesOp = ch.read(readBuf)) > 0) bytesTotal += bytesOp;
+		while (readBuf.hasRemaining() && (bytesOp = ch.read(readBuf)) > 0)
+			bytesTotal += bytesOp;
 
 		if (bytesTotal > 0) {
 			readBuf.flip();
 			onRead(readBuf);
 			readBuf.compact();
-		}
-		else if (bytesOp == -1) {
+		} else if (bytesOp == -1) {
 			log.info("peer closed read channel");
 			ch.close();
 		}
@@ -246,12 +266,14 @@ public abstract class TcpClient implements Runnable {
 	}
 
 	private void processWrite(SelectionKey key) throws IOException {
-		WritableByteChannel ch = (WritableByteChannel)key.channel();
+		WritableByteChannel ch = (WritableByteChannel) key.channel();
 		synchronized (writeBuf) {
 			writeBuf.flip();
 
 			int bytesOp = 0, bytesTotal = 0;
-			while (writeBuf.hasRemaining() && (bytesOp = ch.write(writeBuf)) > 0) bytesTotal += bytesOp;
+			while (writeBuf.hasRemaining()
+					&& (bytesOp = ch.write(writeBuf)) > 0)
+				bytesTotal += bytesOp;
 
 			bytesOut.addAndGet(bytesTotal);
 
@@ -259,7 +281,8 @@ public abstract class TcpClient implements Runnable {
 				key.interestOps(key.interestOps() ^ SelectionKey.OP_WRITE);
 			}
 
-			if (bytesTotal > 0) writeBuf.notify();
+			if (bytesTotal > 0)
+				writeBuf.notify();
 			else if (bytesOp == -1) {
 				log.info("peer closed write channel");
 				ch.close();
@@ -285,7 +308,7 @@ public abstract class TcpClient implements Runnable {
 		return bytesIn.get();
 	}
 
-	public void setReconnect (boolean reconnect) {
+	public void setReconnect(boolean reconnect) {
 		this.reconnect = reconnect;
 	}
 }

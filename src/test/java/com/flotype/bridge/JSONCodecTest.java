@@ -8,11 +8,11 @@ import org.junit.Test;
 import static org.mockito.Mockito.*;
 
 public class JSONCodecTest {
-	
+
 	private static Bridge bridge;
-	
+
 	@Before
-	public void setUp(){
+	public void setUp() {
 		bridge = mock(Bridge.class);
 	}
 
@@ -24,7 +24,9 @@ public class JSONCodecTest {
 	@Test
 	public void testCreateJWP() {
 		String noCallbackJSON = JSONCodec.createJWP(bridge, "FOO", null);
-		assertEquals("{\"command\":\"JOINWORKERPOOL\",\"data\":{\"name\":\"FOO\"}}", noCallbackJSON);
+		assertEquals(
+				"{\"command\":\"JOINWORKERPOOL\",\"data\":{\"name\":\"FOO\"}}",
+				noCallbackJSON);
 	}
 
 	@Test

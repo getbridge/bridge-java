@@ -8,9 +8,9 @@ import com.flotype.bridge.BridgeEventHandler;
 public class Test1 {
 
 	private static final Bridge bridgeServer = new Bridge()
-	.setHost("localhost").setPort(8090);
+			.setHost("localhost").setPort(8090);
 	private static final Bridge bridgeClient = new Bridge()
-	.setHost("localhost").setPort(8090);
+			.setHost("localhost").setPort(8090);
 
 	public static void main(String[] args) throws Exception {
 		try {
@@ -42,7 +42,8 @@ public class Test1 {
 			@Override
 			public void onReady() {
 				System.out.println("aaa4");
-				ConsoleLogHandler handler = bridgeClient.getService("test1_consolelog_java", ConsoleLogHandler.class);
+				ConsoleLogHandler handler = bridgeClient.getService(
+						"test1_consolelog_java", ConsoleLogHandler.class);
 				handler.log("123");
 			}
 		});
