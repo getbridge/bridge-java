@@ -13,12 +13,9 @@ JAR install without Maven: A JAR file containing Flotype Bridge and all
 depencies is available from
 [Flotype](http://cloud.flotype.com/bridge.jar)
 
-
 Source install: 
 
-Clone this repository using `git clone git@bitbucket.org:flotype/bridge-js.git` and install using the npm installer
-
-    npm install bridge-js/
+Clone this repository using `git clone git@bitbucket.org:flotype/bridge-java.git` and install using `mvn install` for Maven users. 
 
 ###Dependencies
 This library has no external dependencies.
