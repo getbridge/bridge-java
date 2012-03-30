@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class Reference implements InvocationHandler{
+class Reference implements InvocationHandler {
 
 	private Bridge client;
 	private String destinationType;
@@ -15,10 +15,9 @@ class Reference implements InvocationHandler{
 	private String objectId;
 	private String methodName;
 	private List<String> operations;
-	
 
-	
-	protected Reference(Bridge client, String dT, String dI, String oI, String mN, List<String> operations) {
+	protected Reference(Bridge client, String dT, String dI, String oI,
+			String mN, List<String> operations) {
 		this.client = client;
 		destinationType = dT;
 		destinationId = dI;
@@ -26,89 +25,98 @@ class Reference implements InvocationHandler{
 		methodName = mN;
 		this.operations = operations;
 	}
-	
-	protected Reference(Reference other){
-		this(other.client, other.destinationType, other.destinationId, other.objectId, other.methodName, other.operations);
+
+	protected Reference(Reference other) {
+		this(other.client, other.destinationType, other.destinationId,
+				other.objectId, other.methodName, other.operations);
 	}
-	
-	public Reference(Bridge bridge, List<String> address, List<String> operations) {
-		this(bridge, address.get(0), address.get(1), address.get(2), null, operations);
-		if(address.size() == 4){
+
+	public Reference(Bridge bridge, List<String> address,
+			List<String> operations) {
+		this(bridge, address.get(0), address.get(1), address.get(2), null,
+				operations);
+		if (address.size() == 4) {
 			this.setMethodName(address.get(3));
 		}
 	}
 
-	public Map<String, Object> toDict(){
+	public Map<String, Object> toDict() {
 		Map<String, Object> dict = new HashMap<String, Object>();
 		List<String> address = new ArrayList<String>();
 		address.add(destinationType);
 		address.add(destinationId);
 		address.add(objectId);
-		if(methodName != null){
+		if (methodName != null) {
 			address.add(methodName);
-		} 
-		
+		}
+
 		dict.put("ref", address);
-		
-		if(methodName == null){
+
+		if (methodName == null) {
 			dict.put("operations", operations);
 		}
-		
+
 		return dict;
 	}
 
 	public Object invoke(Object proxy, Method method, Object[] args) {
 		invokeByName(proxy, method.getName(), args);
-		if(method.getReturnType() == Void.TYPE){
+		if (method.getReturnType() == Void.TYPE) {
 			return null;
 		} else {
 			return Utils.defaultValueForPrimitive(method.getReturnType());
 		}
 	}
-	
+
 	public Object invokeByName(Object proxy, String methodName, Object[] args) {
 		Reference destination = new Reference(this);
 		destination.setMethodName(methodName);
-		if(args == null){
+		if (args == null) {
 			args = new Object[0];
 		}
 		client.send(destination, args);
 		return null;
-	}	
-	
-	public boolean equals(Object o){
-		if(o instanceof Reference){
+	}
+
+	public boolean equals(Object o) {
+		if (o instanceof Reference) {
 			Reference ref = (Reference) o;
 			return this.toDict().equals(ref.toDict());
 		}
-		
+
 		return false;
 	}
-	
-	public int hashCode(){
+
+	public int hashCode() {
 		return this.toString().hashCode();
 	}
-	
-	public String toString(){
+
+	public String toString() {
 		return this.toDict().toString();
 	}
-	
+
 	// Static helper methods
-	
-	static Reference createClientReference(Bridge bridge, String objectId, List<String> operations){
-		return new Reference(bridge, "client", bridge.getClientId(), objectId, null, operations);
+
+	static Reference createClientReference(Bridge bridge, String objectId,
+			List<String> operations) {
+		return new Reference(bridge, "client", bridge.getClientId(), objectId,
+				null, operations);
 	}
-	
-	static Reference createServiceReference(Bridge bridge, String serviceName, List<String> operations){
-		return new Reference(bridge, "named", serviceName, serviceName, null, operations);
+
+	static Reference createServiceReference(Bridge bridge, String serviceName,
+			List<String> operations) {
+		return new Reference(bridge, "named", serviceName, serviceName, null,
+				operations);
 	}
-	
-	static Reference createChannelReference(Bridge bridge, String channelName, List<String> operations){
-		return new Reference(bridge, "channel", channelName, "channel:"+channelName, null, operations);
+
+	static Reference createChannelReference(Bridge bridge, String channelName,
+			List<String> operations) {
+		return new Reference(bridge, "channel", channelName, "channel:"
+				+ channelName, null, operations);
 	}
-	
+
 	// Setters and getters
-	
+
 	public String getDestinationType() {
 		return destinationType;
 	}

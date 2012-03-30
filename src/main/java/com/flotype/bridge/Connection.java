@@ -17,7 +17,7 @@ import net.bobah.nio.TcpClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class Connection extends TcpClient{
+public class Connection extends TcpClient {
 	private static Log log = LogFactory.getLog(Connection.class);
 
 	String clientId;
@@ -27,21 +27,21 @@ public class Connection extends TcpClient{
 
 	// Queue for commands before connects happen
 	private Queue<String> commandQueue = new LinkedList<String>();
-	
+
 	private boolean handshaken;
-	
+
 	private Bridge bridge;
-	private String apiKey;
-	private String host;
-	private int port;
+	private String apiKey = null;
+	private String host = null;
+	private int port = -1;
 	private String redirector;
 
-	protected Connection(Bridge bridge){
+	protected Connection(Bridge bridge) {
 		this.bridge = bridge;
 	}
 
 	protected void connect() throws IOException {
-		if(this.host == null || this.port == -1){
+		if (this.host == null || this.port == -1) {
 			redirector();
 		} else {
 			this.setAddress(new InetSocketAddress(host, port));
@@ -50,15 +50,15 @@ public class Connection extends TcpClient{
 	}
 
 	protected void send(String string) {
-		if(bridge.ready) {
+		if (bridge.ready) {
 			write(string.getBytes());
 		} else {
 			// Buffer messages until reconnection happens
 			commandQueue.add(string);
 		}
 	}
-	
-	public void write(byte[] buffer) {			
+
+	public void write(byte[] buffer) {
 		ByteBuffer data = ByteBuffer.allocate(buffer.length + 4);
 		data.put(Utils.intToByteArray(buffer.length)); // Put the length header
 		data.put(buffer); // Put the data
@@ -72,105 +72,106 @@ public class Connection extends TcpClient{
 		}
 	}
 
-	private void redirector()
-	{
+	private void redirector() {
 		String result = null;
-		if (redirector.startsWith("http://"))
-		{
-			try
-			{
+		if (redirector.startsWith("http://")) {
+			try {
 				// Send data
 				String urlStr = redirector;
-				if(urlStr.charAt(urlStr.length()-1) != '/') {
+				if (urlStr.charAt(urlStr.length() - 1) != '/') {
 					urlStr += '/';
 				}
-				urlStr = urlStr + "redirect/"+ this.apiKey;
+				urlStr = urlStr + "redirect/" + this.apiKey;
 				URL url = new URL(urlStr);
-				URLConnection conn = url.openConnection ();
+				URLConnection conn = url.openConnection();
 
 				// Get the response
-				BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+				BufferedReader rd = new BufferedReader(new InputStreamReader(
+						conn.getInputStream()));
 				StringBuffer sb = new StringBuffer();
 				String line;
-				while ((line = rd.readLine()) != null)
-				{
+				while ((line = rd.readLine()) != null) {
 					sb.append(line);
 				}
 				rd.close();
 				result = sb.toString();
 
 				// Parse response JSON, set fields on self, and connect
-				Map<String, Object> jsonObj = JSONCodec.parseRedirector(result);				
-				Map<String, String> data = (Map<String, String>) jsonObj.get("data");
+				Map<String, Object> jsonObj = JSONCodec.parseRedirector(result);
+				Map<String, String> data = (Map<String, String>) jsonObj
+						.get("data");
 				this.host = data.get("bridge_host");
 				this.port = Integer.parseInt(data.get("bridge_port"));
 				this.connect();
-			} catch (Exception e)
-			{
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
 	private void processCommandQueue() {
-		for (String str : commandQueue ) {
-			// Replace the 'null' in the JSON reference address with the now-known client ID
-			this.send(str.replace("\"ref\":[\"client\",null,", "\"ref\":[\"client\",\""+this.clientId+"\","));
+		for (String str : commandQueue) {
+			// Replace the 'null' in the JSON reference address with the
+			// now-known client ID
+			this.send(str.replace("\"ref\":[\"client\",null,",
+					"\"ref\":[\"client\",\"" + this.clientId + "\","));
 		}
 		commandQueue.clear();
 	}
 
-	@Override 
+	@Override
 	protected void onRead(ByteBuffer buf) throws Exception {
-		while(buf.hasRemaining()){
+		while (buf.hasRemaining()) {
 			// Assuming 4 byte little endian ints
 			int length = buf.getInt();
-			if(buf.remaining() < length){
+			if (buf.remaining() < length) {
 				// Header received but not the body. Wait until next time.
 				break;
 			}
 			byte[] body = new byte[length];
 			buf.get(body);
 			if (length != body.length) {
-				throw new Exception("Expected message length not equal to buffer size");
+				throw new Exception(
+						"Expected message length not equal to buffer size");
 			}
 
-			if(!bridge.ready) {
+			if (!bridge.ready) {
 				// Client not handshaken
 				String[] ids = (new String(body)).split("\\|");
-				if(ids.length == 2) {
+				if (ids.length == 2) {
 					// Got a ID and secret as response
 					clientId = ids[0];
 					secret = ids[1];
 					this.handshaken = true;
-					
+
 					bridge.onReady();
 					processCommandQueue();
 					return;
 				}
-			} 
+			}
 
 			// Parse as normal
 			Map<String, Object> message = Utils.deserialize(bridge, body);
-			bridge.dispatcher.execute((Reference) message.get("destination"), (List<Object>) message.get("args"));
+			bridge.dispatcher.execute((Reference) message.get("destination"),
+					(List<Object>) message.get("args"));
 		}
 	}
 
-	@Override 
+	@Override
 	protected void onDisconnected() {
 		log.warn("Disconnected from TCP server");
 		bridge.onDisconnect();
 	}
 
-	@Override 
+	@Override
 	protected void onConnected() throws Exception {
 		log.info("Connected to TCP server");
-		String connectString = JSONCodec.createCONNECT(bridge, clientId, secret, apiKey);
+		String connectString = JSONCodec.createCONNECT(bridge, clientId,
+				secret, apiKey);
 		// Use write instead of send for unbuffered sending
 		this.write(connectString.getBytes());
 		bridge.onConnected();
 	}
-
 
 	public void setApiKey(String apiKey) {
 		this.apiKey = apiKey;
@@ -180,7 +181,7 @@ public class Connection extends TcpClient{
 		this.host = host;
 	}
 
-	public void setPort(int port){
+	public void setPort(int port) {
 		this.port = port;
 	}
 

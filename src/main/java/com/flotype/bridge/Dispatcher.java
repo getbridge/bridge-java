@@ -1,4 +1,5 @@
 package com.flotype.bridge;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -10,7 +11,6 @@ import java.util.concurrent.Executors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
 class Dispatcher {
 
 	private static Log log = LogFactory.getLog(Dispatcher.class);
@@ -20,19 +20,19 @@ class Dispatcher {
 	private ExecutorService tp;
 	private Bridge bridge;
 
-	protected Dispatcher(Bridge bridge){
+	protected Dispatcher(Bridge bridge) {
 		serviceToClass = new HashMap<Object, Class<?>>();
 		services = new HashMap<String, Object>();
 		tp = Executors.newFixedThreadPool(4);
 		this.bridge = bridge;
 	}
 
-	protected void execute(Reference reference, final List<Object> argList){
+	protected void execute(Reference reference, final List<Object> argList) {
 		String serviceName = reference.getObjectId();
 		String methodName = reference.getMethodName();
 		log.info(serviceName + ":" + methodName + " called");
 		final Object service = services.get(serviceName);
-		if(service == null){
+		if (service == null) {
 			log.error("No such service: " + serviceName);
 			return;
 		}
@@ -40,19 +40,21 @@ class Dispatcher {
 		// Turn List<Object> to Object[] as reflection requires
 		final Object[] args = new Object[argList.size()];
 		int idx = 0;
-		for(Object o : argList){
+		for (Object o : argList) {
 			args[idx++] = o;
 		}
 
-		final Method m = getConformingMethod(methodName, args, serviceToClass.get(service));
-		if(m == null){
+		final Method m = getConformingMethod(methodName, args,
+				serviceToClass.get(service));
+		if (m == null) {
 			log.error("No method found: " + methodName);
 			return;
 		}
-		tp.execute(new Runnable(){
+		tp.execute(new Runnable() {
 			public void run() {
 				try {
-					// avoids JVM bug involving member access to anonymous classes
+					// avoids JVM bug involving member access to anonymous
+					// classes
 					m.setAccessible(true);
 					m.invoke(service, args);
 				} catch (IllegalArgumentException e) {
@@ -66,22 +68,23 @@ class Dispatcher {
 		});
 	}
 
-	protected Reference storeObject(String objectName, Object object){
-		if(object == null){
+	protected Reference storeObject(String objectName, Object object) {
+		if (object == null) {
 			return null;
 		}
 		Class<?> klass = object.getClass();
 		serviceToClass.put(object, klass);
 		services.put(objectName, object);
-		return Reference.createClientReference(bridge, objectName, Utils.getMethods(klass));
+		return Reference.createClientReference(bridge, objectName,
+				Utils.getMethods(klass));
 	}
 
-	public Reference storeRandomObject(Object object){
+	public Reference storeRandomObject(Object object) {
 		String randomId = Utils.generateRandomId();
-		return storeObject(randomId,object);
+		return storeObject(randomId, object);
 	}
 
-	protected Object getObject(String key){
+	protected Object getObject(String key) {
 		return services.get(key);
 	}
 
@@ -90,34 +93,39 @@ class Dispatcher {
 		return storeObject(newKey, s);
 	}
 
-	protected Method getConformingMethod(String methodName, Object[] arguments, Class<?> cls) {
+	protected Method getConformingMethod(String methodName, Object[] arguments,
+			Class<?> cls) {
 		Method[] publicMethods = cls.getMethods();
 		Method result = null;
 
-		methodLoop:
-			for(int iMethod = 0; iMethod < publicMethods.length; iMethod++){
-				Method m = publicMethods[iMethod];
-				if(m.getName().equals(methodName)){
-					Class<?>[] formalParameters = m.getParameterTypes();
-					if(arguments.length == formalParameters.length){
-						for(int iParam = 0; iParam < arguments.length; iParam++){
-							Class<?> param = formalParameters[iParam];
-							if (!param.isAssignableFrom(arguments[iParam].getClass())) {
-								if(!(arguments[iParam] instanceof Reference
-										&& Utils.contains(param.getInterfaces(), BridgeRemoteObject.class))){
-									// Argument is not assignable and is not proxyable. Skip this method
-									continue methodLoop;
-								} else {
-									// Can create a proxy using the Reference object and the interface that is expected
-									arguments[iParam] = Utils.createProxy((Reference) arguments[iParam], param);
-								}
+		methodLoop: for (int iMethod = 0; iMethod < publicMethods.length; iMethod++) {
+			Method m = publicMethods[iMethod];
+			if (m.getName().equals(methodName)) {
+				Class<?>[] formalParameters = m.getParameterTypes();
+				if (arguments.length == formalParameters.length) {
+					for (int iParam = 0; iParam < arguments.length; iParam++) {
+						Class<?> param = formalParameters[iParam];
+						if (!param.isAssignableFrom(arguments[iParam]
+								.getClass())) {
+							if (!(arguments[iParam] instanceof Reference && Utils
+									.contains(param.getInterfaces(),
+											BridgeRemoteObject.class))) {
+								// Argument is not assignable and is not
+								// proxyable. Skip this method
+								continue methodLoop;
+							} else {
+								// Can create a proxy using the Reference object
+								// and the interface that is expected
+								arguments[iParam] = Utils.createProxy(
+										(Reference) arguments[iParam], param);
 							}
 						}
-						result = m;
-						break;
 					}
+					result = m;
+					break;
 				}
 			}
+		}
 
 		return result;
 	}

@@ -22,14 +22,15 @@ class Utils<T> {
 
 	@SuppressWarnings("unchecked")
 	protected static Map<String, Object> deserialize(Bridge bridge, byte[] json)
-	throws JsonParseException, JsonMappingException, IOException {
+			throws JsonParseException, JsonMappingException, IOException {
 
 		// Create object mapper
 		ObjectMapper mapper = new ObjectMapper();
 
 		// Return a request object parsed by mapper
-		Map<String, Object> jsonObj =
-			mapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+		Map<String, Object> jsonObj = mapper.readValue(json,
+				new TypeReference<Map<String, Object>>() {
+				});
 		jsonObj = (Map<String, Object>) constructRefs(bridge, jsonObj);
 		return jsonObj;
 	}
@@ -38,15 +39,15 @@ class Utils<T> {
 	public static Object constructRefs(Bridge bridge, Map<String, Object> theMap) {
 		Object pathchain;
 		if ((pathchain = theMap.get("ref")) != null) {
-			return new Reference(bridge, (List<String>) pathchain, (List<String>) theMap.get("operations"));
+			return new Reference(bridge, (List<String>) pathchain,
+					(List<String>) theMap.get("operations"));
 		}
 
 		for (Map.Entry<String, Object> entry : (theMap).entrySet()) {
 
 			Object value = entry.getValue();
 
-			if (value != null
-					&& value instanceof HashMap) {
+			if (value != null && value instanceof HashMap) {
 				value = constructRefs(bridge, (Map<String, Object>) value);
 			} else if (value != null && value instanceof ArrayList) {
 				value = constructRefs(bridge, (List<Object>) value);
@@ -63,8 +64,7 @@ class Utils<T> {
 
 		int idx = 0;
 		for (Object value : list) {
-			if (value != null
-					&& value instanceof HashMap) {
+			if (value != null && value instanceof HashMap) {
 				value = constructRefs(bridge, (Map<String, Object>) value);
 			} else if (value != null && value instanceof ArrayList) {
 				value = constructRefs(bridge, (List<Object>) value);
@@ -77,10 +77,11 @@ class Utils<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected static <T> T createProxy(InvocationHandler handler, Class<T> proxiedClass){
-		return (T) java.lang.reflect.Proxy.newProxyInstance(proxiedClass.getClassLoader(),
-                new Class[] { proxiedClass },
-                handler);
+	protected static <T> T createProxy(InvocationHandler handler,
+			Class<T> proxiedClass) {
+		return (T) java.lang.reflect.Proxy.newProxyInstance(
+				proxiedClass.getClassLoader(), new Class[] { proxiedClass },
+				handler);
 	}
 
 	protected static String generateRandomId() {
@@ -102,35 +103,34 @@ class Utils<T> {
 				(byte) (value >>> 8), (byte) value };
 	}
 
-	protected static List<String> getMethods(Class<?> klass){
+	protected static List<String> getMethods(Class<?> klass) {
 		Map<Method, Boolean> methodMap = new HashMap<Method, Boolean>();
-		for(Method m : klass.getMethods()){
+		for (Method m : klass.getMethods()) {
 			methodMap.put(m, true);
 		}
-		
+
 		Method[] methods = klass.getDeclaredMethods();
 		List<String> methodNames = new ArrayList<String>();
 
-		for(int i = 0; i < methods.length; i++) {
+		for (int i = 0; i < methods.length; i++) {
 			Method m = methods[i];
-			if(methodMap.get(m) != null && methodMap.get(m) == true){
+			if (methodMap.get(m) != null && methodMap.get(m) == true) {
 				methodNames.add(m.getName());
 			}
 		}
 		return methodNames;
 	}
 
-	public static boolean contains(Object[] container,
-			Object item) {
-		for(int i = 0; i < container.length; i++){
-			if(container[i].equals(item)){
+	public static boolean contains(Object[] container, Object item) {
+		for (int i = 0; i < container.length; i++) {
+			if (container[i].equals(item)) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
-	public static Object defaultValueForPrimitive(Class<?> primitive){
+
+	public static Object defaultValueForPrimitive(Class<?> primitive) {
 		boolean bool = false;
 		int i = 0;
 		float f = 0;
@@ -138,23 +138,23 @@ class Utils<T> {
 		byte b = 0x0;
 		char c = 0;
 		long l = 0;
-		
-		if(primitive.equals(boolean.class)){
+
+		if (primitive.equals(boolean.class)) {
 			return bool;
-		} else if(primitive.equals(int.class)) {
+		} else if (primitive.equals(int.class)) {
 			return i;
-		} else if(primitive.equals(float.class)) {
+		} else if (primitive.equals(float.class)) {
 			return f;
-		} else if(primitive.equals(double.class)) {
+		} else if (primitive.equals(double.class)) {
 			return d;
-		} else if(primitive.equals(byte.class)) {
+		} else if (primitive.equals(byte.class)) {
 			return b;
-		} else if(primitive.equals(char.class)) {
+		} else if (primitive.equals(char.class)) {
 			return c;
-		} else if(primitive.equals(long.class)) {
+		} else if (primitive.equals(long.class)) {
 			return l;
 		}
-		
+
 		return null;
 	}
 }
