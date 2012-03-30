@@ -4,6 +4,9 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+
 import java.lang.reflect.Proxy;
 
 /**
@@ -288,6 +291,22 @@ public class Bridge {
 
 	public Bridge setReconnect(boolean reconnect) {
 		this.connection.setReconnect(reconnect);
+		return this;
+	}
+	
+	public Bridge setLogLevel(int level) {
+		ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		switch(level) {
+		case 3:
+			rootLogger.setLevel(Level.INFO);
+			break;
+		case 2:
+			rootLogger.setLevel(Level.WARN);
+			break;
+		case 1:
+			rootLogger.setLevel(Level.ERROR);
+			break;
+		}
 		return this;
 	}
 
