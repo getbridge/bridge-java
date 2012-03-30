@@ -7,8 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class Reference implements InvocationHandler {
 
+	private static Logger log = LoggerFactory.getLogger(Reference.class);
+	
 	private Bridge client;
 	private String destinationType;
 	private String destinationId;
@@ -42,13 +47,7 @@ class Reference implements InvocationHandler {
 
 	public Map<String, Object> toDict() {
 		Map<String, Object> dict = new HashMap<String, Object>();
-		List<String> address = new ArrayList<String>();
-		address.add(destinationType);
-		address.add(destinationId);
-		address.add(objectId);
-		if (methodName != null) {
-			address.add(methodName);
-		}
+		List<String> address = getAddress();
 
 		dict.put("ref", address);
 
@@ -57,6 +56,17 @@ class Reference implements InvocationHandler {
 		}
 
 		return dict;
+	}
+
+	private List<String> getAddress() {
+		List<String> address = new ArrayList<String>();
+		address.add(destinationType);
+		address.add(destinationId);
+		address.add(objectId);
+		if (methodName != null) {
+			address.add(methodName);
+		}
+		return address;
 	}
 
 	public Object invoke(Object proxy, Method method, Object[] args) {
@@ -71,6 +81,7 @@ class Reference implements InvocationHandler {
 	public Object invokeByName(Object proxy, String methodName, Object[] args) {
 		Reference destination = new Reference(this);
 		destination.setMethodName(methodName);
+		log.info("Calling {}.{}", getAddress(), methodName);
 		if (args == null) {
 			args = new Object[0];
 		}

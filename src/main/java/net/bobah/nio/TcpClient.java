@@ -167,7 +167,6 @@ public abstract class TcpClient implements Runnable {
 
 	@Override
 	public void run() {
-		log.info("event loop running");
 		try {
 			while (!Thread.interrupted()) { // reconnection loop
 				try {
@@ -206,7 +205,7 @@ public abstract class TcpClient implements Runnable {
 					Thread.sleep(reconnectInterval);
 					if (reconnectInterval < MAXIMUM_RECONNECT_INTERVAL)
 						reconnectInterval *= 2;
-					log.warn("reconnecting to " + address);
+					log.info("Attempting reconnect");
 				} catch (InterruptedException e) {
 					break;
 				}
@@ -214,8 +213,6 @@ public abstract class TcpClient implements Runnable {
 		} catch (Exception e) {
 			log.error("unrecoverable error");
 		}
-
-		log.warn("event loop terminated");
 	}
 
 	private void processSelectedKeys(Set<SelectionKey> keys) throws Exception {
@@ -237,7 +234,6 @@ public abstract class TcpClient implements Runnable {
 	private void processConnect(SelectionKey key) throws Exception {
 		SocketChannel ch = (SocketChannel) key.channel();
 		if (ch.finishConnect()) {
-			log.info("connected to " + address);
 			key.interestOps(key.interestOps() ^ SelectionKey.OP_CONNECT);
 			key.interestOps(key.interestOps() | SelectionKey.OP_READ);
 			reconnectInterval = INITIAL_RECONNECT_INTERVAL;

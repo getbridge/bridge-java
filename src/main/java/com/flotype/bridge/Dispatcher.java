@@ -33,7 +33,7 @@ class Dispatcher {
 		log.info(serviceName + ":" + methodName + " called");
 		final Object service = services.get(serviceName);
 		if (service == null) {
-			log.error("No such service: " + serviceName);
+			log.warn("Could not find object to handle {} ", serviceName);
 			return;
 		}
 
@@ -47,7 +47,7 @@ class Dispatcher {
 		final Method m = getConformingMethod(methodName, args,
 				serviceToClass.get(service));
 		if (m == null) {
-			log.error("No method found: " + methodName);
+			log.error("Could not find method to handle {}" , methodName);
 			return;
 		}
 		tp.execute(new Runnable() {

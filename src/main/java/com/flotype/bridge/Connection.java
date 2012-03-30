@@ -45,10 +45,11 @@ public class Connection extends TcpClient {
 			redirector();
 		} else {
 			this.setAddress(new InetSocketAddress(host, port));
+			log.info("Starting TCP connection {} {}", this.host, this.port);
 			start();
 		}
 	}
-
+	
 	protected void send(String string) {
 		if (bridge.ready) {
 			write(string.getBytes());
@@ -59,6 +60,7 @@ public class Connection extends TcpClient {
 	}
 
 	public void write(byte[] buffer) {
+		log.info("Sending {}", buffer);
 		ByteBuffer data = ByteBuffer.allocate(buffer.length + 4);
 		data.put(Utils.intToByteArray(buffer.length)); // Put the length header
 		data.put(buffer); // Put the data
@@ -100,6 +102,12 @@ public class Connection extends TcpClient {
 				Map<String, Object> jsonObj = JSONCodec.parseRedirector(result);
 				Map<String, String> data = (Map<String, String>) jsonObj
 						.get("data");
+				
+				if(data.get("bridge_host") == null || data.get("bridge_port") == null) {
+					log.error("Could not find host and port in JSON body");
+					return;
+				}
+				
 				this.host = data.get("bridge_host");
 				this.port = Integer.parseInt(data.get("bridge_port"));
 				this.connect();
@@ -134,38 +142,46 @@ public class Connection extends TcpClient {
 				throw new Exception(
 						"Expected message length not equal to buffer size");
 			}
+			
+			log.info("Received {}", body);
 
 			if (!bridge.ready) {
 				// Client not handshaken
 				String[] ids = (new String(body)).split("\\|");
 				if (ids.length == 2) {
 					// Got a ID and secret as response
+					log.info("clientId receieved {}", ids[0]);
 					clientId = ids[0];
 					secret = ids[1];
 					this.handshaken = true;
 
 					bridge.onReady();
 					processCommandQueue();
+					log.info("Handshake complete");
 					return;
 				}
 			}
 
 			// Parse as normal
 			Map<String, Object> message = Utils.deserialize(bridge, body);
+			if(message.get("destination") == null) {
+				log.warn("No destination in message {}", body);
+			} else {
 			bridge.dispatcher.execute((Reference) message.get("destination"),
 					(List<Object>) message.get("args"));
+			}
 		}
 	}
 
 	@Override
 	protected void onDisconnected() {
-		log.warn("Disconnected from TCP server");
+		log.warn("Connection closed");
 		bridge.onDisconnect();
 	}
 
 	@Override
 	protected void onConnected() throws Exception {
-		log.info("Connected to TCP server");
+		log.info("Beginning handshake");
 		String connectString = JSONCodec.createCONNECT(bridge, clientId,
 				secret, apiKey);
 		// Use write instead of send for unbuffered sending

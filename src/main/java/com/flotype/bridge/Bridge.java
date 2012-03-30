@@ -147,7 +147,7 @@ public class Bridge {
 	public void publishService(String name, BridgeObjectBase bridgeObject,
 			BridgeObjectBase callback) {
 		if (name.equals("system")) {
-			log.error("Invalid service name: " + name);
+			log.error("Invalid service name {}", name);
 			return;
 		}
 
