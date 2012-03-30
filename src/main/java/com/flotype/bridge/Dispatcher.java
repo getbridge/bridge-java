@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class Dispatcher {
 
-	private static Log log = LogFactory.getLog(Dispatcher.class);
+	private static Logger log = LoggerFactory.getLogger(Dispatcher.class);
 
 	private Map<Object, Class<?>> serviceToClass;
 	private Map<String, Object> services;

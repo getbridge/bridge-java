@@ -14,11 +14,11 @@ import java.util.Queue;
 
 import net.bobah.nio.TcpClient;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connection extends TcpClient {
-	private static Log log = LogFactory.getLog(Connection.class);
+	private static Logger log = LoggerFactory.getLogger(Connection.class);
 
 	String clientId;
 

@@ -15,8 +15,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simple NIO TCP client Assumptions: - the client should always be connected,
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  */
 public abstract class TcpClient implements Runnable {
-	private static Log log = LogFactory.getLog(TcpClient.class);
+	private static Logger log = LoggerFactory.getLogger(TcpClient.class);
 
 	private static final long INITIAL_RECONNECT_INTERVAL = 500; // 500 ms.
 	private static final long MAXIMUM_RECONNECT_INTERVAL = 30000; // 30 sec.

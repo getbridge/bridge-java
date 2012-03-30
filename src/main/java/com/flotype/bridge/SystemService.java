@@ -2,14 +2,14 @@ package com.flotype.bridge;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class SystemService implements BridgeObject {
 	Dispatcher dispatcher;
 	private Bridge bridge;
 
-	private static Log log = LogFactory.getLog(SystemService.class);
+	private static Logger log = LoggerFactory.getLogger(SystemService.class);
 
 	public SystemService(Bridge bridge, Dispatcher dispatcher) {
 		this.dispatcher = dispatcher;

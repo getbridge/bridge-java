@@ -2,8 +2,8 @@ package com.flotype.bridge;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.lang.reflect.Proxy;
 
 /**
@@ -17,7 +17,7 @@ import java.lang.reflect.Proxy;
  */
 public class Bridge {
 	BridgeEventHandler eventHandler = null;
-	private static Log log = LogFactory.getLog(Bridge.class);
+	private static Logger log = LoggerFactory.getLogger(Bridge.class);
 	protected Dispatcher dispatcher = new Dispatcher(this);
 	boolean ready = false;
 	private Connection connection;
