@@ -60,7 +60,7 @@ public class Connection extends TcpClient {
 	}
 
 	public void write(byte[] buffer) {
-		log.info("Sending {}", buffer);
+		log.info("Sending {}", new String(buffer));
 		ByteBuffer data = ByteBuffer.allocate(buffer.length + 4);
 		data.put(Utils.intToByteArray(buffer.length)); // Put the length header
 		data.put(buffer); // Put the data
@@ -138,6 +138,7 @@ public class Connection extends TcpClient {
 			}
 			byte[] body = new byte[length];
 			buf.get(body);
+			String bodyString = new String(body);
 			if (length != body.length) {
 				throw new Exception(
 						"Expected message length not equal to buffer size");
@@ -147,7 +148,7 @@ public class Connection extends TcpClient {
 
 			if (!bridge.ready) {
 				// Client not handshaken
-				String[] ids = (new String(body)).split("\\|");
+				String[] ids = (bodyString).split("\\|");
 				if (ids.length == 2) {
 					// Got a ID and secret as response
 					log.info("clientId receieved {}", ids[0]);
@@ -165,7 +166,7 @@ public class Connection extends TcpClient {
 			// Parse as normal
 			Map<String, Object> message = Utils.deserialize(bridge, body);
 			if(message.get("destination") == null) {
-				log.warn("No destination in message {}", body);
+				log.warn("No destination in message {}", bodyString);
 			} else {
 			bridge.dispatcher.execute((Reference) message.get("destination"),
 					(List<Object>) message.get("args"));
