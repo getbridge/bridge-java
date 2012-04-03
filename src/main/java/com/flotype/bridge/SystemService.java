@@ -40,9 +40,9 @@ class SystemService implements BridgeObject {
 	public void getService(String name, Reference callback) throws IOException {
 		Object service = dispatcher.getObject(name);
 		if (service != null) {
-			callback.invokeByName(null, "callback", new Object[] { service });
+			callback.invokeByName(null, "callback", new Object[] {service, name});
 		} else {
-			callback.invokeByName(null, "callback", new Object[] { null });
+			callback.invokeByName(null, "callback", new Object[] { null, name});
 		}
 
 	}
