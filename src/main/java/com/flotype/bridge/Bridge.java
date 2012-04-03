@@ -320,7 +320,8 @@ public class Bridge {
 	}
 
 	protected void onReconnect() {
-
+		this.ready = true;
+		this.eventHandler.onReconnect();
 	}
 
 	protected void onConnected() {
