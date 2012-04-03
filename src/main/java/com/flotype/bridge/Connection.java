@@ -157,13 +157,14 @@ public class Connection extends TcpClient {
 					log.info("clientId receieved {}", ids[0]);
 					clientId = ids[0];
 					secret = ids[1];
-					this.handshaken = true;
 
-					if(clientId == null) {
+					if(this.handshaken == false) {
 						bridge.onReady();
+						this.handshaken = true;
 					} else {
 						bridge.onReconnect();
 					}
+					
 					processCommandQueue();
 					log.info("Handshake complete");
 					return;
