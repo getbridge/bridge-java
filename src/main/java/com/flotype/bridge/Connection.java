@@ -147,7 +147,7 @@ public class Connection extends TcpClient {
 						"Expected message length not equal to buffer size");
 			}
 			
-			log.info("Received {}", body);
+			log.info("Received {}", bodyString);
 
 			if (!bridge.ready) {
 				// Client not handshaken
