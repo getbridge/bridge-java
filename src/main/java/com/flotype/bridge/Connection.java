@@ -130,7 +130,10 @@ public class Connection extends TcpClient {
 	@Override
 	protected void onRead(ByteBuffer buf) throws Exception {
 		while (buf.hasRemaining()) {
-			// Assuming 4 byte little endian ints
+			if(buf.remaining() < 4) {
+				// Full header not received yet. Wait until next time
+				break;
+			}
 			int length = buf.getInt();
 			if (buf.remaining() < length) {
 				// Header received but not the body. Wait until next time.
