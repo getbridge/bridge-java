@@ -1,13 +1,12 @@
 package com.flotype.bridge;
 
 import java.io.IOException;
+import java.lang.reflect.Proxy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
-
-import java.lang.reflect.Proxy;
 
 /**
  * Bridge class is the interface to the Bridge server. A Bridge object
@@ -65,7 +64,7 @@ public class Bridge {
 	 *            is disrupted
 	 */
 	public Bridge(String host, Integer port, String apiKey,
-			BridgeEventHandler eventHandler, boolean reconnect) {
+	        BridgeEventHandler eventHandler, boolean reconnect) {
 		this();
 		this.setHost(host);
 		this.setPort(port);
@@ -89,7 +88,7 @@ public class Bridge {
 	 *            is disrupted
 	 */
 	public Bridge(String redirectorUrl, String apiKey,
-			BridgeEventHandler eventHandler, boolean reconnect) {
+	        BridgeEventHandler eventHandler, boolean reconnect) {
 		this();
 		this.setRedirector(redirectorUrl);
 		this.setApiKey(apiKey);
@@ -148,7 +147,7 @@ public class Bridge {
 	 *            A local object that has a method named callback
 	 */
 	public void publishService(String name, BridgeObjectBase bridgeObject,
-			BridgeObjectBase callback) {
+	        BridgeObjectBase callback) {
 		if (name.equals("system")) {
 			log.error("Invalid service name {}", name);
 			return;
@@ -179,7 +178,7 @@ public class Bridge {
 	 */
 	public <T> T getService(String serviceName, Class<T> serviceInterface) {
 		Reference result = Reference.createServiceReference(this, serviceName,
-				Utils.getMethods(serviceInterface));
+		        Utils.getMethods(serviceInterface));
 		return Utils.createProxy(result, serviceInterface);
 	}
 
@@ -197,7 +196,7 @@ public class Bridge {
 		this.connection.send(msg);
 
 		Reference result = Reference.createChannelReference(this, channelName,
-				Utils.getMethods(channelInterface));
+		        Utils.getMethods(channelInterface));
 		return Utils.createProxy(result, channelInterface);
 	}
 
@@ -222,7 +221,7 @@ public class Bridge {
 	 *            A callback that will be called upon joining the channel
 	 */
 	public void joinChannel(String channelName, BridgeObjectBase handler,
-			BridgeObjectBase callback) {
+	        BridgeObjectBase callback) {
 		Reference handlerRef = null;
 		if (handler instanceof BridgeObject) {
 			handlerRef = dispatcher.storeRandomObject(handler);
@@ -236,7 +235,7 @@ public class Bridge {
 			callbackRef = (Reference) Proxy.getInvocationHandler(callback);
 		}
 		String msg = JSONCodec.createJC(this, channelName, handlerRef,
-				callbackRef);
+		        callbackRef);
 		this.connection.send(msg);
 	}
 
@@ -257,11 +256,11 @@ public class Bridge {
 	 * @param handler
 	 */
 	public void leaveChannel(String name, BridgeObject handler,
-			BridgeObject callback) {
+	        BridgeObject callback) {
 		Reference handlerRef = dispatcher.storeObject(name, handler);
 		Reference callbackRef = dispatcher.storeRandomObject(callback);
 		String msg = JSONCodec.createLEAVECHANNEL(this, name, handlerRef,
-				callbackRef);
+		        callbackRef);
 		this.connection.send(msg);
 	}
 
@@ -293,10 +292,11 @@ public class Bridge {
 		this.connection.setReconnect(reconnect);
 		return this;
 	}
-	
+
 	public Bridge setLogLevel(int level) {
-		ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-		switch(level) {
+		ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory
+		        .getLogger(Logger.ROOT_LOGGER_NAME);
+		switch (level) {
 		case 3:
 			rootLogger.setLevel(Level.INFO);
 			break;
