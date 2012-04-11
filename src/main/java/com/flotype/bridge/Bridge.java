@@ -6,6 +6,9 @@ import java.lang.reflect.Proxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+
 /**
  * Bridge class is the interface to the Bridge server. A Bridge object
  * encapsulates a network connection and state of stored objects. The network
@@ -21,6 +24,7 @@ public class Bridge {
 	protected Dispatcher dispatcher = new Dispatcher(this);
 	boolean ready = false;
 	private Connection connection;
+	private final ExecutorService singleThreadPool;
 
 	/**
 	 * Default Bridge constructor which uses all default settings. This
@@ -36,6 +40,7 @@ public class Bridge {
 	 */
 	public Bridge() {
 		connection = new Connection(this);
+		singleThreadPool = Executors.newSingleThreadExecutor();
 		this.setRedirector(Utils.DEFAULT_REDIRECTOR);
 		this.setEventHandler(Utils.DEFAULT_EVENT_HANDLER);
 		this.setReconnect(Utils.DEFAULT_RECONNECT);
@@ -109,9 +114,15 @@ public class Bridge {
 		return true;
 	}
 
-	protected void send(Reference destination, Object[] args) {
-		String msg = JSONCodec.createSEND(this, destination, args);
-		this.connection.send(msg);
+	protected void send(final Reference destination, final Object[] args) {
+		final Bridge self = this;
+		singleThreadPool.execute(new Runnable() {
+			@Override
+			public void run() {
+				String msg = JSONCodec.createSEND(self, destination, args);
+				connection.send(msg);
+			}
+		});
 	}
 
 	/**
@@ -293,6 +304,7 @@ public class Bridge {
 
 	protected void onDisconnect() {
 		this.ready = false;
+		//pool.shutdownNow(); // Cancel currently executing tasks
 	}
 
 	protected void onReady() {
