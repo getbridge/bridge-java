@@ -137,6 +137,9 @@ public class Connection extends TcpClient {
 			int length = buf.getInt();
 			if (buf.remaining() < length) {
 				// Header received but not the body. Wait until next time.
+				// Reset the ByteBuffer position to the start of the header.
+				int pos = buf.position() - 4;
+				buf.position(pos);
 				break;
 			}
 			byte[] body = new byte[length];
