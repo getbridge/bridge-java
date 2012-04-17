@@ -13,7 +13,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
-class Utils<T> {
+public class Utils<T> {
 
 	public static final String DEFAULT_REDIRECTOR = "http://redirector.flotype.com";
 	public static final BridgeEventHandler DEFAULT_EVENT_HANDLER = new BridgeEventHandler();

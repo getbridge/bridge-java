@@ -30,7 +30,7 @@ public class Main {
 
 			}
 		};
-
+		
 		bridge.publishService("myService", handler, callback); // TEST
 
 		bridge.publishService("myService", handler); // TEST
