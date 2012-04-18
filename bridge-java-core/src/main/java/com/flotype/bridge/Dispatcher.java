@@ -105,11 +105,9 @@ class Dispatcher {
 				if (arguments.length == formalParameters.length) {
 					for (int iParam = 0; iParam < arguments.length; iParam++) {
 						Class<?> param = formalParameters[iParam];
-						if (!param.isAssignableFrom(arguments[iParam]
-								.getClass())) {
-							if (!(arguments[iParam] instanceof Reference && Utils
-									.contains(param.getInterfaces(),
-											BridgeRemoteObject.class))) {
+						Class<?> argParam = arguments[iParam].getClass();
+						if (!param.isAssignableFrom(argParam) && param != Utils.autobox(argParam)) {
+							if (!(arguments[iParam] instanceof Reference && Utils.isRemoteObject(param))){
 								// Argument is not assignable and is not
 								// proxyable. Skip this method
 								continue methodLoop;

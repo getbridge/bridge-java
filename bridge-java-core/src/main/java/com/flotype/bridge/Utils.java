@@ -19,7 +19,24 @@ public class Utils<T> {
 	public static final BridgeEventHandler DEFAULT_EVENT_HANDLER = new BridgeEventHandler();
 	public static final boolean DEFAULT_RECONNECT = true;
 	public static int logLevel = 5;
-
+	
+	private static Map<Class<?>, Class<?>> autoboxMap = new HashMap<Class<?>, Class<?>>();
+	
+	static {
+		autoboxMap.put(byte.class, Byte.class);
+		autoboxMap.put(Byte.class, byte.class);
+		autoboxMap.put(short.class, Short.class);
+		autoboxMap.put(Short.class, short.class);
+		autoboxMap.put(int.class, Integer.class);
+		autoboxMap.put(Integer.class, int.class);
+		autoboxMap.put(long.class, Long.class);
+		autoboxMap.put(Long.class, long.class);
+		autoboxMap.put(double.class, Double.class);
+		autoboxMap.put(Double.class, double.class);
+		autoboxMap.put(boolean.class, Boolean.class);
+		autoboxMap.put(Boolean.class, boolean.class);
+	}
+	
 	@SuppressWarnings("unchecked")
 	protected static Map<String, Object> deserialize(Bridge bridge, byte[] json)
 			throws JsonParseException, JsonMappingException, IOException {
@@ -121,13 +138,23 @@ public class Utils<T> {
 		return methodNames;
 	}
 
-	public static boolean contains(Object[] container, Object item) {
-		for (int i = 0; i < container.length; i++) {
-			if (container[i].equals(item)) {
+	public static boolean isRemoteObject(Class<?> klass) {
+		if(klass == BridgeRemoteObject.class) {
+			return true;
+		}
+		
+		Class[] interfaces = klass.getInterfaces();
+		for (int i = 0; i < interfaces.length; i++) {
+			if (interfaces[i].equals(BridgeRemoteObject.class)) {
 				return true;
 			}
 		}
+		
 		return false;
+	}
+	
+	public static Class<?> autobox(Class<?> klass){
+		return autoboxMap.get(klass);
 	}
 
 	public static Object defaultValueForPrimitive(Class<?> primitive) {
