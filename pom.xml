@@ -7,15 +7,31 @@
     <groupId>com.flotype.bridge</groupId>
     <artifactId>bridge-java</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
-    <name>Flotype Bridge for Java Parent</name>
-
+    <version>0.0.1-SNAPSHOT</version>
+    <name>Flotype Bridge for Java - Parent Project</name>
+    <developers>
+		  <developer>
+			  <id>sridatta</id>
+			  <name>Sridatta Thatipamala</name>
+        <email>sridatta@flotype.com</email>
+        <roles>
+          <role>developer</role>
+        </roles>
+        <timezone>-8</timezone>
+      </developer>
+    </developers>
+    <licenses>
+      <license>
+        <name>MIT License</name>
+        <url>http://mit-license.org/</url>
+        <distribution>repo</distribution>
+      </license>
+    </licenses>
     <modules>
         <module>bridge-java-core</module>
         <module>bridge-java-examples</module>
         <module>bridge-java-itests</module>
     </modules>
-    
     <build>
     	<plugins>
     		<plugin>
@@ -29,4 +45,12 @@
     		</plugin>
     	</plugins>
     </build>
+    <parent>
+    	<groupId>org.sonatype.oss</groupId>
+    	<artifactId>oss-parent</artifactId>
+    	<version>7</version>
+    </parent>
+    <description>Maven multi-module project containing Flotype Bridge for Java core library, examples and tests.
+
+Flotype Bridge enables cross-language RPC for interserver and client-server communication.</description>
 </project>
