@@ -71,8 +71,8 @@
 	</parent>
   <scm>
 		<url>http://git.flotype.com/bridge-java</url>
-		<connection>scm:git:https://bitbucket.org/flotype/bridge-java.git</connection>
-    <developerConnection>scm:git:ssh://git@bitbucket.org:flotype/bridge-java.git</developerConnection>
+		<connection>scm:git:git://git@bitbucket.org/flotype/bridge-java.git</connection>
+    <developerConnection>scm:git:git://git@bitbucket.org/flotype/bridge-java.git</developerConnection>
 	</scm>
 	<description>Maven multi-module project containing Flotype Bridge for Java core library, examples and tests.
 
