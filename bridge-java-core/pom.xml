@@ -99,11 +99,6 @@
 		<name>Flotype Inc.</name>
 		<url>http://flotype.com</url>
 	</organization>
-	<scm>
-		<url>http://git.flotype.com/bridge-java</url>
-		<connection>scm:git:git://bitbucket.org:/flotype/bridge-java.git</connection>
-		<developerConnection>scm:git:git://bitbucket.org:/flotype/bridge-java.git</developerConnection>
-	</scm>
 	<description>Flotype Bridge enables cross-language RPC for interserver and client-server communication.</description>
 	<parent>
 		<groupId>com.flotype.bridge</groupId>
