@@ -1,0 +1,38 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>bridge-java-itests</artifactId>
+  <name>Flotype Bridge for Java- Integration tests</name>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>com.flotype.bridge</groupId>
+      <artifactId>bridge-java-core</artifactId>
+      <version>0.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.10</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <url>http://flotype.com</url>
+  <organization>
+    <name>Flotype Inc.</name>
+    <url>http://flotype.com</url>
+  </organization>
+  <scm>
+    <url>http://git.flotype.com/bridge-java</url>
+  </scm>
+  <description>Integration tests for the Flotype Bridge for Java library.
+
+Flotype Bridge enables cross-language RPC for interserver and client-server communication.</description>
+  <parent>
+  	<groupId>com.flotype.bridge</groupId>
+  	<artifactId>bridge-java</artifactId>
+  	<version>0.0.1</version>
+  </parent>
+</project>
