@@ -2,6 +2,7 @@ package com.flotype.bridge;
 
 import java.io.IOException;
 import java.lang.reflect.Proxy;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,7 +120,11 @@ public class Bridge {
 		singleThreadPool.execute(new Runnable() {
 			@Override
 			public void run() {
+        //long timestamp = new Date().getTime();
+        //log.info("Before serialize: " + timestamp);                       
 				String msg = JSONCodec.createSEND(self, destination, args);
+        //long timestamp_after = new Date().getTime();
+        //log.info("Serialize Time: " + (timestamp_after - timestamp));                       
 				connection.send(msg);
 			}
 		});

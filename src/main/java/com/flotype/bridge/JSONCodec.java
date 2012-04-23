@@ -15,6 +15,12 @@ import org.codehaus.jackson.map.module.SimpleModule;
 import org.codehaus.jackson.type.TypeReference;
 
 class JSONCodec {
+	// Static reusable object mappers.
+	private static ObjectMapper sendMapper = new ObjectMapper();
+	private static SimpleModule sendModule = new SimpleModule("Handler", new Version(0, 1, 0,
+			"alpha"));
+	private static ObjectMapper redirectorMapper = new ObjectMapper();
+
 
 	public static String createSEND(Bridge bridge, Reference destination,
 			Object[] args) {
@@ -80,24 +86,22 @@ class JSONCodec {
 
 	private static String createCommand(Bridge bridge, String command,
 			Map<String, Object> data) {
-		// Format: {command: STRING, data: {...}}
-		ObjectMapper mapper = new ObjectMapper();
-		SimpleModule module = new SimpleModule("Handler", new Version(0, 1, 0,
-				"alpha"));
-		module.addSerializer(new ReferenceSerializer(bridge, Reference.class))
+			// Format: {command: STRING, data: {...}}
+
+		sendModule.addSerializer(new ReferenceSerializer(bridge, Reference.class))
 				.addSerializer(
 						new BridgeObjectSerializer(bridge, BridgeObject.class))
 				.addSerializer(
 						new BridgeRemoteObjectSerializer(bridge,
 								BridgeRemoteObject.class));
-		mapper.registerModule(module);
+		sendMapper.registerModule(sendModule);
 
 		Map<String, Object> commandObj = new HashMap<String, Object>();
 		commandObj.put("command", command);
 		commandObj.put("data", data);
 
 		try {
-			return mapper.writeValueAsString(commandObj);
+			return sendMapper.writeValueAsString(commandObj);
 		} catch (JsonGenerationException e) {
 			e.printStackTrace();
 			return null;
@@ -112,8 +116,7 @@ class JSONCodec {
 
 	public static Map<String, Object> parseRedirector(String result)
 			throws JsonParseException, JsonMappingException, IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		return mapper.readValue(result,
+		return redirectorMapper.readValue(result,
 				new TypeReference<Map<String, Object>>() {
 				});
 	}

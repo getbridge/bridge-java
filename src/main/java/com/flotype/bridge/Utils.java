@@ -20,15 +20,14 @@ class Utils<T> {
 	public static final boolean DEFAULT_RECONNECT = true;
 	public static int logLevel = 5;
 
+	private static ObjectMapper readMapper = new ObjectMapper();
+
 	@SuppressWarnings("unchecked")
 	protected static Map<String, Object> deserialize(Bridge bridge, byte[] json)
 			throws JsonParseException, JsonMappingException, IOException {
 
-		// Create object mapper
-		ObjectMapper mapper = new ObjectMapper();
-
 		// Return a request object parsed by mapper
-		Map<String, Object> jsonObj = mapper.readValue(json,
+		Map<String, Object> jsonObj = readMapper.readValue(json,
 				new TypeReference<Map<String, Object>>() {
 				});
 		jsonObj = (Map<String, Object>) constructRefs(bridge, jsonObj);

@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Date;
 
 import net.bobah.nio.TcpClient;
 
@@ -151,6 +152,8 @@ public class Connection extends TcpClient {
 			}
 			
 			log.info("Received {}", bodyString);
+      //long timestamp = new Date().getTime();
+      //log.info("Read Before Unserialize: " + timestamp);                       
 
 			if (!bridge.ready) {
 				// Client not handshaken
@@ -176,6 +179,10 @@ public class Connection extends TcpClient {
 
 			// Parse as normal
 			Map<String, Object> message = Utils.deserialize(bridge, body);
+
+      //long timestamp_after = new Date().getTime();
+      //log.info("Read After Unserialize: " + (timestamp_after - timestamp));                       
+
 			if(message.get("destination") == null) {
 				log.warn("No destination in message {}", bodyString);
 			} else {
