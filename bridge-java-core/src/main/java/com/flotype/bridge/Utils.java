@@ -19,7 +19,9 @@ public class Utils<T> {
 	public static final BridgeEventHandler DEFAULT_EVENT_HANDLER = new BridgeEventHandler();
 	public static final boolean DEFAULT_RECONNECT = true;
 	public static int logLevel = 5;
-	
+
+	private static ObjectMapper readMapper = new ObjectMapper();
+
 	private static Map<Class<?>, Class<?>> autoboxMap = new HashMap<Class<?>, Class<?>>();
 	
 	static {
@@ -41,11 +43,8 @@ public class Utils<T> {
 	protected static Map<String, Object> deserialize(Bridge bridge, byte[] json)
 			throws JsonParseException, JsonMappingException, IOException {
 
-		// Create object mapper
-		ObjectMapper mapper = new ObjectMapper();
-
 		// Return a request object parsed by mapper
-		Map<String, Object> jsonObj = mapper.readValue(json,
+		Map<String, Object> jsonObj = readMapper.readValue(json,
 				new TypeReference<Map<String, Object>>() {
 				});
 		jsonObj = (Map<String, Object>) constructRefs(bridge, jsonObj);
