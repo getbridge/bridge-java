@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Bridge class is the interface to the Bridge server. A Bridge object
@@ -24,8 +23,7 @@ public class Bridge {
 	protected Dispatcher dispatcher = new Dispatcher(this);
 	boolean ready = false;
 	private Connection connection;
-	private final ExecutorService singleThreadPool;
-
+	
 	/**
 	 * Default Bridge constructor which uses all default settings. This
 	 * constructor provides all basic setup instructions to connect to the
@@ -40,7 +38,7 @@ public class Bridge {
 	 */
 	public Bridge() {
 		connection = new Connection(this);
-		singleThreadPool = Executors.newSingleThreadExecutor();
+		Executors.newSingleThreadExecutor();
 		this.setRedirector(Utils.DEFAULT_REDIRECTOR);
 		this.setEventHandler(Utils.DEFAULT_EVENT_HANDLER);
 		this.setReconnect(Utils.DEFAULT_RECONNECT);
@@ -67,7 +65,7 @@ public class Bridge {
 	 *            is disrupted
 	 */
 	public Bridge(String host, Integer port, String apiKey,
-	        BridgeEventHandler eventHandler, boolean reconnect) {
+			BridgeEventHandler eventHandler, boolean reconnect) {
 		this();
 		this.setHost(host);
 		this.setPort(port);
@@ -91,7 +89,7 @@ public class Bridge {
 	 *            is disrupted
 	 */
 	public Bridge(String redirectorUrl, String apiKey,
-	        BridgeEventHandler eventHandler, boolean reconnect) {
+			BridgeEventHandler eventHandler, boolean reconnect) {
 		this();
 		this.setRedirector(redirectorUrl);
 		this.setApiKey(apiKey);
@@ -115,14 +113,8 @@ public class Bridge {
 	}
 
 	protected void send(final Reference destination, final Object[] args) {
-		final Bridge self = this;
-		singleThreadPool.execute(new Runnable() {
-			@Override
-			public void run() {
-				String msg = JSONCodec.createSEND(self, destination, args);
-				connection.send(msg);
-			}
-		});
+		String msg = JSONCodec.createSEND(this, destination, args);
+		connection.send(msg);
 	}
 
 	/**
@@ -156,7 +148,7 @@ public class Bridge {
 	 *            A local object that has a method named callback
 	 */
 	public void publishService(String name, BridgeObjectBase bridgeObject,
-	        BridgeObjectBase callback) {
+			BridgeObjectBase callback) {
 		if (name.equals("system")) {
 			log.error("Invalid service name {}", name);
 			return;
@@ -187,7 +179,7 @@ public class Bridge {
 	 */
 	public <T> T getService(String serviceName, Class<T> serviceInterface) {
 		Reference result = Reference.createServiceReference(this, serviceName,
-		        Utils.getMethods(serviceInterface));
+				Utils.getMethods(serviceInterface));
 		return Utils.createProxy(result, serviceInterface);
 	}
 
@@ -205,7 +197,7 @@ public class Bridge {
 		this.connection.send(msg);
 
 		Reference result = Reference.createChannelReference(this, channelName,
-		        Utils.getMethods(channelInterface));
+				Utils.getMethods(channelInterface));
 		return Utils.createProxy(result, channelInterface);
 	}
 
@@ -230,7 +222,7 @@ public class Bridge {
 	 *            A callback that will be called upon joining the channel
 	 */
 	public void joinChannel(String channelName, BridgeObjectBase handler,
-	        BridgeObjectBase callback) {
+			BridgeObjectBase callback) {
 		Reference handlerRef = null;
 		if (handler instanceof BridgeObject) {
 			handlerRef = dispatcher.storeRandomObject(handler);
@@ -244,7 +236,7 @@ public class Bridge {
 			callbackRef = (Reference) Proxy.getInvocationHandler(callback);
 		}
 		String msg = JSONCodec.createJC(this, channelName, handlerRef,
-		        callbackRef);
+				callbackRef);
 		this.connection.send(msg);
 	}
 
@@ -265,11 +257,11 @@ public class Bridge {
 	 * @param handler
 	 */
 	public void leaveChannel(String name, BridgeObject handler,
-	        BridgeObject callback) {
+			BridgeObject callback) {
 		Reference handlerRef = dispatcher.storeObject(name, handler);
 		Reference callbackRef = dispatcher.storeRandomObject(callback);
 		String msg = JSONCodec.createLEAVECHANNEL(this, name, handlerRef,
-		        callbackRef);
+				callbackRef);
 		this.connection.send(msg);
 	}
 
