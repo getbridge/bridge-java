@@ -21,6 +21,7 @@ public class Bridge {
 	BridgeEventHandler eventHandler = null;
 	private static Logger log = LoggerFactory.getLogger(Bridge.class);
 	protected Dispatcher dispatcher = new Dispatcher(this);
+	protected BridgeClient context = null; 
 	boolean ready = false;
 	private Connection connection;
 	
@@ -263,6 +264,10 @@ public class Bridge {
 		String msg = JSONCodec.createLEAVECHANNEL(this, name, handlerRef,
 				callbackRef);
 		this.connection.send(msg);
+	}
+	
+	public BridgeClient getContext() {
+		return this.context;
 	}
 
 	public Bridge setApiKey(String apiKey) {

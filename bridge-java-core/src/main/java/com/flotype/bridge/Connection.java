@@ -49,7 +49,7 @@ public class Connection extends TcpClient {
 			start();
 		}
 	}
-	
+
 	protected void send(String string) {
 		if (bridge.ready) {
 			write(string.getBytes());
@@ -102,12 +102,13 @@ public class Connection extends TcpClient {
 				Map<String, Object> jsonObj = JSONCodec.parseRedirector(result);
 				Map<String, String> data = (Map<String, String>) jsonObj
 						.get("data");
-				
-				if(data.get("bridge_host") == null || data.get("bridge_port") == null) {
+
+				if (data.get("bridge_host") == null
+						|| data.get("bridge_port") == null) {
 					log.error("Could not find host and port in JSON body");
 					return;
 				}
-				
+
 				this.host = data.get("bridge_host");
 				this.port = Integer.parseInt(data.get("bridge_port"));
 				this.connect();
@@ -176,12 +177,15 @@ public class Connection extends TcpClient {
 
 			// Parse as normal
 			Map<String, Object> message = Utils.deserialize(bridge, body);
-			if(message.get("destination") == null) {
-				log.warn("No destination in message {}", bodyString);
-			} else {
+			if (message.get("destination") == null) {
+				log.warn("No destination in message {}", bodyString);	
+				return;
+			}
+			if (message.get("source") != null) {
+				bridge.context = new BridgeClient(bridge, (String) message.get("source"));
+			}
 			bridge.dispatcher.execute((Reference) message.get("destination"),
 					(List<Object>) message.get("args"));
-			}
 		}
 	}
 
