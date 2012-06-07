@@ -2,11 +2,10 @@ package com.flotype.bridge;
 
 import java.io.IOException;
 import java.lang.reflect.Proxy;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.Executors;
 
 /**
  * Bridge class is the interface to the Bridge server. A Bridge object
@@ -108,7 +107,7 @@ public class Bridge {
 	 * @throws IOException
 	 */
 	public boolean connect() throws IOException {
-		this.connection.connect();
+		this.connection.start();
 		return true;
 	}
 
@@ -270,8 +269,14 @@ public class Bridge {
 		return this;
 	}
 
-	public void setRedirector(String redirectorUrl) {
+	public Bridge setRedirector(String redirectorUrl) {
 		this.connection.setRedirector(redirectorUrl);
+		return this;
+	}
+	
+	public Bridge setSecure(boolean secure) {
+		this.connection.setSecure(secure);
+		return this;
 	}
 
 	public Bridge setHost(String host) {
@@ -290,7 +295,6 @@ public class Bridge {
 	}
 
 	public Bridge setReconnect(boolean reconnect) {
-		this.connection.setReconnect(reconnect);
 		return this;
 	}
 
