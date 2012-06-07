@@ -76,7 +76,6 @@ public class Connection {
 		redirectorRequest.connect();
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void onRedirectorResponse(String json) throws JsonParseException, JsonMappingException, IOException {
 		Map<String, Object> response = JSONCodec.parseRedirector(json);
 		Map<String, Object> data = (Map<String, Object>) response.get("data");
