@@ -72,7 +72,14 @@ public class Connection {
 
 	private void redirector() throws MalformedURLException {
 		String endpoint = redirector + "/redirect/" + apiKey;
-		HTTPConnection redirectorRequest = new HTTPConnection(this, endpoint);
+		
+		HTTPConnection redirectorRequest;
+		if(this.secure) {
+			redirectorRequest = new HTTPSConnection(this, endpoint);
+		} else {
+			redirectorRequest = new HTTPConnection(this, endpoint);
+		}
+		
 		redirectorRequest.connect();
 	}
 	
