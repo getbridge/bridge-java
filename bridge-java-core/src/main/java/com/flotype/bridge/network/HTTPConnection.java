@@ -31,7 +31,7 @@ public class HTTPConnection {
 
 
 	Connection connection;
-	private ClientBootstrap client;
+	protected ClientBootstrap client;
 	private String url;
 
 	public HTTPConnection(Connection connection, String url) {
