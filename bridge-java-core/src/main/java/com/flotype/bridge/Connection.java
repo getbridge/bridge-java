@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.flotype.bridge.network.HTTPConnection;
+import com.flotype.bridge.network.HTTPSConnection;
 import com.flotype.bridge.network.Socket;
 import com.flotype.bridge.network.SocketBuffer;
 import com.flotype.bridge.network.TCPSocket;
@@ -44,16 +45,38 @@ public class Connection {
 	private static final ScheduledExecutorService reconnectExecutor = 
 		  Executors.newSingleThreadScheduledExecutor();
 
-	private boolean reconnect;
+	private boolean reconnect = true;
 
-	private boolean secure;
+	private boolean secure = false;
+	
 
-	protected Connection(Bridge bridge) {
+	protected Connection(Bridge bridge, String apiKey, String host, int port, String redirectorUrl, boolean secure) {
 		this.bridge = bridge;
+		this.host = host;
+		this.port = port;
+		this.apiKey = apiKey;
+		this.secure = secure;
+		
+		if(secure) {
+			this.redirector = Utils.DEFAULT_SECURE_REDIRECTOR;
+		} else {
+			this.redirector = Utils.DEFAULT_REDIRECTOR;
+		}
+		
+		if(redirectorUrl != null) {
+			this.redirector = redirectorUrl;
+		}
+
 		reconnectInterval = 400;
 		
 		sockBuffer = new SocketBuffer();
-		tcpSock = new TCPSocket(this);
+		
+		if(this.secure == true) {
+			tcpSock = new SSLSocket(this);
+		} else {
+			tcpSock = new TCPSocket(this);
+		}
+		
 		sock = sockBuffer;
 	}
 
@@ -183,31 +206,6 @@ public class Connection {
 			e.printStackTrace();
 		}
 
-	}
-
-	public void setApiKey(String apiKey) {
-		this.apiKey = apiKey;
-	}
-
-	public void setHost(String host) {
-		this.host = host;
-	}
-
-	public void setPort(int port) {
-		this.port = port;
-	}
-
-	public void setRedirector(String redirectorUrl) {
-		this.redirector = redirectorUrl;
-	}
-
-	public void setSecure(boolean secure) {
-		this.secure = secure;
-		if(this.secure == true) {
-			tcpSock = new SSLSocket(this);
-		} else {
-			tcpSock = new TCPSocket(this);
-		}
 	}
 
 }
