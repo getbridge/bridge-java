@@ -43,12 +43,12 @@ public class Connection {
 
 	private long reconnectInterval;
 	private static final ScheduledExecutorService reconnectExecutor = 
-		  Executors.newSingleThreadScheduledExecutor();
+		Executors.newSingleThreadScheduledExecutor();
 
 	private boolean reconnect = true;
 
 	private boolean secure = false;
-	
+
 
 	protected Connection(Bridge bridge, String apiKey, String host, int port, String redirectorUrl, boolean secure) {
 		this.bridge = bridge;
@@ -56,27 +56,27 @@ public class Connection {
 		this.port = port;
 		this.apiKey = apiKey;
 		this.secure = secure;
-		
+
 		if(secure) {
 			this.redirector = Utils.DEFAULT_SECURE_REDIRECTOR;
 		} else {
 			this.redirector = Utils.DEFAULT_REDIRECTOR;
 		}
-		
+
 		if(redirectorUrl != null) {
 			this.redirector = redirectorUrl;
 		}
 
 		reconnectInterval = 400;
-		
+
 		sockBuffer = new SocketBuffer();
-		
+
 		if(this.secure == true) {
 			tcpSock = new SSLSocket(this);
 		} else {
 			tcpSock = new TCPSocket(this);
 		}
-		
+
 		sock = sockBuffer;
 	}
 
@@ -95,17 +95,17 @@ public class Connection {
 
 	private void redirector() throws MalformedURLException {
 		String endpoint = redirector + "/redirect/" + apiKey;
-		
+
 		HTTPConnection redirectorRequest;
 		if(this.secure) {
 			redirectorRequest = new HTTPSConnection(this, endpoint);
 		} else {
 			redirectorRequest = new HTTPConnection(this, endpoint);
 		}
-		
+
 		redirectorRequest.connect();
 	}
-	
+
 	public void onRedirectorResponse(String json) throws JsonParseException, JsonMappingException, IOException {
 		Map<String, Object> response = JSONCodec.parseRedirector(json);
 		Map<String, Object> data = (Map<String, Object>) response.get("data");
@@ -113,7 +113,7 @@ public class Connection {
 			log.error("Unable to parse redirector response");
 			return;
 		}
-		
+
 		if(data.get("bridge_port") == null || data.get("bridge_host") == null) {
 			log.error("Could not find host and port in JSON body");
 		} else {
@@ -121,9 +121,9 @@ public class Connection {
 			port =  Integer.parseInt((String) data.get("bridge_port"));
 			establishConnection();
 		}
-		
+
 	}
-	
+
 	private void reconnect() {
 		log.info("Attempting to reconnect");
 		if(reconnectInterval < 32768) {
@@ -133,11 +133,11 @@ public class Connection {
 					establishConnection();
 				}
 			};
-			
+
 			reconnectExecutor.schedule(task, reconnectInterval, TimeUnit.MILLISECONDS);
 		}
 	}
-	
+
 	public void send(String msg){
 		sock.send(msg);
 	}
@@ -189,12 +189,17 @@ public class Connection {
 		Map<String, Object> obj;
 		try {
 			obj = Utils.deserialize(bridge, message.getBytes());
-			if(obj.get("destination") == null) {
-				log.warn("No destination in message {}", message);
-			} else {
-				bridge.dispatcher.execute((Reference) obj.get("destination"),
-						(List<Object>) obj.get("args"));
+			if (obj.get("destination") == null) {
+				log.warn("No destination in message {}", message);	
+				return;
 			}
+			if (obj.get("source") != null) {
+				bridge.context = new BridgeClient(bridge, (String) obj.get("source"));
+			}
+
+			bridge.dispatcher.execute((Reference) obj.get("destination"),
+					(List<Object>) obj.get("args"));
+
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
