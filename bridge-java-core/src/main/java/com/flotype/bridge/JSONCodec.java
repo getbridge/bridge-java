@@ -62,10 +62,12 @@ class JSONCodec {
 	}
 
 	public static String createJC(Bridge bridge, String name,
-			Reference handlerRef, Reference callbackRef) {
+			Reference handlerRef, boolean writeable,
+			Reference callbackRef) {
 		// Format: {name: STRING, handler: BRIDGEREF , callback: BRIDGEREF
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("name", name);
+		data.put("writeable", Boolean.valueOf(writeable));
 		data.put("handler", handlerRef);
 		if (callbackRef != null) {
 			data.put("callback", callbackRef);

@@ -223,6 +223,36 @@ public class Bridge {
 	 */
 	public void joinChannel(String channelName, BridgeObjectBase handler,
 			BridgeObjectBase callback) {
+	    joinChannel(channelName, handler, false, callback);
+	}
+
+	/**
+	 * Joins this Bridge client to a channel whose messages will be handled by
+	 * the given handler.
+	 * 
+	 * @param channelName
+	 * @param handler
+	 * @param writeable
+	 *            Whether the handler's owner may address the channel
+	 */
+	public void joinChannel(String channelName, BridgeObjectBase handler,
+			boolean writeable) {
+	    joinChannel(channelName, handler, writeable, null);
+	}
+
+	/**
+	 * Joins this Bridge client to a channel whose messages will be handled by
+	 * the given handler.
+	 * 
+	 * @param channelName
+	 * @param handler
+	 * @param writeable
+	 *            Whether the handler's owner may address the channel
+	 * @param callback
+	 *            A callback that will be called upon joining the channel
+	 */
+	public void joinChannel(String channelName, BridgeObjectBase handler,
+			boolean writeable, BridgeObjectBase callback) {
 		Reference handlerRef = null;
 		if (handler instanceof BridgeObject) {
 			handlerRef = dispatcher.storeRandomObject(handler);
@@ -236,7 +266,7 @@ public class Bridge {
 			callbackRef = (Reference) Proxy.getInvocationHandler(callback);
 		}
 		String msg = JSONCodec.createJC(this, channelName, handlerRef,
-				callbackRef);
+				writeable, callbackRef);
 		this.connection.send(msg);
 	}
 
