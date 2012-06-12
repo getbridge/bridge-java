@@ -107,7 +107,7 @@ public class JSONCodecTest {
 
 	@Test
 	public void testCreateJC() throws JsonParseException, JsonMappingException, IOException {
-		String gen = JSONCodec.createJC(bridge, "CHANNEL", localRef, localRef);
+		String gen = JSONCodec.createJC(bridge, "CHANNEL", localRef, true, localRef);
 		String spec = "{\"command\":\"JOINCHANNEL\",\"data\":{\"name\":\"CHANNEL\",\"handler\":{\"ref\":[\"client\",\"abcdefgh\",\"RANDOM\"],\"operations\":[]},\"callback\":{\"ref\":[\"client\",\"abcdefgh\",\"RANDOM\"],\"operations\":[]}}}";
 		Map<String, Object> specObj = mapper.readValue(spec,
 				new TypeReference<Map<String, Object>>() {
