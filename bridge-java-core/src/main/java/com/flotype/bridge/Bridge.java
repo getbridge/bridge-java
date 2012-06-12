@@ -209,7 +209,7 @@ public class Bridge {
 	 * @param handler
 	 */
 	public void joinChannel(String channelName, BridgeObject handler) {
-		joinChannel(channelName, handler, null);
+		joinChannel(channelName, handler, true, null);
 	}
 
 	/**
@@ -223,7 +223,7 @@ public class Bridge {
 	 */
 	public void joinChannel(String channelName, BridgeObjectBase handler,
 			BridgeObjectBase callback) {
-	    joinChannel(channelName, handler, false, callback);
+	    joinChannel(channelName, handler, true, callback);
 	}
 
 	/**
