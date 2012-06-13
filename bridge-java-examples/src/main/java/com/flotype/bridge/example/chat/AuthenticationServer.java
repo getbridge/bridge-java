@@ -24,8 +24,7 @@ public class AuthenticationServer {
 
 	public static void main(String[] args) throws Exception {
 
-		Bridge bridge = new Bridge()
-		.setApiKey("abcdefgh");
+		Bridge bridge = new Bridge("abcdefgh");
 		bridge.connect();
 
 		bridge.publishService("auth", new AuthObj(bridge));
