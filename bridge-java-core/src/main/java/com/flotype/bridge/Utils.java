@@ -18,6 +18,7 @@ public class Utils<T> {
 	public static final String DEFAULT_REDIRECTOR = "http://redirector.flotype.com";
 	public static final BridgeEventHandler DEFAULT_EVENT_HANDLER = new BridgeEventHandler();
 	public static final boolean DEFAULT_RECONNECT = true;
+	public static final String DEFAULT_SECURE_REDIRECTOR = "https://redirector.flotype.com";
 	public static int logLevel = 5;
 
 	private static ObjectMapper readMapper = new ObjectMapper();

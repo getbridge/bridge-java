@@ -11,6 +11,11 @@
       <artifactId>bridge-java-core</artifactId>
       <version>0.0.1</version>
     </dependency>
+    <dependency>
+    	<groupId>ch.qos.logback</groupId>
+    	<artifactId>logback-classic</artifactId>
+    	<version>1.0.3</version>
+    </dependency>
   </dependencies>
 
   <url>http://flotype.com</url>

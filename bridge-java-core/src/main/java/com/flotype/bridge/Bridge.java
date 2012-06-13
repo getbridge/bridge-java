@@ -6,8 +6,6 @@ import java.lang.reflect.Proxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.Executors;
-
 /**
  * Bridge class is the interface to the Bridge server. A Bridge object
  * encapsulates a network connection and state of stored objects. The network
@@ -21,28 +19,24 @@ public class Bridge {
 	BridgeEventHandler eventHandler = null;
 	private static Logger log = LoggerFactory.getLogger(Bridge.class);
 	protected Dispatcher dispatcher = new Dispatcher(this);
+	protected BridgeClient context = null; 
 	boolean ready = false;
 	private Connection connection;
 	
-	/**
-	 * Default Bridge constructor which uses all default settings. This
-	 * constructor provides all basic setup instructions to connect to the
-	 * Bridge server operated by Flotype. Instead of establishing a direct
-	 * connection, the client will first make an HTTP request to a 'redirector'
-	 * to determine which Bridge server to connect to. The default settings are:
-	 * <ul>
-	 * <li>host: http://redirector.flotype.com
-	 * <li>port: -1 (signifies HTTP request instead of TCP socket)
-	 * <li>reconnect: true
-	 * </ul>
-	 */
-	public Bridge() {
-		connection = new Connection(this);
-		Executors.newSingleThreadExecutor();
-		this.setRedirector(Utils.DEFAULT_REDIRECTOR);
+	public Bridge(String host, int port, String redirector, String apiKey, boolean secure) {
+		
+		if(redirector == null) {
+			if(secure) {
+				redirector = Utils.DEFAULT_SECURE_REDIRECTOR;
+			} else {
+				redirector = Utils.DEFAULT_REDIRECTOR;
+			}
+		}
+				
 		this.setEventHandler(Utils.DEFAULT_EVENT_HANDLER);
 		this.setReconnect(Utils.DEFAULT_RECONNECT);
 
+		connection = new Connection(this, apiKey, host, port, redirector , secure);
 		dispatcher.storeObject("system", new SystemService(this, dispatcher));
 	}
 
@@ -64,14 +58,12 @@ public class Bridge {
 	 *            Boolean specifying whether or not to reconnect if connection
 	 *            is disrupted
 	 */
-	public Bridge(String host, Integer port, String apiKey,
-			BridgeEventHandler eventHandler, boolean reconnect) {
-		this();
-		this.setHost(host);
-		this.setPort(port);
-		this.setApiKey(apiKey);
-		this.setEventHandler(eventHandler);
-		this.setReconnect(reconnect);
+	public Bridge(String host, Integer port, String apiKey) {
+		this(host, port, apiKey, false);
+	}
+	
+	public Bridge(String host, Integer port, String apiKey, boolean secure) {
+		this(host, port, null, apiKey, secure);
 	}
 
 	/**
@@ -88,15 +80,35 @@ public class Bridge {
 	 *            Boolean specifying whether or not to reconnect if connection
 	 *            is disrupted
 	 */
-	public Bridge(String redirectorUrl, String apiKey,
-			BridgeEventHandler eventHandler, boolean reconnect) {
-		this();
-		this.setRedirector(redirectorUrl);
-		this.setApiKey(apiKey);
-		this.setEventHandler(eventHandler);
-		this.setReconnect(reconnect);
+	public Bridge(String redirectorUrl, String apiKey) {
+		this(redirectorUrl, apiKey, false);
 	}
 
+	public Bridge(String redirectorUrl, String apiKey, boolean secure) {
+		this(null, -1, redirectorUrl, apiKey, secure);
+	}
+	
+	/**
+	 * Default Bridge constructor which uses all default settings. This
+	 * constructor provides all basic setup instructions to connect to the
+	 * Bridge server operated by Flotype. Instead of establishing a direct
+	 * connection, the client will first make an HTTP request to a 'redirector'
+	 * to determine which Bridge server to connect to. The default settings are:
+	 * <ul>
+	 * <li>host: http://redirector.flotype.com
+	 * <li>port: -1 (signifies HTTP request instead of TCP socket)
+	 * <li>reconnect: true
+	 * </ul>
+	 */
+	
+	public Bridge(String apiKey) {
+		this(apiKey, false);
+	}
+	
+	public Bridge(String apiKey, boolean secure) {
+		this(null, -1, null, apiKey, secure);
+	}
+	
 	/**
 	 * Establishes the connection and handshake process. If a redirected
 	 * connection is specified, the client will make a synchronous HTTP request
@@ -108,7 +120,7 @@ public class Bridge {
 	 * @throws IOException
 	 */
 	public boolean connect() throws IOException {
-		this.connection.connect();
+		this.connection.start();
 		return true;
 	}
 
@@ -294,25 +306,11 @@ public class Bridge {
 				callbackRef);
 		this.connection.send(msg);
 	}
-
-	public Bridge setApiKey(String apiKey) {
-		this.connection.setApiKey(apiKey);
-		return this;
+	
+	public BridgeClient getContext() {
+		return this.context;
 	}
 
-	public void setRedirector(String redirectorUrl) {
-		this.connection.setRedirector(redirectorUrl);
-	}
-
-	public Bridge setHost(String host) {
-		this.connection.setHost(host);
-		return this;
-	}
-
-	public Bridge setPort(Integer port) {
-		this.connection.setPort(port);
-		return this;
-	}
 
 	public Bridge setEventHandler(BridgeEventHandler eventHandler) {
 		this.eventHandler = eventHandler;
@@ -320,7 +318,6 @@ public class Bridge {
 	}
 
 	public Bridge setReconnect(boolean reconnect) {
-		this.connection.setReconnect(reconnect);
 		return this;
 	}
 
