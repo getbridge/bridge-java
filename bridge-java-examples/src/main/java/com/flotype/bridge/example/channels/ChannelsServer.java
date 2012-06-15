@@ -26,5 +26,6 @@ public class ChannelsServer {
 		ChannelsChatCallback callback = new ChannelsChatCallback();
 		bridge.joinChannel("+rw", obj, callback);
 		bridge.joinChannel("+r", obj, false, callback);
+		bridge.connect();
 	}
 }
