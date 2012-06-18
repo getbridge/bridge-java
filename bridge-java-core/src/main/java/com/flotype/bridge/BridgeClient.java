@@ -8,7 +8,7 @@ public class BridgeClient {
 		this.bridge = bridge;
 	}
 	public <T> T getService(String serviceName, Class<T> serviceInterface) {
-		Reference result = Reference.createClientReference(bridge, serviceName,
+		Reference result = Reference.createRemoteClientReference(bridge, clientId, serviceName,
 				Utils.getMethods(serviceInterface));
 		return Utils.createProxy(result, serviceInterface);
 	}

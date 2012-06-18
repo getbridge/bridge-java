@@ -113,6 +113,12 @@ class Reference implements InvocationHandler {
 		return new Reference(bridge, "client", bridge.getClientId(), objectId,
 				null, operations);
 	}
+	
+	static Reference createRemoteClientReference(Bridge bridge, String clientId, String objectId,
+			List<String> operations) {
+		return new Reference(bridge, "client", clientId, objectId,
+				null, operations);
+	}
 
 	static Reference createServiceReference(Bridge bridge, String serviceName,
 			List<String> operations) {
