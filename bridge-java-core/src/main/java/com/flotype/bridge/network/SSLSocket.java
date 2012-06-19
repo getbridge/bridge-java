@@ -1,9 +1,14 @@
 package com.flotype.bridge.network;
 
+import java.security.KeyStore;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -24,17 +29,16 @@ public class SSLSocket extends TCPSocket {
 
 			public ChannelPipeline getPipeline() throws Exception {
 				ChannelPipeline pipeline =  Channels.pipeline();
-				java.security.KeyStore ts = java.security.KeyStore.getInstance("JKS");
-				ts.load(this.getClass().getResourceAsStream("/keystore.ks"), "flotype".toCharArray());
 				
-				TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-				tmf.init(ts);
+				TrustManagerFactory tmFactory = TrustManagerFactory.getInstance("SunX509");
+				KeyStore tmpKS = null;
+				tmFactory.init(tmpKS);
+				TrustManager[] tm = tmFactory.getTrustManagers();
 
-				SSLContext sslc = SSLContext.getInstance("TLS");     
-				sslc.init(null, tmf.getTrustManagers(), null);
+				SSLContext sslContext = SSLContext.getInstance("TLS");
+				sslContext.init(null, tm, null);
+				SSLEngine engine = sslContext.createSSLEngine();
 
-
-				SSLEngine engine = sslc.createSSLEngine();
 				engine.setUseClientMode(true);
 				engine.setEnableSessionCreation(true);
 				engine.setWantClientAuth(true);
@@ -57,7 +61,19 @@ public class SSLSocket extends TCPSocket {
 				ChannelStateEvent e) throws Exception
 		{
 			super.channelConnected(ctx, e);
-			sslHandler.handshake();
+			ChannelFuture f = sslHandler.handshake();
+			
+			f.addListener(new ChannelFutureListener() {
+
+				@Override
+				public void operationComplete(ChannelFuture future)
+						throws Exception {
+					// TODO Auto-generated method stub
+					System.out.println(future.isSuccess());
+					
+				}
+				
+			});
 		}
 	}
 
