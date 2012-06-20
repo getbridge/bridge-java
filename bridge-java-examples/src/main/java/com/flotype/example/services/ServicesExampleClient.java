@@ -26,8 +26,7 @@ interface RemoteTestService extends BridgeRemoteObject {
 public class ServicesExampleClient {
 
 	public static void main(String[] args) throws IOException {
-		Bridge bridge = new Bridge()
-		.setApiKey("mypubkey");
+		Bridge bridge = new Bridge("mypubkey");
 		bridge.connect();
 
 		RemoteTestService test = bridge.getService("testService", RemoteTestService.class);

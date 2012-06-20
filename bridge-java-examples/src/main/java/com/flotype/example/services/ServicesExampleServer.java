@@ -29,8 +29,7 @@ class TestService implements BridgeObject {
 public class ServicesExampleServer {
 
 	public static void main(String[] args) throws IOException {
-		Bridge bridge = new Bridge()
-		.setApiKey("myprivkey");
+		Bridge bridge = new Bridge("myprivkey");
 		bridge.connect();
 
 		bridge.publishService("testService", new TestService());

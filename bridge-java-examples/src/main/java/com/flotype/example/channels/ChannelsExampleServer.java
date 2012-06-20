@@ -26,8 +26,7 @@ class TestChannel implements BridgeObject {
 public class ChannelsExampleServer {
 
 	public static void main(String[] args) throws IOException {
-		Bridge bridge = new Bridge()
-		.setApiKey("myprivkey");
+		Bridge bridge = new Bridge("myprivkey");
 		bridge.connect();
 
 		bridge.joinChannel("testChannel", new TestChannel());

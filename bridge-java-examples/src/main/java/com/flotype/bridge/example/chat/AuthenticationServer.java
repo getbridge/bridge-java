@@ -24,9 +24,9 @@ public class AuthenticationServer {
 
 	public static void main(String[] args) throws Exception {
 
-		Bridge bridge = new Bridge("abcdefgh");
+		Bridge bridge = new Bridge("myprivkey");
+		bridge.publishService("auth", new AuthObj(bridge));
 		bridge.connect();
 
-		bridge.publishService("auth", new AuthObj(bridge));
 	}
 }

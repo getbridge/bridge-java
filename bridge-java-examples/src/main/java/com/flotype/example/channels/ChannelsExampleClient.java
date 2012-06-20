@@ -23,8 +23,7 @@ interface RemoteTestChannel extends BridgeRemoteObject {
 public class ChannelsExampleClient {
 
 	public static void main(String[] args) throws IOException {
-		Bridge bridge = new Bridge()
-		.setApiKey("myprivkey");
+		Bridge bridge = new Bridge("myprivkey");
 		bridge.connect();
 
 		RemoteTestChannel testChannel = bridge.getChannel("testChannel", RemoteTestChannel.class);

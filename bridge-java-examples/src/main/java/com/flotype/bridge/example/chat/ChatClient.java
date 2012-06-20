@@ -26,7 +26,7 @@ public class ChatClient {
 
 	public static void main(String[] args) throws Exception {
 
-		Bridge bridge = new Bridge("abcdefgh");
+		Bridge bridge = new Bridge("myapikey");
 
 		RemoteAuth auth = bridge.getService("auth", RemoteAuth.class);
 		auth.login("steve", "secret123", "flotype-lovers", new ChatObj(), new ChatCallback());
