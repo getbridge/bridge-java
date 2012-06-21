@@ -23,7 +23,7 @@ interface RemoteTestService extends BridgeRemoteObject {
 	public void ping(CallbackObject cb);
 }
 
-public class ServicesExampleClient {
+public class Client {
 
 	public static void main(String[] args) throws IOException {
 		Bridge bridge = new Bridge("mypubkey");

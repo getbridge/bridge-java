@@ -1,4 +1,4 @@
-package com.getbridge.bridge.example.channels;
+package com.getbridge.example.channels;
 
 import com.getbridge.bridge.*;
 

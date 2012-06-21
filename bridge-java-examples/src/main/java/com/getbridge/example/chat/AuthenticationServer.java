@@ -1,4 +1,4 @@
-package com.getbridge.bridge.example.chat;
+package com.getbridge.example.chat;
 
 import com.getbridge.bridge.*;
 

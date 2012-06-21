@@ -1,4 +1,4 @@
-package com.getbridge.example.channels;
+package com.getbridge.example.simplechannels;
 
 import java.io.IOException;
 
@@ -20,7 +20,7 @@ interface RemoteTestChannel extends BridgeRemoteObject {
 	public void log(String message);
 }
 
-public class ChannelsExampleClient {
+public class Client {
 
 	public static void main(String[] args) throws IOException {
 		Bridge bridge = new Bridge("myprivkey");

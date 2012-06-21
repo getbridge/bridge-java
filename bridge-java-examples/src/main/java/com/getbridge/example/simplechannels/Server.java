@@ -1,4 +1,4 @@
-package com.getbridge.example.channels;
+package com.getbridge.example.simplechannels;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ class TestChannel implements BridgeObject {
 	}
 }
 
-public class ChannelsExampleServer {
+public class Server {
 
 	public static void main(String[] args) throws IOException {
 		Bridge bridge = new Bridge("myprivkey");

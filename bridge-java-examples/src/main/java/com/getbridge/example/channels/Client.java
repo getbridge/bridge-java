@@ -1,4 +1,4 @@
-package com.getbridge.bridge.example.channels;
+package com.getbridge.example.channels;
 
 import java.io.IOException;
 
@@ -6,7 +6,7 @@ import com.getbridge.bridge.Bridge;
 import com.getbridge.bridge.BridgeObject;
 import com.getbridge.bridge.BridgeRemoteObject;
 
-public class ClientWriteable {
+public class Client {
 
 	static class ChatObj implements BridgeObject {
 		public void message(String sender, String message) {
@@ -20,8 +20,8 @@ public class ClientWriteable {
 
 	static class ChatCallback implements BridgeObject {
 		public void callback(RemoteChat channel, String channelName) {
-			// The following RPC call will succeed because client was joined to channel with write permissions
-			channel.message("steve", "Can write to channel:" + channelName);
+			// The following RPC call will fail because client was not joined to channel with write permissions
+			channel.message("steve", "This should not work.");
 		}
 	}
 
@@ -34,7 +34,7 @@ public class ClientWriteable {
 		
 		Bridge bridge = new Bridge("myapikey");
 		RemoteAuth auth = bridge.getService("auth", RemoteAuth.class);
-		auth.joinWriteable("flotype-lovers", "secret123", new ChatObj(), new ChatCallback());
+		auth.join("flotype-lovers", new ChatObj(), new ChatCallback());
 		bridge.connect();
 	}
 

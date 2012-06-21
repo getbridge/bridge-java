@@ -26,7 +26,7 @@ class TestService implements BridgeObject {
 	}
 }
 
-public class ServicesExampleServer {
+public class Server {
 
 	public static void main(String[] args) throws IOException {
 		Bridge bridge = new Bridge("myprivkey");
