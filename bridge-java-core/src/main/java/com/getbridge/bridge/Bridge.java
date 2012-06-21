@@ -23,7 +23,8 @@ public class Bridge {
 	boolean ready = false;
 	private Connection connection;
 	
-	public Bridge(String host, int port, String redirector, String apiKey, boolean secure) {
+
+	private Bridge(String apiKey, String host, int port, String redirector, boolean secure) {
 		
 		if(redirector == null) {
 			if(secure) {
@@ -41,51 +42,37 @@ public class Bridge {
 	}
 
 	/**
-	 * Bridge constructor which allows all options to be specified manually This
-	 * constructor calls the default constructor and then calls setter methods
-	 * to change from the defaults.
+	 * Bridge constructor which allows direct connection to a local Bridge server.
 	 * 
+	 * @param apiKey
+	 *            An API key issued and recognized by the Bridge server
 	 * @param host
 	 *            Either a hostname for direct connection
 	 * @param port
 	 *            Positive integer value if hostname specified. Else, null
-	 * @param apiKey
-	 *            An API key issued and recognized by the Bridge server
-	 * @param eventHandler
-	 *            An instance of {@link BridgeEventHandler} to receive event
-	 *            notifications
-	 * @param reconnect
-	 *            Boolean specifying whether or not to reconnect if connection
-	 *            is disrupted
 	 */
-	public Bridge(String host, Integer port, String apiKey) {
-		this(host, port, apiKey, false);
+	public Bridge(String apiKey, String host, Integer port) {
+		this(apiKey, host, port, false);
 	}
 	
-	public Bridge(String host, Integer port, String apiKey, boolean secure) {
-		this(host, port, null, apiKey, secure);
+	public Bridge(String apiKey, String host, Integer port, boolean secure) {
+		this(apiKey, host, port, null, secure);
 	}
 
 	/**
-	 * Bridge constructor to be used for a redirected connection.
+	 * Bridge constructor to be used for a redirected connection using a local redirector.
 	 * 
-	 * @param redirectorUrl
-	 *            Must be a valid HTTP URL
 	 * @param apiKey
 	 *            An API key issued and recognized by the Bridge server
-	 * @param eventHandler
-	 *            An instance of {@link BridgeEventHandler} to receive event
-	 *            notifications
-	 * @param reconnect
-	 *            Boolean specifying whether or not to reconnect if connection
-	 *            is disrupted
+	 * @param redirectorUrl
+	 *            Must be a valid HTTP URL
 	 */
-	public Bridge(String redirectorUrl, String apiKey) {
+	public Bridge(String apiKey, String redirectorUrl) {
 		this(redirectorUrl, apiKey, false);
 	}
 
-	public Bridge(String redirectorUrl, String apiKey, boolean secure) {
-		this(null, -1, redirectorUrl, apiKey, secure);
+	public Bridge(String apiKey, String redirectorUrl, boolean secure) {
+		this(apiKey, null, -1, redirectorUrl,  secure);
 	}
 	
 	/**
@@ -100,13 +87,12 @@ public class Bridge {
 	 * <li>reconnect: true
 	 * </ul>
 	 */
-	
 	public Bridge(String apiKey) {
 		this(apiKey, false);
 	}
 	
 	public Bridge(String apiKey, boolean secure) {
-		this(null, -1, null, apiKey, secure);
+		this(apiKey, null, -1, null,secure);
 	}
 	
 	/**
@@ -179,6 +165,23 @@ public class Bridge {
 		String msg = JSONCodec.createJWP(this, name, callbackRef);
 		this.connection.send(msg);
 	}
+	
+	/**
+	 * Stores a  Bridge object locally with the given name
+	 * 
+	 * @param name
+	 * @param bridgeObject
+	 */
+	public void storeService(String name, BridgeObjectBase bridgeObject) {
+		if (name.equals("system")) {
+			log.error("Invalid service name {}", name);
+			return;
+		}
+
+		if (bridgeObject instanceof BridgeObject) {
+			dispatcher.storeObject(name, bridgeObject);
+		}
+	}
 
 	/**
 	 * Creates a proxy object to a service published by a remote Bridge client.
@@ -214,7 +217,7 @@ public class Bridge {
 	}
 
 	/**
-	 * Joins this Bridge client to a channel whose messages will be handled by
+	 * Joins a Bridge client to a channel whose messages will be handled by
 	 * the given handler.
 	 * 
 	 * @param channelName
@@ -222,6 +225,19 @@ public class Bridge {
 	 */
 	public void joinChannel(String channelName, BridgeObject handler) {
 		joinChannel(channelName, handler, true, null);
+	}
+	
+	/**
+	 * Joins a Bridge client to a channel whose messages will be handled by
+	 * the given handler.
+	 * 
+	 * @param channelName
+	 * @param handler
+	 * @param writeable
+	 * 			Specifies whether the client being joined is allowed to write to the channel.
+	 */
+	public void joinChannel(String channelName, BridgeObject handler, boolean writeable) {
+		joinChannel(channelName, handler, writeable, null);
 	}
 
 	/**

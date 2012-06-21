@@ -9,8 +9,8 @@ import com.getbridge.bridge.BridgeEventHandler;
 
 public class Test1 {
 
-	private static final Bridge bridgeServer = 	new Bridge("localhost", 8090, "abcdefgh");
-	private static final Bridge bridgeClient = new Bridge("localhost", 8090, "qwertyui");
+	private static final Bridge bridgeServer = 	new Bridge("abcdefgh", "localhost", 8090);
+	private static final Bridge bridgeClient = new Bridge("qwertyui", "localhost", 8090);
 
 	@Test
 	public void runTest() throws Exception {
