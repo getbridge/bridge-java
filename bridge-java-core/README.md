@@ -14,7 +14,7 @@ depencies is available from
 
 Source install: 
 
-Clone this repository using `git clone git@bitbucket.org:flotype/bridge-java.git` and install using `mvn install` for Maven users. 
+Clone this repository using `git clone git@github.com:flotype/bridge-java.git` and install using `mvn install` for Maven users. 
 
 ###Dependencies
 This library has no external dependencies.
