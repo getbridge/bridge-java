@@ -30,20 +30,20 @@
     <module>bridge-java-itests</module>
   </modules>
   <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <executions>
+          <execution>
+             <id>sign-artifacts</id>
+             <phase>verify</phase>
+           <goals>
+             <goal>sign</goal>
+           </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -71,8 +71,8 @@
   </parent>
   <scm>
     <url>http://git.flotype.com/bridge-java</url>
-    <connection>scm:git:https://bitbucket.org/flotype/bridge-java.git</connection>
-    <developerConnection>scm:git:ssh://git@bitbucket.org:flotype/bridge-java.git</developerConnection>
+    <connection>scm:git:https://github.com/getbridge/bridge-java.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:getbridge/bridge-java.git</developerConnection>
   </scm>
   <description>Maven multi-module project containing  Bridge for Java core library, examples and tests.
 
