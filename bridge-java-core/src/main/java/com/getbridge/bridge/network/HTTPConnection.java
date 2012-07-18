@@ -73,8 +73,7 @@ public class HTTPConnection {
 			@Override
 			public void operationComplete(ChannelFuture future)
 			throws Exception {
-				future.getChannel().write(request);
-
+					future.getChannel().write(request);
 			}
 		});
 	}
@@ -82,7 +81,9 @@ public class HTTPConnection {
 	class ClientMessageHandler extends SimpleChannelHandler {
 		@Override
 		public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+
 			e.getCause().printStackTrace();
+			HTTPConnection.this.connection.onRedirectorError(e.getCause().getMessage());
 		}
 
 		@Override

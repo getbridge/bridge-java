@@ -98,7 +98,8 @@ public class TCPSocket implements Socket {
 		public void exceptionCaught(ChannelHandlerContext ctx,
                 ExceptionEvent e)
 		{
-			System.out.println(e.getCause().getMessage());
+			e.getCause().printStackTrace();
+			TCPSocket.this.connection.onConnectionError(e.getCause().getMessage());
 		}
 	}
 
