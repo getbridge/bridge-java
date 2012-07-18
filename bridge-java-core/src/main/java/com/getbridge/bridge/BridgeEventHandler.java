@@ -10,4 +10,7 @@ public class BridgeEventHandler {
 
 	public void onReconnect() {
 	}
+
+        public void onDisconnect() {
+        }
 }
