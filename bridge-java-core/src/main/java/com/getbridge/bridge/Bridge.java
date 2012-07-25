@@ -339,7 +339,7 @@ public class Bridge {
 
 	protected void onDisconnect() {
 		this.ready = false;
-		//pool.shutdownNow(); // Cancel currently executing tasks
+    this.eventHandler.onDisconnect();
 	}
 
 	protected void onReady() {
@@ -351,6 +351,10 @@ public class Bridge {
 		this.ready = true;
 		this.eventHandler.onReconnect();
 	}
+
+  protected void onRemoteError(String msg) {
+    this.eventHandler.onRemoteError(msg);
+  }
 
 	protected void onConnected() {
 

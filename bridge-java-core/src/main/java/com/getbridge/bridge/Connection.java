@@ -124,6 +124,20 @@ public class Connection {
 
 	}
 
+	public void onRedirectorError(String msg) {
+		log.error("Redirector Connection Error");
+		bridge.onRemoteError("[Redirector Error]: " + msg);
+	}
+
+	public void onConnectionError(String msg) {
+		log.error("Connection to Bridge Error");
+		if(bridge.ready) {
+			bridge.onRemoteError("[Connection Error] " + msg);
+		} else {
+			bridge.onRemoteError("[Establish Connection Error]: " + msg);
+		}
+	}
+
 	private void reconnect() {
 		log.info("Attempting to reconnect");
 		if(reconnectInterval < 32768) {
